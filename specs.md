@@ -6,56 +6,80 @@
 - **Non-goals (v1):** Voice, file/image uploads from user, multi-thread UI, paywall, advanced settings.
 
 ## 2) Architecture
-- **Client:** React Native (Expo). One chat screen + minimal Settings.
-- **Backend:** **Firebase**
-  - **Auth:** Email + Google (Apple added when iOS ships).
-  - **Firestore:** users, threads, messages, usage, settings.
-  - **Cloud Functions:** a single HTTPS/Callable façade `coursegpt.chat` (and a `coursegpt.clear` helper) that owns all OpenAI calls.
-  - **App Check, Analytics, Crashlytics** enabled.
-- **Model API:** OpenAI **Assistants API** with **File Search** attached to a **Vector Store** containing the ACIM CE PDF and Wapnick Q&A. Default model **gpt-5-mini**. (Backend only; the app never exposes keys.)
 
-### Why Assistants API for MVP
-- Built‑in file indexing + retrieval.
-- Threads/Messages/Runs pattern is simple to reason about.
-- Easy to migrate later (keep a thin backend wrapper).
+## Phase 1: Harden and Refactor the Core Python Logic
 
-## 3) Assistant configuration (server-side, not user-editable)
-- **Name/ID:** `CourseGPT`.
-- **Model:** `gpt-5-mini` (toggle to `gpt-5` via Remote Config later).
-- **Tools:** `file_search` with a Vector Store linked to uploaded PDFs.
-- **Instructions (essentials):**
-  - Ground answers in ACIM CE + Wapnick; **verbatim quotes must be exact** and include a **clear citation** (lesson/section and, if available, page).
-  - Maintain a spiritual/forgiveness focus; deflect worldly/technical/medical fixes with one line and invite inner work.
-  - English responses only for MVP.
-- **Threads:** One server-owned thread per user (created lazily).
+The current scripts are functional but not yet production-grade. This phase makes them robust, easier to manage, and ready for a backend integration.
 
-## 4) Data model (Cloud Firestore)
-All documents are namespaced by `userId` and guarded by Security Rules.
+### Step 1.1: Consolidate Assistant Management
 
-- **users/{userId}**
-  - `email`, `createdAt`, `plan` (`free`), `locale` (`en`), `tone` (`direct` | `gentle`), `dailyCapOutTokens` (default `2000`).
-- **threads/{threadId}**
-  - `userId`, `assistantThreadId`, `title`, `createdAt`, `lastMessageAt`, `msgCount`.
-- **threads/{threadId}/messages/{messageId}**
-  - `role` (`user` | `assistant`), `text`, `citations[]` (array of `{fileId, fileName, location, lesson}`), `tokenIn`, `tokenOut`, `createdAt`.
-- **users/{userId}/usage/{yyyymmdd}**
-  - `inTokens`, `outTokens`, `requests`, `limitHit` (bool).
-- **users/{userId}/settings/default**
-  - `showCitations` (bool), `model` (`gpt-5-mini` | `gpt-5`).
+-   **Goal**: Replace `setup_assistant.py` and `update_assistant.py` with a single, powerful management script.
+-   **Action**:
+    1.  Create a new file: `manage_assistant.py`.
+    2.  Implement command-line argument parsing (using Python's `argparse`) to support distinct actions:
+        -   `python manage_assistant.py create`: Performs the full setup, creating a new vector store and assistant. It will first check for an existing `ASSISTANT_ID` in `.env` and require a `--force` flag to overwrite, preventing accidental deletion.
+        -   `python manage_assistant.py update --model gpt-4o`: Updates the existing assistant's properties.
+        -   `python manage_assistant.py sync-files`: **(New Feature)** This command will intelligently synchronize the files in your local `data/` directory with the OpenAI Vector Store, adding new files and removing obsolete ones without recreating the entire store.
+    3.  Once the new script is verified, delete `setup_assistant.py` and `update_assistant.py`.
+    4.  Update the `README.md` to document the new `manage_assistant.py` script and its commands.
 
-## 5) Security & privacy
-- **Rules:**
-  - Users can read/write only their own docs.
-  - Only Cloud Functions can create `assistant` messages (enforced with custom claims / Callable context).
-- **Secrets:** OpenAI key, Assistant ID, Vector Store ID stored in Functions env config.
-- **App Check:** Required for all callable endpoints.
-- **Moderation:** Lightweight check server-side; block/trim if needed.
+### Step 1.2: Implement Structured Logging
 
-## 6) Quoting & citation enforcement
-- The Function inspects assistant output:
-  1. If it contains quote markers or lesson references **without** `file_citation` annotations from File Search, the backend auto-reruns with an internal nudge: “Return exact quotes with citations.”
-  2. If still missing, the Function returns a friendly error instructing the user to rephrase or proceed without quotations.
-- The client renders citations as pills, e.g. `Workbook — Lesson 102` (tap → bottom sheet shows file + location snippet).
+-   **Goal**: Replace all `print()` statements with a proper logging framework for better debugging and monitoring.
+-   **Action**:
+    1.  In `main.py` and `manage_assistant.py`, configure Python's built-in `logging` module.
+    2.  Set the log level based on an environment variable (`LOG_LEVEL=INFO`) or a command-line flag (`--verbose`).
+    3.  Replace `print("Status message...")` with `logging.info("Status message...")`.
+    4.  Replace `print("Error...")` with `logging.error("Error...")`.
+    5.  Wrap all OpenAI API calls in `try...except` blocks that log specific errors (e.g., `openai.APIError`).
+
+---
+
+## Phase 2: Transition to a Cloud-Based Backend (Firebase)
+
+To make this accessible to a mobile app, we must move the core logic to a secure, scalable cloud backend.
+
+### Step 2.1: Set Up Cloud Functions Environment
+
+-   **Goal**: Prepare the `functions/` directory for development.
+-   **Action**:
+    1.  In the `functions/` directory, run `npm install openai firebase-admin firebase-functions`.
+    2.  Configure Firebase environment variables using the CLI: `firebase functions:config:set openai.key="your_key" assistant.id="your_id"`. This keeps secrets out of the code.
+
+### Step 2.2: Create the Main Chat Endpoint
+
+-   **Goal**: Create a secure HTTPS Callable Function that the mobile app can call to interact with the assistant.
+-   **Action**:
+    1.  In `functions/index.js`, create a new callable function named `chatWithAssistant`.
+    2.  This function will receive the user's message as input.
+    3.  Inside the function, it will perform the logic currently in `main.py`:
+        -   Create a new OpenAI Thread if one doesn't exist for the user.
+        -   Add the user's message to the Thread.
+        -   Create and poll a Run.
+        -   Return the assistant's final response.
+    4.  Deploy the function using `firebase deploy --only functions`.
+
+---
+
+## Phase 3: Develop the Mobile Application (Android)
+
+With the backend in place, we can build the user-facing mobile app.
+
+### Step 3.1: Basic App Shell and Firebase Connection
+
+-   **Goal**: Create a minimal Android app that can connect to your Firebase project.
+-   **Action**:
+    1.  Create a new Android Studio project with the package name `com.acimguide.mvp`.
+    2.  Add the `google-services.json` file (which you would download from the Firebase console) to the app.
+    3.  Add Firebase SDK dependencies (`firebase-auth`, `firebase-functions`) to the app's `build.gradle` file.
+
+### Step 3.2: Build the Chat Interface
+
+-   **Goal**: Create the main screen where users interact with the chatbot.
+-   **Action**:
+    1.  Design a simple UI with a message list, a text input field, and a send button.
+    2.  When the user presses "send," the app will call the `chatWithAssistant` Cloud Function from Phase 2.
+    3.  The app will display the response from the function in the message list.
 
 ## 7) API contract (Cloud Functions)
 ### `coursegpt.chat` (Callable HTTPS)
