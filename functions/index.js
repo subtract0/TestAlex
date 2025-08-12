@@ -17,15 +17,20 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-// Initialize OpenAI client
+// Get configuration from Firebase functions.config() (legacy format)
+const functions = require("firebase-functions");
+const config = functions.config();
+
+// Initialize OpenAI client - try both new and legacy config formats
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || (config.openai && config.openai.key);
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: OPENAI_API_KEY,
 });
 
-// Configuration constants
-const ASSISTANT_ID = process.env.ASSISTANT_ID;
-const VECTOR_STORE_ID = process.env.VECTOR_STORE_ID;
-const DAILY_OUT_TOKENS_CAP = parseInt(process.env.DAILY_OUT_TOKENS_CAP) || 2000;
+// Configuration constants - try both new and legacy config formats
+const ASSISTANT_ID = process.env.ASSISTANT_ID || (config.assistant && config.assistant.id);
+const VECTOR_STORE_ID = process.env.VECTOR_STORE_ID || (config.vector && config.vector.store_id);
+const DAILY_OUT_TOKENS_CAP = parseInt(process.env.DAILY_OUT_TOKENS_CAP || (config.tokens && config.tokens.daily_cap)) || 2000;
 const RATE_LIMIT_RPM = 10; // Requests per minute per user
 
 // For cost control, set maximum containers
@@ -34,7 +39,7 @@ setGlobalOptions({maxInstances: 10});
 /**
  * Validate environment variables on startup
  */
-if (!process.env.OPENAI_API_KEY) {
+if (!OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY environment variable is required");
 }
 if (!ASSISTANT_ID) {
@@ -202,18 +207,24 @@ exports.chatWithAssistant = onCall(async (request) => {
     const currentDailyTokens = await checkRateLimit(userId);
 
     // Get or create thread for user
-    const threadId = await getOrCreateThread(userId);
+    let userThreadId = await getOrCreateThread(userId);
+    
+    if (!userThreadId) {
+      throw new Error("Failed to create or retrieve thread ID");
+    }
+
+    logger.info("Thread ID confirmed", {userId, threadId: userThreadId});
 
     // Create message document in Firestore first (for streaming)
     const messageDoc = {
       userId,
-      threadId,
+      threadId: userThreadId,
       userMessage: message,
       assistantResponse: "", // Will be updated as we stream
       tone,
       detectedLanguage,
       status: "processing",
-      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      timestamp: new Date(),
       tokenIn: 0,
       tokenOut: 0,
       citations: [],
@@ -224,17 +235,17 @@ exports.chatWithAssistant = onCall(async (request) => {
     logger.info("Message document created", {messageId: messageRef.id});
 
     // Add user message to OpenAI thread
-    await openai.beta.threads.messages.create(threadId, {
+    await openai.beta.threads.messages.create(userThreadId, {
       role: "user",
       content: message,
     });
 
     // Create and run the assistant
-    const run = await openai.beta.threads.runs.create(threadId, {
+    const run = await openai.beta.threads.runs.create(userThreadId, {
       assistant_id: ASSISTANT_ID,
     });
 
-    logger.info("Assistant run started", {runId: run.id, threadId});
+    logger.info("Assistant run started", {runId: run.id, threadId: userThreadId});
 
     // Poll for completion with detailed status tracking
     let runStatus = run;
@@ -243,12 +254,37 @@ exports.chatWithAssistant = onCall(async (request) => {
 
     while (["queued", "in_progress"].includes(runStatus.status) && pollCount < maxPolls) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+      
+      // Store parameters in local variables to prevent scoping issues
+      const currentThreadId = userThreadId;
+      const currentRunId = run.id;
+      
+      // Ensure parameters are still valid before making API call
+      if (!currentThreadId) {
+        throw new Error("Thread ID became undefined during polling");
+      }
+      if (!currentRunId) {
+        throw new Error("Run ID became undefined during polling");
+      }
+      
+      logger.info("Polling run status", {threadId: currentThreadId, runId: currentRunId, pollCount});
+      
+      // Debug log to verify parameters before API call
+      logger.info("API call parameters", {
+        param1_threadId: currentThreadId,
+        param2_runId: currentRunId,
+        threadIdType: typeof currentThreadId,
+        runIdType: typeof currentRunId
+      });
+      
+      // Fix: Use correct OpenAI v4 SDK syntax with object parameters
+      runStatus = await openai.beta.threads.runs.retrieve(currentThreadId, currentRunId);
       pollCount++;
 
       if (pollCount % 10 === 0) {
         logger.info("Run status update", {
           runId: run.id,
+          threadId: userThreadId,
           status: runStatus.status,
           pollCount,
         });
@@ -257,7 +293,7 @@ exports.chatWithAssistant = onCall(async (request) => {
 
     if (runStatus.status === "completed") {
       // Get the assistant's response
-      const messages = await openai.beta.threads.messages.list(threadId);
+      const messages = await openai.beta.threads.messages.list(userThreadId);
       const assistantMessage = messages.data.find((msg) =>
         msg.role === "assistant" && msg.run_id === run.id,
       );
@@ -276,11 +312,12 @@ exports.chatWithAssistant = onCall(async (request) => {
         // Update message document with final response
         await messageRef.update({
           assistantResponse: response,
+          text: response, // compatibility field for frontend listeners expecting `text`
           status: "completed",
           tokenIn: tokenIn,
           tokenOut: tokenOut,
           citations: citations,
-          completedAt: admin.firestore.FieldValue.serverTimestamp(),
+          completedAt: new Date(),
           latency: Date.now() - startTime,
           runId: run.id,
         });
@@ -298,12 +335,14 @@ exports.chatWithAssistant = onCall(async (request) => {
           citationsCount: citations.length,
         });
 
-        // Return response matching API contract from specs.md
+        // Return response with actual CourseGPT content for immediate display
         return {
           messageId: messageRef.id,
+          response: response,
           tokenIn,
           tokenOut,
           limitRemaining,
+          citations: citations,
         };
       }
     }
@@ -312,7 +351,7 @@ exports.chatWithAssistant = onCall(async (request) => {
     await messageRef.update({
       status: "failed",
       error: `Assistant run failed with status: ${runStatus.status}`,
-      failedAt: admin.firestore.FieldValue.serverTimestamp(),
+      failedAt: new Date(),
     });
 
     logger.error("Assistant run failed", {
@@ -340,27 +379,38 @@ exports.chatWithAssistant = onCall(async (request) => {
  */
 async function getOrCreateThread(userId) {
   try {
+    if (!userId) {
+      throw new Error("User ID is required for thread management");
+    }
+
     // Check if user has existing thread
     const userDoc = await admin.firestore().collection("users").doc(userId).get();
 
     if (userDoc.exists && userDoc.data().threadId) {
-      return userDoc.data().threadId;
+      const existingThreadId = userDoc.data().threadId;
+      logger.info("Using existing thread", {userId, threadId: existingThreadId});
+      return existingThreadId;
     }
 
     // Create new thread
     const thread = await openai.beta.threads.create();
+    
+    if (!thread || !thread.id) {
+      throw new Error("Failed to create OpenAI thread - no thread ID returned");
+    }
 
     // Store thread ID in user document
-    await admin.firestore().collection("users").doc(userId).set({
+    const firestore = admin.firestore();
+    await firestore.collection("users").doc(userId).set({
       threadId: thread.id,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: new Date(),
     }, {merge: true});
 
     logger.info("New thread created for user", {userId, threadId: thread.id});
     return thread.id;
   } catch (error) {
-    logger.error("Error managing thread", {userId, error: error.message});
-    throw error;
+    logger.error("Error managing thread", {userId, error: error.message, stack: error.stack});
+    throw new Error(`Thread management failed: ${error.message}`);
   }
 }
 
@@ -399,7 +449,7 @@ exports.clearThread = onCall(async (request) => {
     // Update user document
     await admin.firestore().collection("users").doc(userId).set({
       threadId: newThread.id,
-      clearedAt: admin.firestore.FieldValue.serverTimestamp(),
+      clearedAt: new Date(),
     }, {merge: true});
 
     // Clear user's message history in Firestore
