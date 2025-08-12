@@ -11,7 +11,7 @@ Transform ACIMguide into the preeminent (unofficial) ACIM-GPT platform, powered 
 - **Technology**: CourseGPT system prompt + ACIM knowledge base
 - **Data Sources**: 
   - `/data/CourseGPT.md` (system prompt)
-  - `/data/ACIM_CE.pdf` (Complete Edition)
+  - `/data/A_Course_In_Miracles_Urtext.pdf` (Complete Urtext - public domain)
   - `/data/final_training_data_*.py` (Kenneth Wapnick Q&A database)
 - **No External Sources**: No internet, no image recognition, no worldly citations
 
@@ -72,7 +72,7 @@ Transform ACIMguide into the preeminent (unofficial) ACIM-GPT platform, powered 
 - **Spiritual Focus**: Redirect worldly questions to spiritual perspective
 
 ### **Data Architecture**
-- **ACIM_CE.pdf**: Complete ACIM text for exact quotations
+- **A_Course_In_Miracles_Urtext.pdf**: Complete ACIM Urtext for exact quotations
 - **final_training_data_*.py**: Kenneth Wapnick Q&A for deep understanding
 - **No External Data**: Completely self-contained knowledge base
 - **Exact Quotations**: Verify all ACIM quotes against source documents

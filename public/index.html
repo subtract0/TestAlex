@@ -86,6 +86,58 @@
             border-bottom-left-radius: 5px;
         }
         
+        .message.assistant .message-content strong {
+            color: #007bff;
+            font-weight: 600;
+        }
+        
+        .message.assistant .message-content em {
+            font-style: italic;
+            color: #6c757d;
+        }
+        
+        .message.assistant .message-content blockquote {
+            border-left: 3px solid #007bff;
+            padding-left: 15px;
+            margin: 10px 0;
+            font-style: italic;
+            color: #495057;
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+        
+        .message.assistant .message-content .course-quote {
+            background: #f8fff9;
+            color: #155724;
+            font-weight: 500;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border-left: 3px solid #28a745;
+            display: inline-block;
+            margin: 0 2px;
+        }
+        
+        .message.assistant .message-content .section-break {
+            border: none;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #007bff, transparent);
+            margin: 20px 0;
+        }
+        
+        .message.assistant .message-content p {
+            margin: 12px 0;
+            line-height: 1.6;
+        }
+        
+        .message.assistant .message-content p:first-child {
+            margin-top: 0;
+        }
+        
+        .message.assistant .message-content p:last-child {
+            margin-bottom: 0;
+        }
+        
         .input-container {
             padding: 20px;
             background: white;
@@ -278,7 +330,7 @@
         const firestore = firebase.firestore();
 
         // For development, you might want to use the emulator
-        // functions.useEmulator("localhost", 5001);
+        functions.useEmulator("localhost", 5001);
 
         let isAuthenticated = false;
         let currentUserId = null;
@@ -372,25 +424,27 @@
                                     response += '<br><br><strong>📚 Citations from A Course in Miracles:</strong><br>' +
                                         messageData.citations.map(c => `• ${c.text}`).join('<br>');
                                 }
-                                // If an immediate assistant response was already shown, replace it with the enriched one (with citations)
+                                // Check if this exact response already exists to prevent duplicates
                                 const chatContainer = document.getElementById('chatContainer');
-                                const lastMsg = chatContainer.lastElementChild;
-                                let updatedExisting = false;
-                                if (lastMsg && lastMsg.classList.contains('assistant')) {
-                                    const lastContentEl = lastMsg.querySelector('.message-content');
-                                    if (lastContentEl) {
-                                        const lastText = (lastContentEl.textContent || '').trim();
-                                        // If the new response includes citations and starts with the previous assistant text, upgrade in place
-                                        if (response.includes('📚') && lastText && response.startsWith(lastText)) {
-                                            lastContentEl.innerHTML = response;
-                                            updatedExisting = true;
-                                        } else if (lastText === content) {
-                                            // If the Firestore content equals the already-shown immediate response, avoid duplicate
-                                            updatedExisting = true;
-                                        }
+                                const existingMessages = Array.from(chatContainer.querySelectorAll('.message.assistant .message-content'));
+                                let isDuplicate = false;
+                                
+                                // Check if this exact content (or very similar) already exists
+                                for (const existingMsg of existingMessages) {
+                                    const existingText = (existingMsg.textContent || '').trim();
+                                    const newText = content.trim();
+                                    
+                                    // Check for exact match or very high similarity
+                                    if (existingText === newText || 
+                                        (existingText.length > 50 && newText.length > 50 && 
+                                         existingText.substring(0, 100) === newText.substring(0, 100))) {
+                                        isDuplicate = true;
+                                        break;
                                     }
                                 }
-                                if (!updatedExisting) {
+                                
+                                // Only add the message if it's not a duplicate
+                                if (!isDuplicate) {
                                     addMessage(response);
                                 }
                                 showLoading(false);
@@ -410,7 +464,51 @@
             
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
-            contentDiv.innerHTML = content;
+            
+            // Enhanced formatting for assistant messages
+            if (!isUser) {
+                // Robust formatting that handles CourseGPT responses properly
+                let formattedContent = content;
+                
+                // First, split content into paragraphs and format each
+                let paragraphs = formattedContent.split(/\n\s*\n/);
+                let formattedParagraphs = paragraphs.map(paragraph => {
+                    if (!paragraph.trim()) return '';
+                    
+                    // Handle bold text
+                    paragraph = paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    
+                    // Handle italic text
+                    paragraph = paragraph.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                    
+                    // Handle bullet points
+                    paragraph = paragraph.replace(/^- (.+)/gm, '• $1');
+                    
+                    // Handle numbered lists
+                    paragraph = paragraph.replace(/^(\d+\.\s)/gm, '<strong>$1</strong>');
+                    
+                    // Handle Course quotes
+                    paragraph = paragraph.replace(/"([^"]*?)"/g, '<span class="course-quote">"$1"</span>');
+                    
+                    // Handle blockquotes
+                    paragraph = paragraph.replace(/^>\s*(.+)/gm, '<blockquote>$1</blockquote>');
+                    
+                    // Add line breaks for single newlines within paragraphs
+                    paragraph = paragraph.replace(/\n/g, '<br>');
+                    
+                    return `<p>${paragraph}</p>`;
+                }).filter(p => p !== '<p></p>');
+                
+                // Join paragraphs with spacing
+                formattedContent = formattedParagraphs.join('');
+                
+                // Handle section breaks
+                formattedContent = formattedContent.replace(/---/g, '<hr style="margin: 20px 0; border: none; height: 2px; background: linear-gradient(to right, transparent, #007bff, transparent);">');
+                
+                contentDiv.innerHTML = formattedContent;
+            } else {
+                contentDiv.innerHTML = content;
+            }
             
             messageDiv.appendChild(contentDiv);
             chatContainer.appendChild(messageDiv);
@@ -470,11 +568,16 @@
                     tone: 'gentle'
                 });
                 
-                console.log('✅ Message sent to CourseGPT:', result.data);
+                console.log('✅ Message sent to CourseGPT:', {
+                    messageId: result.data.messageId,
+                    responseLength: result.data.response ? result.data.response.length : 0,
+                    hasResponse: !!result.data.response
+                });
                 
                 // Check if response is included directly in the result
                 if (result.data.response && result.data.response.trim()) {
-                    console.log('✅ CourseGPT response received directly, displaying...');
+                    console.log('✅ CourseGPT response received directly, displaying full response...');
+                    console.log('Response preview:', result.data.response.substring(0, 200) + '...');
                     addMessage(result.data.response);
                 } else {
                     console.log('⏳ No direct response, CourseGPT is still processing...');

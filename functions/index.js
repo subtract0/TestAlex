@@ -30,7 +30,7 @@ const openai = new OpenAI({
 // Configuration constants - try both new and legacy config formats
 const ASSISTANT_ID = process.env.ASSISTANT_ID || (config.assistant && config.assistant.id);
 const VECTOR_STORE_ID = process.env.VECTOR_STORE_ID || (config.vector && config.vector.store_id);
-const DAILY_OUT_TOKENS_CAP = parseInt(process.env.DAILY_OUT_TOKENS_CAP || (config.tokens && config.tokens.daily_cap)) || 2000;
+const DAILY_OUT_TOKENS_CAP = parseInt(process.env.DAILY_OUT_TOKENS_CAP || (config.tokens && config.tokens.daily_cap)) || 10000;
 const RATE_LIMIT_RPM = 10; // Requests per minute per user
 
 // For cost control, set maximum containers
@@ -150,20 +150,8 @@ function extractCitations(message) {
  * @return {string} Detected language code (e.g., 'en', 'de', 'es', 'fr')
  */
 function detectLanguage(message) {
-  // Simple language detection based on common patterns
-  // German indicators
-  if (/\b(der|die|das|und|ich|bin|ist|sind|haben|wird|kann|soll|mit|für|auf|von|zu|im|am|ein|eine|einen)\b/i.test(message)) {
-    return 'de';
-  }
-  // Spanish indicators  
-  if (/\b(el|la|los|las|y|yo|soy|es|son|tiene|será|puede|debe|con|para|en|de|a|un|una)\b/i.test(message)) {
-    return 'es';
-  }
-  // French indicators
-  if (/\b(le|la|les|et|je|suis|est|sont|avoir|sera|peut|doit|avec|pour|dans|de|à|un|une)\b/i.test(message)) {
-    return 'fr';
-  }
-  // Default to English
+  // Temporarily default to English to resolve backend issues
+  // TODO: Implement more sophisticated language detection later
   return 'en';
 }
 

@@ -9,7 +9,7 @@
 - [ ] Verify exact ACIM quotation functionality
 
 ### **Priority 2: Data Source Optimization**
-- [ ] Ensure ACIM_CE.pdf is properly indexed in vector store
+- [ ] Ensure A_Course_In_Miracles_Urtext.pdf is properly indexed in vector store
 - [ ] Integrate final_training_data_*.py Kenneth Wapnick Q&A
 - [ ] Remove any external data sources or internet dependencies
 - [ ] Test knowledge base completeness and accuracy

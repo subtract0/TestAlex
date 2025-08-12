@@ -25,7 +25,7 @@
 - **ACIMcoach.com**: Alex Monas personal brand + SEO blog funnel
 - **Core Product**: 100% free ACIM guidance powered by CourseGPT
 - **Premium Offerings**: 14-day courses (€7), advanced models, personal coaching
-- **Data Sources**: ACIM_CE.pdf + final_training_data_*.py (no external sources)
+- **Data Sources**: A_Course_In_Miracles_Urtext.pdf + cleaned_training_data_*.py (no external sources)
 
 ### **🌍 User Journey & Business Model**
 1. **Discovery**: ACIMcoach.com blog (SEO) → ACIMguide.com
@@ -50,6 +50,7 @@
 - **Quick Actions**: ACIM-focused spiritual guidance prompts
 - **Enhanced UX**: Loading states, error handling, citations display
 - **Cross-platform**: Works on desktop, tablet, and mobile browsers
+- ⚠️ **Known Issue**: CourseGPT responses still display as wall of text - formatting needs refinement
 
 ### **✅ Development Infrastructure (COMPLETE)**
 - **Firebase Hosting**: CDN-powered global distribution

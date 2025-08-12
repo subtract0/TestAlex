@@ -24,7 +24,7 @@ ACIMguide provides authentic spiritual guidance based exclusively on *A Course i
 - **Free Forever**: ✅ Unlimited spiritual conversations, no limitations
 - **Data Sources**: Exclusive ACIM content (no external sources)
   - `/data/CourseGPT.md` - Core system prompt
-  - `/data/ACIM_CE.pdf` - Complete Edition text
+  - `/data/A_Course_In_Miracles_Urtext.pdf` - Complete Urtext (public domain)
   - `/data/final_training_data_*.py` - Kenneth Wapnick Q&A database
 
 ### **✅ Technical Foundation (STABLE)**
