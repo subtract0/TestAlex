@@ -37,8 +37,9 @@ class AgentIntegrationSystem:
     
     def __init__(self, project_root: str = "/home/am/TestAlex"):
         self.project_root = Path(project_root)
-        self.agent_roles_path = self.project_root / "Agent Roles"
-        self.prompts_path = self.project_root / "prompts"
+        self.agents_path = self.project_root / "agents"
+        self.specialized_agents_path = self.agents_path / "specialized"
+        self.core_prompts_path = self.agents_path / "core"
         self.task_queue = TaskQueue()
         self.value_engine = ValueGenerationEngine()
         self.agents = self._initialize_agents()
@@ -61,7 +62,7 @@ class AgentIntegrationSystem:
                 ],
                 input_types=["business_goals", "user_feedback", "market_data"],
                 output_types=["product_requirements", "user_stories", "roadmaps"],
-                prompt_file="product_manager.md",
+                prompt_file="specialized/product_manager.md",
                 value_focus_areas=["revenue_growth", "user_acquisition", "market_expansion"]
             ),
             
@@ -79,7 +80,7 @@ class AgentIntegrationSystem:
                 ],
                 input_types=["acim_content", "spiritual_queries", "content_updates"],
                 output_types=["validation_reports", "content_corrections", "doctrinal_guidance"],
-                prompt_file="acim_scholar.md",
+                prompt_file="specialized/acim_scholar.md",
                 value_focus_areas=["content_quality", "user_trust", "spiritual_integrity"]
             ),
             
@@ -97,7 +98,7 @@ class AgentIntegrationSystem:
                 ],
                 input_types=["technical_requirements", "performance_specs", "api_designs"],
                 output_types=["backend_code", "api_endpoints", "database_schemas"],
-                prompt_file="backend_engineer.md",
+                prompt_file="specialized/backend_engineer.md",
                 value_focus_areas=["performance", "cost_reduction", "scalability"]
             ),
             
@@ -284,7 +285,7 @@ class AgentIntegrationSystem:
             logger.error(f"❌ No agent capability found for {task.assignee}")
             return
         
-        agent_prompt = self.agent_prompts.get(task.assignee)
+        agent_prompt = await self.load_agent_prompt(task.assignee)
         if not agent_prompt:
             logger.error(f"❌ No prompt loaded for {agent_capability.name}")
             return
