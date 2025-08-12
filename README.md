@@ -1,253 +1,266 @@
-# ACIMguide - A Custom AI Companion
+# ACIMguide - Authentic ACIM Spiritual Guidance Platform
 
-This project aims to build a focused, gentle, and precise AI companion for practicing *A Course in Miracles (CE)*. It starts as a local Python-based chatbot and is designed to evolve into a full-fledged Android application backed by Firebase and the OpenAI Assistants API.
+**The premier (unofficial) ACIM-GPT platform powered by CourseGPT**
+
+ACIMguide provides authentic spiritual guidance based exclusively on *A Course in Miracles*, helping people remember their unshakable wellbeing through genuine spiritual transformation. Our platform combines advanced AI technology with perfect fidelity to ACIM teachings.
 
 ---
 
-## Project Vision
+## 🎯 Mission & Vision
 
-The goal is to provide users with a reliable tool for guided chat, offering exact quotes with citations from the source material, and helpful features to support their spiritual practice.
+**Core Mission**: Transform lives through authentic ACIM guidance that redirects worldly concerns to spiritual perspective, offering exact quotations and gentle wisdom that supports genuine inner peace.
 
-## Current Status
+**Strategic Vision**: Become the trusted ACIM-GPT platform where spiritual seekers find reliable, authentic guidance while building a sustainable business model through honest premium offerings.
 
-**🚀 PRODUCTION READY** - The project has evolved into a fully scalable, cloud-based AI companion with enterprise-grade features.
+📖 **[Complete Strategic Vision →](./STRATEGIC_VISION.md)**
 
-- **Backend**: Firebase Cloud Functions with OpenAI GPT-4o integration
+## 🚀 Platform Status
+
+**PRODUCTION READY** - CourseGPT-powered spiritual guidance platform with enterprise-grade infrastructure.
+
+### **Core Experience**
+- **CourseGPT Integration**: Authentic ACIM guidance with multilingual support
+- **Free Forever**: Unlimited spiritual conversations, no limitations
+- **Data Sources**: Exclusive ACIM content (no external sources)
+  - `/data/CourseGPT.md` - Core system prompt
+  - `/data/ACIM_CE.pdf` - Complete Edition text
+  - `/data/final_training_data_*.py` - Kenneth Wapnick Q&A database
+
+### **Technical Foundation**
+- **Backend**: Firebase Cloud Functions with OpenAI GPT-4o
 - **Database**: Firestore with real-time capabilities and security rules
-- **Features**: Rate limiting, token management, citation extraction, message streaming
-- **Security**: Production-ready authentication and user-specific data access
-- **Monitoring**: Comprehensive logging and error handling
+- **Features**: Rate limiting, token management, spiritual guidance optimization
+- **Security**: Production-ready authentication and user privacy protection
+- **Monitoring**: Comprehensive logging and spiritual content validation
 
-**Ready for immediate deployment and mobile app development.**
+### **Business Model**
+- **Free Core**: 100% free unlimited CourseGPT conversations
+- **Premium Tiers**: €7 guided courses, advanced AI, personal coaching
+- **Growth Engine**: SEO blog content driving organic traffic
 
-## Development Roadmap
+🗺️ **[Implementation Roadmap →](./IMPLEMENTATION_ROADMAP.md)**
 
-The full, detailed development plan is documented in `specs.md`. This roadmap outlines the three major phases to take this project from its current state to a production-ready application:
+## 🏗️ Architecture Overview
 
-1.  **Phase 1: Harden and Refactor the Core Python Logic**
-2.  **Phase 2: Transition to a Cloud-Based Backend (Firebase)**
-3.  **Phase 3: Develop the Mobile Application (Android)**
+### **Platform Structure**
+- **ACIMguide.com**: Main product with free CourseGPT + premium features
+- **ACIMcoach.com**: Personal brand blog driving traffic and conversions
+- **Mobile Apps**: React Native cross-platform (iOS/Android)
 
-Please refer to **[`specs.md`](./specs.md)** for a complete breakdown of the features, architecture, and step-by-step implementation plan.
+### **Agent System**
+Our autonomous development is powered by specialized AI agents:
+
+📁 **[Agent Documentation →](./agents/README.md)**
+- **Core Agents**: ACIM Scholar, Product Manager, Backend Engineer
+- **Specialized Agents**: Blogger, DevOps, UI/UX Designer, QA Tester
+- **Templates**: Standardized agent creation and integration
+
+### **Development Phases**
+1. **Foundation**: CourseGPT integration, documentation overhaul
+2. **Core Features**: Premium courses, blog automation, payment processing  
+3. **Growth**: Advanced AI, personal coaching, mobile development
+4. **Scale**: Community features, international expansion
+
+🗺️ **[Complete Implementation Roadmap →](./IMPLEMENTATION_ROADMAP.md)**
 
 ---
 
-### Local Setup (Previous Version)
+## 🚀 Quick Start Guide
 
-For details on how to set up and run the previous local Python version of the application, please see the commit history prior to this update. The project is being rebooted to follow the new roadmap.
-firestore.indexes.json # Database indexes ✅ CREATED
-```
+### **For Users**
+1. **Visit ACIMguide.com** for free unlimited CourseGPT conversations
+2. **Ask spiritual questions** and receive authentic ACIM guidance
+3. **Explore premium courses** for deeper spiritual transformation
 
-## Development Status
-
-### ✅ Phase 1: Python Core Logic (COMPLETED)
-- ✅ **Consolidated Assistant Management**: `manage_assistant.py` with create/update/sync commands
-- ✅ **Structured Logging**: Implemented throughout Python codebase
-- ✅ **Error Handling**: Robust OpenAI API error handling
-- ✅ **File Sync**: Intelligent vector store file synchronization
-
-### ✅ Phase 2: Cloud Backend (COMPLETED)
-- ✅ **Firebase CLI**: Installed and authenticated
-- ✅ **GitHub CLI**: Installed and authenticated (subtract0)
-- ✅ **Firebase Project**: Connected to "acim-guide-test"
-- ✅ **Enhanced Cloud Functions**: Full API contract compliance
-  - Token counting and usage tracking
-  - Rate limiting (10 rpm per user)
-  - Daily token caps (2000 tokens)
-  - Citation extraction
-  - Comprehensive logging and observability
-- ✅ **Firestore**: Configured with rules and indexes
-- ✅ **Message Streaming**: Firestore-based progressive response updates
-
-### 🎯 Phase 3: Mobile Application (READY TO START)
-- 📱 **Android App**: Architecture defined, ready for development
-- 🔐 **Firebase Authentication**: Google Sign-In integration planned
-- 🎨 **UI Components**: Chat interface, quick actions, settings designed
-
-## 🚀 Quick Deployment
-
-### Production Deployment (5 minutes)
+### **For Developers**
 ```bash
-# 1. Setup environment
+# Clone and setup
+git clone https://github.com/subtract0/TestAlex.git
+cd TestAlex
 source venv/bin/activate
 pip install -r requirements.txt
 
-# 2. Create assistant (first time only)
-python manage_assistant.py create --name "CourseGPT" --model gpt-4o
+# Configure environment
+cp .env.example .env
+# Add your OPENAI_API_KEY
 
-# 3. Deploy to Firebase
+# Deploy to Firebase
 firebase deploy
 
-# 4. Test deployment
-firebase functions:log --only chatWithAssistant
-```
-
-**📖 Full deployment guide**: See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for complete instructions.
-
-## Usage Instructions
-
-### Python Assistant Management
-
-```bash
-# Activate virtual environment
-source venv/bin/activate
-
-# Create a new assistant (requires OPENAI_API_KEY in .env)
-python manage_assistant.py create
-
-# Update assistant model
-python manage_assistant.py update --model gpt-4o
-
-# Sync files to vector store
-python manage_assistant.py sync-files
-
-# Run local chat (interactive mode)
-python main.py
-
-# Run single query
+# Test locally
 python main.py "What is forgiveness according to ACIM?"
 ```
 
-### Firebase Cloud Functions
+📚 **[Complete Setup Guide →](./DEPLOYMENT.md)**
 
+## 🛠️ Development Status
+
+### ✅ **Foundation Complete**
+- **CourseGPT System**: Authentic ACIM guidance with multilingual support
+- **Agent Framework**: Consolidated autonomous development system
+- **Firebase Backend**: Production-ready with security and monitoring
+- **Documentation**: Comprehensive cross-referenced guides
+
+### ✅ **Production Infrastructure**
+- **Cloud Functions**: Enhanced API with rate limiting and token management
+- **Firestore**: Optimized with security rules and indexes
+- **Authentication**: User-specific data access and privacy protection
+- **Monitoring**: Real-time logging and spiritual content validation
+
+### 🎯 **Next Phase: Core Features**
+- **Premium Courses**: €7 14-day guided spiritual journeys
+- **Blog Automation**: SEO content engine for organic growth
+- **Mobile Development**: React Native cross-platform apps
+
+## 🔧 API Reference
+
+### **Core Endpoints**
+
+#### `chatWithAssistant`
+**Purpose**: CourseGPT spiritual guidance conversations
+
+```javascript
+// Request
+{
+  "message": "What does ACIM say about forgiveness?",
+  "tone": "gentle" // optional: "direct" | "gentle"
+}
+
+// Response
+{
+  "messageId": "msg_abc123",
+  "tokenIn": 45,
+  "tokenOut": 156,
+  "limitRemaining": 1844
+}
+```
+
+#### `clearThread`
+**Purpose**: Reset user conversation history
+
+```javascript
+// Response
+{
+  "threadId": "thread_xyz789",
+  "message": "Thread cleared and reset successfully"
+}
+```
+
+📚 **[Complete API Documentation →](./DEPLOYMENT.md#api-reference)**
+
+## 🛠️ Development Workflow
+
+### **Assistant Management**
 ```bash
-# Start local emulators
+# Create CourseGPT assistant (first time)
+python manage_assistant.py create --name "CourseGPT" --model gpt-4o
+
+# Update system prompt with CourseGPT
+python manage_assistant.py update --prompt /data/CourseGPT.md
+
+# Sync ACIM knowledge base
+python manage_assistant.py sync-files
+
+# Test locally
+python main.py "Help me understand ACIM Lesson 1"
+```
+
+### **Firebase Development**
+```bash
+# Local development
 firebase emulators:start --only functions
 
 # Deploy to production
 firebase deploy --only functions
 
-# View logs
-firebase functions:log
+# Monitor production
+firebase functions:log --only chatWithAssistant
 ```
 
-### API Endpoints
+### **Agent System**
+```bash
+# Run autonomous improvement pipeline
+python start_autonomous_pipeline.py
 
-#### `chatWithAssistant`
-Callable HTTPS Function for chat interactions
+# Test specific agent
+python -m agents.specialized.acim_scholar
 
-**Request:**
-```json
-{
-  "message": "string",
-  "tone": "direct|gentle" // optional, defaults to "gentle"
-}
+# Validate agent integration
+python -m orchestration.agent_integration_system
 ```
 
-**Response:**
-```json
-{
-  "messageId": "string",
-  "tokenIn": 123,
-  "tokenOut": 456,
-  "limitRemaining": 1544
-}
+## ⚙️ Configuration
+
+### **Environment Variables**
+```bash
+# Required
+OPENAI_API_KEY=your_openai_api_key_here
+ASSISTANT_ID=asst_coursegpt_id  # Auto-generated
+
+# Optional
+VECTOR_STORE_ID=vs_acim_knowledge  # Auto-generated
+DAILY_OUT_TOKENS_CAP=2000  # Per-user daily limit
+LOG_LEVEL=INFO  # Logging verbosity
 ```
 
-#### `clearThread`
-Callable HTTPS Function to reset user conversation
+### **Firebase Configuration**
+```bash
+# Project setup
+firebase use acim-guide-test
+firebase deploy --only functions,firestore:rules,firestore:indexes
 
-**Response:**
-```json
-{
-  "threadId": "string",
-  "message": "Thread cleared and reset successfully"
-}
+# Environment variables
+firebase functions:config:set openai.api_key="your_key_here"
+firebase functions:config:set assistant.id="asst_coursegpt_id"
 ```
 
-## Environment Variables
+## 📊 Analytics & Monitoring
 
-### Required
-- `OPENAI_API_KEY`: OpenAI API key
-- `ASSISTANT_ID`: OpenAI Assistant ID (auto-generated by manage_assistant.py)
+### **Key Events**
+- `coursegpt_conversation_start` - User begins spiritual guidance session
+- `premium_course_purchase` - €7 course conversion
+- `spiritual_insight_shared` - User reports transformation
+- `acim_quote_requested` - Specific ACIM text lookup
+- `multilingual_response` - Non-English guidance provided
 
-### Optional
-- `VECTOR_STORE_ID`: OpenAI Vector Store ID (auto-generated)
-- `DAILY_OUT_TOKENS_CAP`: Daily token limit per user (default: 2000)
-- `LOG_LEVEL`: Python logging level (default: INFO)
-
-## Original Repo layout (suggested)
-
-## Analytics events (names)
-`app_open`, `sign_in_success`, `message_send`, `message_stream_start`, `message_stream_end`, `quick_action_used`, `limit_reached_daily_tokens`, `settings_changed`.
+### **Success Metrics**
+- **Spiritual Impact**: User transformation testimonials
+- **Engagement**: Average session depth and return rates
+- **Conversion**: Free-to-premium upgrade rates
+- **Content Quality**: ACIM quotation accuracy
+- **Platform Health**: Response times and uptime
 
 ---
 
-## Autonomous Agent Prompt System
+## 🤖 Autonomous Agent System
 
-This repository includes a sophisticated prompt system for autonomous agents that can handle various aspects of software development while maintaining strict adherence to ACIM principles and technical excellence.
+Our development is powered by specialized AI agents that maintain ACIM spiritual integrity while delivering technical excellence.
 
-### Prompt Structure
-
-The prompt system is organized hierarchically:
-
+### **Agent Architecture**
 ```
-prompts/
-├── master_system_prompt.md          # Core foundational prompt
-├── orchestration_protocol.md        # Agent coordination protocol
-├── [role]_engineer.md               # Role-specific prompts
-└── snippets/                        # Modular components
-    ├── guardrails.md                # Code quality & architecture rules
-    ├── docs_testing.md              # Documentation & testing standards
-    └── security_performance.md      # Security & performance guidelines
-```
-
-### Available Agent Roles
-
-- **Backend Engineer** (`backend_engineer.md`) - Python/FastAPI backend development
-- **Android Engineer** (`android_engineer.md`) - Kotlin/Jetpack Compose mobile development
-- **Cloud Functions Engineer** (`cloud_functions_engineer.md`) - Firebase Cloud Functions
-- **DevOps/SRE** (`devops_sre.md`) - Infrastructure and deployment
-- **QA Tester** (`qa_tester.md`) - Testing and quality assurance
-- **ACIM Scholar** (`acim_scholar.md`) - A Course in Miracles content validation
-
-### Usage
-
-#### Manual Prompt Assembly
-```bash
-# Render a complete prompt for a specific role
-python scripts/render_prompt.py --role backend_engineer --output rendered_prompt.txt
-
-# Include specific snippets
-python scripts/render_prompt.py --role android_engineer --snippets guardrails docs_testing
-
-# Validate prompt integrity
-python scripts/render_prompt.py --validate-all
+/agents/
+├── core/
+│   ├── master_system_prompt.md      # Universal ACIM principles
+│   ├── orchestration_protocol.md    # Agent coordination
+│   └── coursegpt_integration.md     # Core system prompt
+├── specialized/
+│   ├── acim_scholar.md              # Spiritual guardian
+│   ├── product_manager.md           # Strategy & growth
+│   ├── backend_engineer.md          # API development
+│   ├── blogger.md                   # SEO content creation
+│   └── [other specialized agents]
+└── templates/
+    └── agent_template.md            # Standard format
 ```
 
-#### Programmatic Usage
-```python
-from scripts.render_prompt import PromptRenderer
+### **Agent Capabilities**
+- **ACIM Scholar**: Validates all content for spiritual authenticity
+- **Product Manager**: Drives strategy and user experience optimization  
+- **Backend Engineer**: Develops robust APIs and database architecture
+- **Blogger**: Creates SEO-optimized ACIM content for organic growth
+- **DevOps Engineer**: Ensures scalable, reliable infrastructure
 
-# Initialize renderer
-renderer = PromptRenderer()
-
-# Render complete prompt for backend engineering
-backend_prompt = renderer.render_role_prompt('backend_engineer', 
-                                           snippets=['guardrails', 'security_performance'])
-
-# Validate all prompts
-validation_results = renderer.validate_all_prompts()
-```
-
-### Prompt Components
-
-#### Master System Prompt
-Contains the foundational rules, ACIM principles, and coding standards that apply to all agents. This serves as the base layer for all role-specific prompts.
-
-#### Role-Specific Prompts
-Each role inherits from the master prompt and adds specialized:
-- Technical stack requirements
-- Role-specific responsibilities
-- Success criteria and metrics
-- Handoff protocols between roles
-- Specialized code examples and patterns
-
-#### Snippet System
-Modular components that can be mixed and matched:
-- **Guardrails**: Code quality, architecture patterns, testing requirements
-- **Docs/Testing**: Documentation standards, test coverage goals, CI/CD requirements
-- **Security/Performance**: Security best practices, performance budgets, monitoring
+📁 **[Complete Agent Documentation →](./agents/README.md)**
 
 ### Validation and CI
 
