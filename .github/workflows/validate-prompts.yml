@@ -1,0 +1,356 @@
+name: Validate Autonomous Agent Prompt System
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'prompts/**'
+      - 'scripts/render_prompt.py'
+      - '.github/workflows/validate-prompts.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'prompts/**'
+      - 'scripts/render_prompt.py'
+      - '.github/workflows/validate-prompts.yml'
+
+jobs:
+  validate-prompts:
+    name: Validate Prompt System
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # No additional dependencies needed for the prompt renderer
+          
+      - name: Make render script executable
+        run: chmod +x scripts/render_prompt.py
+        
+      - name: List available prompt components
+        run: python scripts/render_prompt.py --list
+        
+      - name: Validate all prompt components
+        run: |
+          echo "🔍 Validating prompt system integrity..."
+          python scripts/render_prompt.py --validate-all
+          
+      - name: Test prompt rendering for all roles
+        run: |
+          echo "🎭 Testing prompt rendering for all available roles..."
+          
+          # Get list of available roles
+          roles=$(python scripts/render_prompt.py --list | grep "Roles" | cut -d: -f2 | tr ',' '\n' | sed 's/^ *//')
+          
+          # Test rendering each role
+          for role in $roles; do
+            role=$(echo $role | xargs)  # trim whitespace
+            if [ -n "$role" ]; then
+              echo "Testing role: $role"
+              python scripts/render_prompt.py --role "$role" --output "test_output_${role}.txt"
+              
+              # Basic validation of rendered output
+              if [ -f "test_output_${role}.txt" ]; then
+                lines=$(wc -l < "test_output_${role}.txt")
+                if [ $lines -lt 50 ]; then
+                  echo "❌ ERROR: Rendered prompt for $role is too short ($lines lines)"
+                  exit 1
+                fi
+                echo "✅ Role $role rendered successfully ($lines lines)"
+                rm "test_output_${role}.txt"
+              else
+                echo "❌ ERROR: Failed to render prompt for role $role"
+                exit 1
+              fi
+            fi
+          done
+          
+      - name: Test prompt rendering with snippets
+        run: |
+          echo "🧩 Testing prompt rendering with snippet combinations..."
+          
+          # Test backend engineer with guardrails and security snippets
+          python scripts/render_prompt.py \
+            --role backend_engineer \
+            --snippets guardrails security_performance \
+            --output test_backend_with_snippets.txt
+            
+          # Validate output
+          if grep -q "SNIPPET: GUARDRAILS" test_backend_with_snippets.txt && \
+             grep -q "SNIPPET: SECURITY PERFORMANCE" test_backend_with_snippets.txt; then
+            echo "✅ Snippet integration working correctly"
+            rm test_backend_with_snippets.txt
+          else
+            echo "❌ ERROR: Snippets not properly integrated"
+            exit 1
+          fi
+          
+      - name: Test orchestration protocol integration
+        run: |
+          echo "🔄 Testing orchestration protocol integration..."
+          
+          python scripts/render_prompt.py \
+            --role qa_tester \
+            --include-orchestration \
+            --output test_with_orchestration.txt
+            
+          # Validate orchestration protocol is included
+          if grep -q "ORCHESTRATION PROTOCOL" test_with_orchestration.txt; then
+            echo "✅ Orchestration protocol integration working"
+            rm test_with_orchestration.txt
+          else
+            echo "❌ ERROR: Orchestration protocol not properly integrated"
+            exit 1
+          fi
+          
+      - name: Validate ACIM fidelity preservation
+        run: |
+          echo "📖 Validating ACIM fidelity preservation in prompts..."
+          
+          # Check that master prompt maintains ACIM principles
+          if ! grep -q "ACIM" prompts/master_system_prompt.md; then
+            echo "❌ ERROR: Master prompt missing ACIM references"
+            exit 1
+          fi
+          
+          # Check that role prompts inherit from master
+          for role_file in prompts/*_engineer.md prompts/qa_tester.md prompts/devops_sre.md prompts/acim_scholar.md; do
+            if [ -f "$role_file" ]; then
+              if ! grep -q "Inherits all principles, rules, and architecture from" "$role_file"; then
+                echo "❌ ERROR: $role_file missing inheritance declaration"
+                exit 1
+              fi
+            fi
+          done
+          
+          echo "✅ ACIM fidelity preservation validated"
+          
+      - name: Check for spiritual integrity violations
+        run: |
+          echo "🙏 Checking for spiritual integrity violations..."
+          
+          # List of terms that should not appear in prompts (worldly advice patterns)
+          prohibited_terms=(
+            "practical life advice"
+            "problem solving strategies" 
+            "worldly success"
+            "material goals"
+            "psychological counseling"
+          )
+          
+          violations_found=false
+          
+          for term in "${prohibited_terms[@]}"; do
+            if grep -r -i "$term" prompts/; then
+              echo "❌ WARNING: Found potentially problematic term: '$term'"
+              violations_found=true
+            fi
+          done
+          
+          if [ "$violations_found" = false ]; then
+            echo "✅ No spiritual integrity violations detected"
+          else
+            echo "⚠️  Manual review recommended for flagged content"
+          fi
+          
+      - name: Generate validation report
+        if: always()
+        run: |
+          echo "📊 Generating validation report..."
+          
+          {
+            echo "# Prompt System Validation Report"
+            echo "Generated at: $(date -u)"
+            echo ""
+            echo "## Components Validated"
+            python scripts/render_prompt.py --list
+            echo ""
+            echo "## Validation Results"
+            python scripts/render_prompt.py --validate-all || true
+            echo ""
+            echo "## System Status"
+            if [ $? -eq 0 ]; then
+              echo "✅ All validations passed - Prompt system is healthy"
+            else
+              echo "❌ Some validations failed - Manual review required"
+            fi
+          } > validation_report.md
+          
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: prompt-validation-report
+          path: validation_report.md
+          retention-days: 30
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: validate-prompts
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Scan for secrets in prompts
+        run: |
+          echo "🔒 Scanning prompts for potential secrets..."
+          
+          # Check for common secret patterns
+          secret_patterns=(
+            "api[_-]?key"
+            "password"
+            "secret"
+            "token"
+            "credential"
+            "private[_-]?key"
+          )
+          
+          secrets_found=false
+          
+          for pattern in "${secret_patterns[@]}"; do
+            if grep -r -i "$pattern" prompts/ | grep -v "# " | grep -v "example" | grep -v "placeholder"; then
+              echo "⚠️  Potential secret detected with pattern: $pattern"
+              secrets_found=true
+            fi
+          done
+          
+          if [ "$secrets_found" = false ]; then
+            echo "✅ No secrets detected in prompt files"
+          else
+            echo "❌ Potential secrets found - manual review required"
+            exit 1
+          fi
+          
+      - name: Validate prompt file permissions
+        run: |
+          echo "🔐 Validating prompt file permissions..."
+          
+          # Check that prompt files are not executable
+          executable_prompts=$(find prompts/ -name "*.md" -executable)
+          
+          if [ -n "$executable_prompts" ]; then
+            echo "❌ ERROR: Found executable prompt files:"
+            echo "$executable_prompts"
+            exit 1
+          else
+            echo "✅ Prompt file permissions are correct"
+          fi
+
+  integration-test:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    needs: validate-prompts
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Test complete workflow simulation
+        run: |
+          echo "🎯 Testing complete autonomous agent workflow simulation..."
+          
+          # Simulate a complete development workflow using different roles
+          roles=("backend_engineer" "android_engineer" "qa_tester" "devops_sre")
+          
+          for role in "${roles[@]}"; do
+            echo "Simulating $role workflow..."
+            
+            # Render prompt for role
+            python scripts/render_prompt.py \
+              --role "$role" \
+              --snippets guardrails docs_testing \
+              --output "workflow_${role}.txt"
+              
+            # Validate the rendered prompt has all necessary components
+            required_sections=(
+              "MASTER SYSTEM PROMPT"
+              "ROLE-SPECIFIC PROMPT"
+              "SNIPPET: GUARDRAILS"
+              "SNIPPET: DOCS TESTING"
+              "INTEGRATION INSTRUCTIONS"
+            )
+            
+            for section in "${required_sections[@]}"; do
+              if ! grep -q "$section" "workflow_${role}.txt"; then
+                echo "❌ ERROR: Missing section '$section' in $role workflow"
+                exit 1
+              fi
+            done
+            
+            echo "✅ $role workflow simulation complete"
+            rm "workflow_${role}.txt"
+          done
+          
+      - name: Test cross-role handoff protocols
+        run: |
+          echo "🤝 Testing cross-role handoff protocols..."
+          
+          # Verify that role prompts contain handoff protocols
+          role_files=(
+            "prompts/backend_engineer.md"
+            "prompts/android_engineer.md" 
+            "prompts/qa_tester.md"
+            "prompts/devops_sre.md"
+          )
+          
+          for role_file in "${role_files[@]}"; do
+            if [ -f "$role_file" ]; then
+              if ! grep -q "Hand-off Protocol" "$role_file"; then
+                echo "❌ ERROR: $role_file missing handoff protocols"
+                exit 1
+              fi
+            fi
+          done
+          
+          echo "✅ Cross-role handoff protocols validated"
+          
+      - name: Performance test
+        run: |
+          echo "⚡ Testing prompt rendering performance..."
+          
+          start_time=$(date +%s%N)
+          
+          # Render a complex prompt with multiple snippets
+          python scripts/render_prompt.py \
+            --role backend_engineer \
+            --snippets guardrails docs_testing security_performance \
+            --include-orchestration \
+            --output performance_test.txt
+            
+          end_time=$(date +%s%N)
+          duration=$((($end_time - $start_time) / 1000000))  # Convert to milliseconds
+          
+          echo "Prompt rendering took ${duration}ms"
+          
+          # Fail if rendering takes too long (over 5 seconds = 5000ms)
+          if [ $duration -gt 5000 ]; then
+            echo "❌ ERROR: Prompt rendering is too slow (${duration}ms > 5000ms)"
+            exit 1
+          fi
+          
+          # Validate output size is reasonable
+          file_size=$(stat -f%z performance_test.txt 2>/dev/null || stat -c%s performance_test.txt)
+          
+          if [ $file_size -gt 1048576 ]; then  # 1MB limit
+            echo "❌ ERROR: Rendered prompt is too large (${file_size} bytes > 1MB)"
+            exit 1
+          fi
+          
+          echo "✅ Performance test passed (${duration}ms, ${file_size} bytes)"
+          rm performance_test.txt

@@ -1,0 +1,9 @@
+# Requirements for prompt rendering and validation scripts
+# All functionality is implemented using Python standard library
+# No external dependencies required
+
+# Future potential dependencies:
+# pydantic>=2.0.0        # For schema validation
+# pyyaml>=6.0           # For YAML configuration files
+# jinja2>=3.0.0         # For advanced template rendering
+# click>=8.0.0          # For enhanced CLI interface
