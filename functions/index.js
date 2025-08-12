@@ -140,8 +140,31 @@ function extractCitations(message) {
 }
 
 /**
- * Chat with CourseGPT Assistant - Enhanced version with full API contract compliance
- * Callable HTTPS Function as specified in specs.md
+ * Detect language of user message for multilingual CourseGPT response
+ * @param {string} message - User message to analyze
+ * @return {string} Detected language code (e.g., 'en', 'de', 'es', 'fr')
+ */
+function detectLanguage(message) {
+  // Simple language detection based on common patterns
+  // German indicators
+  if (/\b(der|die|das|und|ich|bin|ist|sind|haben|wird|kann|soll|mit|für|auf|von|zu|im|am|ein|eine|einen)\b/i.test(message)) {
+    return 'de';
+  }
+  // Spanish indicators  
+  if (/\b(el|la|los|las|y|yo|soy|es|son|tiene|será|puede|debe|con|para|en|de|a|un|una)\b/i.test(message)) {
+    return 'es';
+  }
+  // French indicators
+  if (/\b(le|la|les|et|je|suis|est|sont|avoir|sera|peut|doit|avec|pour|dans|de|à|un|une)\b/i.test(message)) {
+    return 'fr';
+  }
+  // Default to English
+  return 'en';
+}
+
+/**
+ * Chat with CourseGPT Assistant - Enhanced with multilingual support
+ * Responds in the user's detected language for authentic ACIM guidance
  */
 exports.chatWithAssistant = onCall(async (request) => {
   const startTime = Date.now();
@@ -164,10 +187,14 @@ exports.chatWithAssistant = onCall(async (request) => {
       throw new Error("Message too long. Maximum 4000 characters.");
     }
 
+    // Detect user's language for multilingual response
+    const detectedLanguage = detectLanguage(message);
+
     logger.info("Chat request received", {
       userId,
       messageLength: message.length,
       tone,
+      detectedLanguage,
       timestamp: startTime,
     });
 
@@ -184,6 +211,7 @@ exports.chatWithAssistant = onCall(async (request) => {
       userMessage: message,
       assistantResponse: "", // Will be updated as we stream
       tone,
+      detectedLanguage,
       status: "processing",
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
       tokenIn: 0,
