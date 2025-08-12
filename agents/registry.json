@@ -1,0 +1,189 @@
+{
+  "agents": {
+    "acim_scholar": {
+      "name": "ACIM Scholar",
+      "description": "Specialized agent for ACIM content integrity and doctrinal accuracy",
+      "prompt_path": "specialized/acim_scholar.md",
+      "capabilities": [
+        "text_validation", 
+        "citation_checker", 
+        "content_analyzer",
+        "doctrinal_validator", 
+        "search_accuracy_tester"
+      ],
+      "tags": ["acim", "content", "validation"],
+      "max_concurrent_tasks": 2,
+      "priority_specialization": ["critical"],
+      "enabled": true
+    },
+    "product_manager": {
+      "name": "Product Manager",
+      "description": "Strategic planning and requirements management",
+      "prompt_path": "specialized/product_manager.md",
+      "capabilities": [
+        "requirements_generator", 
+        "user_story_creator", 
+        "roadmap_planner",
+        "metrics_analyzer", 
+        "documentation_creator"
+      ],
+      "tags": ["planning", "strategy", "requirements"],
+      "max_concurrent_tasks": 3,
+      "priority_specialization": ["medium", "high"],
+      "enabled": true
+    },
+    "backend_engineer": {
+      "name": "Backend Engineer",
+      "description": "API development and database optimization",
+      "prompt_path": "specialized/backend_engineer.md",
+      "capabilities": [
+        "code_generator", 
+        "api_tester", 
+        "database_optimizer",
+        "firebase_deployer", 
+        "performance_profiler"
+      ],
+      "tags": ["backend", "api", "database", "firebase"],
+      "max_concurrent_tasks": 2,
+      "priority_specialization": ["high", "critical"],
+      "enabled": true
+    },
+    "android_engineer": {
+      "name": "Android Engineer",
+      "description": "Mobile development and offline synchronization",
+      "prompt_path": "specialized/android_engineer.md",
+      "capabilities": [
+        "kotlin_generator", 
+        "ui_designer", 
+        "offline_sync_implementer",
+        "performance_optimizer", 
+        "accessibility_validator"
+      ],
+      "tags": ["android", "mobile", "kotlin", "offline"],
+      "max_concurrent_tasks": 2,
+      "priority_specialization": ["medium", "high"],
+      "enabled": true
+    },
+    "devops_sre": {
+      "name": "DevOps/SRE",
+      "description": "Infrastructure management and reliability engineering",
+      "prompt_path": "specialized/devops_sre.md",
+      "capabilities": [
+        "infrastructure_manager", 
+        "security_scanner", 
+        "cost_optimizer",
+        "monitoring_configurator", 
+        "deployment_automator"
+      ],
+      "tags": ["devops", "infrastructure", "security", "deployment"],
+      "max_concurrent_tasks": 2,
+      "priority_specialization": ["critical", "high"],
+      "enabled": true
+    },
+    "qa_tester": {
+      "name": "QA Tester",
+      "description": "Quality assurance and testing automation",
+      "prompt_path": "specialized/qa_tester.md",
+      "capabilities": [
+        "test_generator", 
+        "automation_framework", 
+        "performance_tester",
+        "security_tester", 
+        "accessibility_validator"
+      ],
+      "tags": ["testing", "qa", "automation"],
+      "max_concurrent_tasks": 3,
+      "priority_specialization": ["high", "medium"],
+      "enabled": true
+    },
+    "cloud_functions_engineer": {
+      "name": "Cloud Functions Engineer",
+      "description": "Serverless function development and optimization",
+      "prompt_path": "specialized/cloud_functions_engineer.md",
+      "capabilities": [
+        "function_generator", 
+        "trigger_configurator", 
+        "performance_optimizer",
+        "integration_tester", 
+        "deployment_manager"
+      ],
+      "tags": ["cloud", "serverless", "functions"],
+      "max_concurrent_tasks": 2,
+      "priority_specialization": ["medium", "high"],
+      "enabled": true
+    },
+    "exa_searcher": {
+      "name": "ExaSearcher",
+      "description": "Static code search and TODO detection specialist",
+      "prompt_path": "specialized/exa_searcher.md",
+      "capabilities": [
+        "code_search", 
+        "todo_detector", 
+        "static_analyzer",
+        "code_pattern_finder", 
+        "technical_debt_scanner"
+      ],
+      "tags": ["search", "static-analysis", "code-review"],
+      "max_concurrent_tasks": 4,
+      "priority_specialization": ["low", "medium"],
+      "enabled": true
+    },
+    "playwright_tester": {
+      "name": "PlaywrightTester",
+      "description": "Headless browser E2E testing specialist",
+      "prompt_path": "specialized/playwright_tester.md",
+      "capabilities": [
+        "e2e_tester", 
+        "browser_automator", 
+        "ui_validator",
+        "accessibility_tester", 
+        "performance_monitor"
+      ],
+      "tags": ["playwright", "e2e", "browser-testing"],
+      "max_concurrent_tasks": 3,
+      "priority_specialization": ["high", "medium"],
+      "enabled": true
+    },
+    "revenue_analyst": {
+      "name": "RevenueAnalyst",
+      "description": "Revenue funnel analysis and pricing optimization",
+      "prompt_path": "specialized/revenue_analyst.md",
+      "capabilities": [
+        "funnel_analyzer", 
+        "pricing_optimizer", 
+        "conversion_tracker",
+        "revenue_forecaster", 
+        "ab_test_designer"
+      ],
+      "tags": ["revenue", "analytics", "pricing", "funnel"],
+      "max_concurrent_tasks": 2,
+      "priority_specialization": ["high", "critical"],
+      "enabled": true
+    }
+  },
+  "routing_rules": {
+    "capability_tags": {
+      "search": ["exa_searcher"],
+      "playwright": ["playwright_tester"],
+      "revenue": ["revenue_analyst"],
+      "acim": ["acim_scholar"],
+      "backend": ["backend_engineer", "cloud_functions_engineer"],
+      "mobile": ["android_engineer"],
+      "testing": ["qa_tester", "playwright_tester"],
+      "infrastructure": ["devops_sre"]
+    },
+    "priority_routing": {
+      "critical": ["acim_scholar", "devops_sre", "revenue_analyst"],
+      "high": ["backend_engineer", "devops_sre", "playwright_tester", "revenue_analyst"],
+      "medium": ["product_manager", "android_engineer", "qa_tester", "exa_searcher"],
+      "low": ["exa_searcher"]
+    },
+    "load_balancing": {
+      "strategy": "least_loaded",
+      "max_queue_depth": 5,
+      "fallback_agents": ["product_manager"]
+    }
+  },
+  "version": "2.0",
+  "updated_at": "2024-01-20T00:00:00Z"
+}
