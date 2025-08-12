@@ -1,0 +1,325 @@
+{
+  "task_deb4c259": {
+    "id": "task_deb4c259",
+    "title": "Implement Premium ACIM Subscription",
+    "description": "Design and implement premium subscription service with advanced AI features, personalized guidance, and exclusive ACIM content. Target: $50k/month revenue.",
+    "priority": "critical",
+    "category": "revenue",
+    "assignee": "product_manager",
+    "dependencies": [],
+    "tags": [
+      "revenue",
+      "subscription",
+      "premium",
+      "high-value"
+    ],
+    "status": "pending",
+    "created_at": "2025-08-12T09:51:03.871574",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 40,
+    "actual_hours": null,
+    "metadata": {
+      "revenue_potential": 50000,
+      "roi": 233,
+      "time_to_revenue": 45,
+      "value_category": "revenue_growth"
+    }
+  },
+  "task_dd3ba595": {
+    "id": "task_dd3ba595",
+    "title": "Mobile App Monetization Implementation",
+    "description": "Add in-app purchases, premium features, and subscription model to Android app. Target: $25k/month revenue.",
+    "priority": "high",
+    "category": "revenue",
+    "assignee": "android_engineer",
+    "dependencies": [],
+    "tags": [
+      "mobile",
+      "monetization",
+      "iap",
+      "revenue"
+    ],
+    "status": "pending",
+    "created_at": "2025-08-12T09:51:03.872491",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 30,
+    "actual_hours": null,
+    "metadata": {
+      "revenue_potential": 25000,
+      "roi": 212,
+      "value_category": "revenue_growth"
+    }
+  },
+  "task_5a843873": {
+    "id": "task_5a843873",
+    "title": "Enterprise ACIM Training Platform",
+    "description": "Develop B2B platform for corporate spiritual wellness programs and healthcare applications. Target: $100k/month revenue.",
+    "priority": "high",
+    "category": "revenue",
+    "assignee": "product_manager",
+    "dependencies": [],
+    "tags": [
+      "enterprise",
+      "b2b",
+      "revenue",
+      "high-value"
+    ],
+    "status": "pending",
+    "created_at": "2025-08-12T09:51:03.873493",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 60,
+    "actual_hours": null,
+    "metadata": {
+      "revenue_potential": 100000,
+      "roi": 300,
+      "value_category": "market_expansion"
+    }
+  },
+  "task_aeca1d89": {
+    "id": "task_aeca1d89",
+    "title": "Firebase and OpenAI Cost Optimization",
+    "description": "Optimize Firebase usage patterns, implement intelligent caching, and reduce API costs. Target: $5k/month savings.",
+    "priority": "high",
+    "category": "optimization",
+    "assignee": "devops_sre",
+    "dependencies": [],
+    "tags": [
+      "cost",
+      "optimization",
+      "firebase",
+      "openai"
+    ],
+    "status": "pending",
+    "created_at": "2025-08-12T09:51:03.874269",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 20,
+    "actual_hours": null,
+    "metadata": {
+      "cost_savings": 5000,
+      "roi": 150,
+      "value_category": "cost_reduction"
+    }
+  },
+  "task_5e5e2296": {
+    "id": "task_5e5e2296",
+    "title": "AI-Powered User Onboarding System",
+    "description": "Implement intelligent onboarding flow with personalized ACIM guidance to increase user activation and retention.",
+    "priority": "high",
+    "category": "ux",
+    "assignee": "ui_ux_designer",
+    "dependencies": [],
+    "tags": [
+      "ux",
+      "onboarding",
+      "retention",
+      "ai"
+    ],
+    "status": "pending",
+    "created_at": "2025-08-12T09:51:03.875090",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 24,
+    "actual_hours": null,
+    "metadata": {
+      "user_impact": "30% activation improvement",
+      "revenue_impact": 15000,
+      "value_category": "user_retention"
+    }
+  },
+  "task_21ed3c57": {
+    "id": "task_21ed3c57",
+    "title": "Design Enterprise Features - Enterprise ACIM Training Platform",
+    "description": "Implementation task for B2B platform for spiritual wellness programs in corporations and healthcare",
+    "priority": "high",
+    "category": "opportunity",
+    "assignee": "product_manager",
+    "dependencies": [],
+    "tags": [
+      "opportunity",
+      "revenue_growth"
+    ],
+    "status": "pending",
+    "created_at": "2025-08-12T09:51:03.876659",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 20,
+    "actual_hours": null,
+    "metadata": {
+      "opportunity_id": "enterprise_licensing",
+      "opportunity_value": 100000,
+      "opportunity_roi": 300
+    }
+  },
+  "task_805ec1f0": {
+    "id": "task_805ec1f0",
+    "title": "Develop B2B API - Enterprise ACIM Training Platform",
+    "description": "Implementation task for B2B platform for spiritual wellness programs in corporations and healthcare",
+    "priority": "high",
+    "category": "opportunity",
+    "assignee": "backend_engineer",
+    "dependencies": [],
+    "tags": [
+      "opportunity",
+      "revenue_growth"
+    ],
+    "status": "pending",
+    "created_at": "2025-08-12T09:51:03.877648",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 30,
+    "actual_hours": null,
+    "metadata": {
+      "opportunity_id": "enterprise_licensing",
+      "opportunity_value": 100000,
+      "opportunity_roi": 300
+    }
+  },
+  "task_57dcce57": {
+    "id": "task_57dcce57",
+    "title": "Create Enterprise Documentation - Enterprise ACIM Training Platform",
+    "description": "Implementation task for B2B platform for spiritual wellness programs in corporations and healthcare",
+    "priority": "high",
+    "category": "opportunity",
+    "assignee": "technical_writer",
+    "dependencies": [],
+    "tags": [
+      "opportunity",
+      "revenue_growth"
+    ],
+    "status": "pending",
+    "created_at": "2025-08-12T09:51:03.878657",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 16,
+    "actual_hours": null,
+    "metadata": {
+      "opportunity_id": "enterprise_licensing",
+      "opportunity_value": 100000,
+      "opportunity_roi": 300
+    }
+  },
+  "task_ef505c14": {
+    "id": "task_ef505c14",
+    "title": "Design Premium Features - ACIM Premium Subscription Service",
+    "description": "Implementation task for Launch premium tier with advanced AI features, personalized guidance, and exclusive content",
+    "priority": "high",
+    "category": "opportunity",
+    "assignee": "product_manager",
+    "dependencies": [],
+    "tags": [
+      "opportunity",
+      "revenue_growth"
+    ],
+    "status": "pending",
+    "created_at": "2025-08-12T09:51:03.879904",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 16,
+    "actual_hours": null,
+    "metadata": {
+      "opportunity_id": "premium_subscription",
+      "opportunity_value": 50000,
+      "opportunity_roi": 233
+    }
+  },
+  "task_20644c88": {
+    "id": "task_20644c88",
+    "title": "Implement Subscription Backend - ACIM Premium Subscription Service",
+    "description": "Implementation task for Launch premium tier with advanced AI features, personalized guidance, and exclusive content",
+    "priority": "high",
+    "category": "opportunity",
+    "assignee": "backend_engineer",
+    "dependencies": [],
+    "tags": [
+      "opportunity",
+      "revenue_growth"
+    ],
+    "status": "pending",
+    "created_at": "2025-08-12T09:51:03.883452",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 24,
+    "actual_hours": null,
+    "metadata": {
+      "opportunity_id": "premium_subscription",
+      "opportunity_value": 50000,
+      "opportunity_roi": 233
+    }
+  },
+  "task_38fa4eba": {
+    "id": "task_38fa4eba",
+    "title": "Create Premium UI/UX - ACIM Premium Subscription Service",
+    "description": "Implementation task for Launch premium tier with advanced AI features, personalized guidance, and exclusive content",
+    "priority": "high",
+    "category": "opportunity",
+    "assignee": "ui_ux_designer",
+    "dependencies": [],
+    "tags": [
+      "opportunity",
+      "revenue_growth"
+    ],
+    "status": "pending",
+    "created_at": "2025-08-12T09:51:03.884665",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 20,
+    "actual_hours": null,
+    "metadata": {
+      "opportunity_id": "premium_subscription",
+      "opportunity_value": 50000,
+      "opportunity_roi": 233
+    }
+  },
+  "task_7e7a9fc5": {
+    "id": "task_7e7a9fc5",
+    "title": "Test Subscription Flow - ACIM Premium Subscription Service",
+    "description": "Implementation task for Launch premium tier with advanced AI features, personalized guidance, and exclusive content",
+    "priority": "high",
+    "category": "opportunity",
+    "assignee": "qa_tester",
+    "dependencies": [],
+    "tags": [
+      "opportunity",
+      "revenue_growth"
+    ],
+    "status": "pending",
+    "created_at": "2025-08-12T09:51:03.886175",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 12,
+    "actual_hours": null,
+    "metadata": {
+      "opportunity_id": "premium_subscription",
+      "opportunity_value": 50000,
+      "opportunity_roi": 233
+    }
+  },
+  "task_a4e9556f": {
+    "id": "task_a4e9556f",
+    "title": "Implement Opportunity - Multi-Language ACIM Platform",
+    "description": "Implementation task for Expand to Spanish, Portuguese, and French markets with localized content",
+    "priority": "high",
+    "category": "opportunity",
+    "assignee": "product_manager",
+    "dependencies": [],
+    "tags": [
+      "opportunity",
+      "market_expansion"
+    ],
+    "status": "pending",
+    "created_at": "2025-08-12T09:51:03.887767",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 16,
+    "actual_hours": null,
+    "metadata": {
+      "opportunity_id": "international_expansion",
+      "opportunity_value": 75000,
+      "opportunity_roi": 275
+    }
+  }
+}

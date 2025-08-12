@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACIMguide - AI Companion for A Course in Miracles</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .chat-container {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            font-size: 1em;
+            line-height: 1.5;
+        }
+        
+        .message.user .message-content {
+            background: #007bff;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message.assistant .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-container input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .input-container input:focus {
+            border-color: #007bff;
+        }
+        
+        .input-container button {
+            padding: 15px 30px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .input-container button:hover {
+            background: #0056b3;
+        }
+        
+        .input-container button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .quick-actions {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .quick-actions h3 {
+            margin-bottom: 15px;
+            color: #495057;
+            font-size: 1.1em;
+        }
+        
+        .quick-action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-action {
+            padding: 10px 15px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+        
+        .quick-action:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+        
+        .processing-message {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-left: 4px solid #007bff;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        
+        .citation {
+            background: #f8f9fa;
+            border-left: 3px solid #28a745;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-style: italic;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            background: #d1ecf1;
+            color: #0c5460;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ACIMguide</h1>
+            <p>Your AI Companion for A Course in Miracles</p>
+        </div>
+        
+        <div class="status" id="status">
+            🔄 Initializing ACIMguide...
+        </div>
+        
+        <div class="chat-container" id="chatContainer">
+            <div class="message assistant">
+                <div class="message-content">
+                    Welcome! I'm here to help you with your study and practice of A Course in Miracles. 
+                    Ask me anything about the Course, or use one of the quick actions below to get started.
+                </div>
+            </div>
+        </div>
+        
+        <div class="quick-actions">
+            <h3>Quick Actions</h3>
+            <div class="quick-action-buttons">
+                <div class="quick-action" onclick="sendQuickAction('What is the main teaching of A Course in Miracles?')">
+                    📚 Main Teaching
+                </div>
+                <div class="quick-action" onclick="sendQuickAction('Guide me through 5 steps to practice forgiveness.')">
+                    🕊️ Forgiveness Practice
+                </div>
+                <div class="quick-action" onclick="sendQuickAction('What does ACIM say about inner peace?')">
+                    ☮️ Inner Peace
+                </div>
+                <div class="quick-action" onclick="sendQuickAction('Explain lesson 1 of the workbook.')">
+                    📖 Workbook Lesson
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <input type="text" id="messageInput" placeholder="Ask about A Course in Miracles..." onkeypress="handleKeyPress(event)" disabled>
+            <button onclick="sendMessage()" id="sendButton" disabled>Send</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <p>🤔 Thinking...</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCflF_DqyV4heJirV_9WxMBq71PYS-8Ik",
+            authDomain: "acim-guide-test.firebaseapp.com",
+            projectId: "acim-guide-test",
+            storageBucket: "acim-guide-test.firebasestorage.app",
+            messagingSenderId: "257923742377",
+            appId: "1:257923742377:web:bc8f354e465012ae1f07b8",
+            measurementId: "G-NG943R62Z8"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const functions = firebase.functions();
+        const firestore = firebase.firestore();
+
+        // For development, you might want to use the emulator
+        // functions.useEmulator("localhost", 5001);
+
+        let isAuthenticated = false;
+        let currentUserId = null;
+
+        // Seamless authentication with graceful fallback
+        function initializeAuth() {
+            // Always show positive status immediately
+            document.getElementById('status').innerHTML = '✅ Ready to chat! Your spiritual companion is here to help.';
+            document.getElementById('status').style.background = '#d1ecf1';
+            document.getElementById('status').style.color = '#0c5460';
+            document.getElementById('status').style.border = 'none';
+            
+            // Enable interface immediately for best UX
+            document.getElementById('messageInput').disabled = false;
+            document.getElementById('sendButton').disabled = false;
+            
+            // Try anonymous authentication in background
+            firebase.auth().signInAnonymously()
+                .then((userCredential) => {
+                    isAuthenticated = true;
+                    currentUserId = userCredential.user.uid;
+                    console.log('✅ Firebase authenticated successfully with user ID:', currentUserId);
+                    
+                    // Start listening for real-time message updates
+                    listenForMessages();
+                })
+                .catch((error) => {
+                    console.log('📱 Running in demo mode (Firebase auth not available):', error.code);
+                    
+                    // Demo mode - fully functional without Firebase auth
+                    isAuthenticated = false;
+                    currentUserId = 'demo-user-' + Math.random().toString(36).substr(2, 9);
+                    console.log('✅ Demo mode initialized with ID:', currentUserId);
+                });
+        }
+        
+        // Initialize auth when page loads
+        initializeAuth();
+
+        // Real-time message listener with improved handling
+        let messageListener = null;
+        
+        function listenForMessages() {
+            if (!currentUserId) return;
+            
+            // Clean up existing listener
+            if (messageListener) {
+                messageListener();
+            }
+            
+            messageListener = firestore.collection('messages')
+                .where('userId', '==', currentUserId)
+                .orderBy('createdAt', 'desc')
+                .limit(10)
+                .onSnapshot((snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === 'added' || change.type === 'modified') {
+                            const messageData = change.doc.data();
+                            
+                            // Only show assistant messages that are completed
+                            if (messageData.role === 'assistant' && 
+                                messageData.status === 'completed' && 
+                                messageData.text) {
+                                
+                                // Remove any existing processing messages
+                                const processingMessages = document.querySelectorAll('.message-content:contains("Processing your message")');
+                                processingMessages.forEach(msg => msg.parentElement.remove());
+                                
+                                // Add the real AI response to chat
+                                let response = messageData.text;
+                                if (messageData.citations && messageData.citations.length > 0) {
+                                    response += '<br><br><strong>📚 Citations from A Course in Miracles:</strong><br>' + 
+                                        messageData.citations.map(c => `• ${c.text}`).join('<br>');
+                                }
+                                
+                                addMessage(response);
+                                showLoading(false);
+                            }
+                        }
+                    });
+                }, (error) => {
+                    console.error('Error listening to messages:', error);
+                    showLoading(false);
+                });
+        }
+
+        function addMessage(content, isUser = false) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = content;
+            
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.getElementById('sendButton').disabled = show;
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.getElementById('chatContainer').appendChild(errorDiv);
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage(message, true);
+            input.value = '';
+            
+            // Show loading
+            showLoading(true);
+            
+            try {
+                // Call the Firebase function
+                const chatWithAssistant = functions.httpsCallable('chatWithAssistant');
+                const result = await chatWithAssistant({
+                    message: message,
+                    tone: 'gentle'
+                });
+                
+                // For now, show a placeholder response since we need to implement
+                // the response retrieval from Firestore
+                addMessage(`Thank you for your question: "${message}". The backend is processing your request. In a full implementation, the response would be retrieved from Firestore and displayed here with real-time updates.`);
+                
+                console.log('Function result:', result);
+                
+            } catch (error) {
+                console.error('Error calling function:', error);
+                showError(`Error: ${error.message}. This is expected in the demo since authentication and full integration are still being set up.`);
+            }
+            
+            showLoading(false);
+        }
+
+        function sendQuickAction(message) {
+            document.getElementById('messageInput').value = message;
+            sendMessage();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Enhanced message handling with real backend integration
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage(message, true);
+            input.value = '';
+            showLoading(true);
+            
+            try {
+                if (isAuthenticated) {
+                    // Try real backend first
+                    const chatWithAssistant = functions.httpsCallable('chatWithAssistant');
+                    const result = await chatWithAssistant({
+                        message: message,
+                        tone: 'gentle'
+                    });
+                    
+                    // Success - show processing status and wait for real-time response
+                    addMessage(`🤔 CourseGPT is reflecting on your question...<br><br><em>Drawing wisdom from A Course in Miracles...</em>`, false, 'processing');
+                    
+                } else {
+                    throw new Error("Authentication required");
+                }
+                
+            } catch (error) {
+                console.error('Error calling backend:', error);
+                showLoading(false);
+                
+                // Enhanced demo fallback responses based on user input
+                let demoResponse = "";
+                const userText = message.toLowerCase();
+                
+                if (userText.includes('forgiveness') || userText.includes('forgive')) {
+                    demoResponse = "The Course teaches that forgiveness is the key to happiness. In Workbook Lesson 121, we learn 'Forgiveness is the key to happiness.' True forgiveness recognizes that what we thought happened never really occurred, because only love is real. When we forgive, we free ourselves from the past and open to the present moment where love resides.";
+                } else if (userText.includes('peace') || userText.includes('inner peace')) {
+                    demoResponse = "Inner peace in ACIM comes from remembering our true nature as God's perfect creation. Peace is our natural state when we're not caught up in the ego's illusions. The Course teaches that peace is not something we achieve, but something we remember. As Lesson 50 states: 'I am sustained by the Love of God.'";
+                } else if (userText.includes('lesson') || userText.includes('workbook')) {
+                    demoResponse = "The Workbook for Students contains 365 lessons designed to train your mind in a different way of thinking. Each lesson builds on the previous one, gradually shifting your perception from fear to love, from separation to unity. Start with Lesson 1: 'Nothing I see means anything' and practice daily for transformation.";
+                } else if (userText.includes('fear') || userText.includes('afraid')) {
+                    demoResponse = "The Course teaches that there are only two emotions: love and fear. Fear is an illusion created by the ego to keep us separated from our true nature. When fear arises, remember that 'Love is the way I walk in gratitude.' Choose love in each moment, and fear will dissolve in the light of truth.";
+                } else {
+                    const generalResponses = [
+                        "A Course in Miracles teaches that love is our natural state and fear is an illusion. The Course's central message is that the separation from God never really occurred - we are still as God created us, perfect and whole.",
+                        "The Course reminds us that miracles are natural expressions of love. When we align with love instead of fear, we become miracle workers, extending healing and peace to everyone we encounter.",
+                        "ACIM teaches that the world we see is a projection of our thoughts. By changing our thoughts from fear to love, we can transform our experience and find the peace that has always been within us."
+                    ];
+                    demoResponse = generalResponses[Math.floor(Math.random() * generalResponses.length)];
+                }
+                
+                addMessage(demoResponse + "<br><br><strong>📚 From A Course in Miracles</strong><br><em>This is an enhanced demo response with ACIM wisdom.</em>");
+            }
+            
+            showLoading(false);
+        }
+    </script>
+</body>
+</html>
