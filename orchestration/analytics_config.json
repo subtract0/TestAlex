@@ -1,0 +1,59 @@
+{
+  "mixpanel": {
+    "api_secret": "your_mixpanel_api_secret_here",
+    "project_id": "acim-guide",
+    "funnel_id": "acim_conversion_funnel",
+    "events": {
+      "page_view": "Page View",
+      "signup": "Sign Up",
+      "activation": "First Session",
+      "trial_start": "Trial Started", 
+      "purchase": "Subscription Created",
+      "retention": "Retained User"
+    }
+  },
+  "firebase": {
+    "project_id": "acim-guide-test",
+    "credentials_path": "path/to/firebase-service-account.json",
+    "analytics_property_id": "your_ga4_property_id",
+    "events": {
+      "page_view": "page_view",
+      "sign_up": "sign_up",
+      "first_open": "first_open", 
+      "begin_checkout": "begin_checkout",
+      "purchase": "purchase",
+      "retention_7d": "retention_7d"
+    }
+  },
+  "revenue_tracking": {
+    "currency": "EUR",
+    "stripe_api_key": "your_stripe_api_key_here",
+    "revenue_events": [
+      "subscription_created",
+      "subscription_renewed", 
+      "one_time_purchase"
+    ]
+  },
+  "funnel_mapping": {
+    "visitor": ["page_view", "landing_page_view"],
+    "signup": ["sign_up", "user_registered"],
+    "activation": ["first_open", "first_session", "onboarding_complete"],
+    "trial": ["trial_started", "begin_checkout", "free_trial"],
+    "paid": ["purchase", "subscription_created", "payment_success"],
+    "retained": ["retention_7d", "retained_user", "monthly_active"]
+  },
+  "experiment_config": {
+    "min_sample_size": 100,
+    "confidence_level": 0.95,
+    "statistical_power": 0.8,
+    "max_experiment_duration_days": 21,
+    "min_experiment_duration_days": 7
+  },
+  "optimization_targets": {
+    "monthly_mrr_goal": 10000,
+    "target_conversion_lift": 0.20,
+    "cycle_duration_days": 14,
+    "max_experiments_parallel": 3,
+    "priority_stages": ["trial", "paid", "signup"]
+  }
+}

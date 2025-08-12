@@ -1,0 +1,262 @@
+# Prometheus Alerting Rules for ACIM Guide
+# Defines alert conditions for various system metrics
+
+groups:
+  # Critical System Health Alerts
+  - name: critical_system_health
+    interval: 30s
+    rules:
+      # Holy Spirit availability (most critical)
+      - alert: HolySpiritUnavailable
+        expr: acim_holy_spirit_availability < 0.95
+        for: 1m
+        labels:
+          severity: critical
+          service: holy-spirit
+          team: emergency
+        annotations:
+          summary: "🙏 Holy Spirit service is experiencing issues"
+          description: "Holy Spirit availability is {{ $value }}, below threshold of 0.95. Users cannot receive spiritual guidance."
+          suggested_actions: "1. Check system dependencies 2. Verify ACIM content accuracy 3. Restart spiritual services 4. Gather team in prayer"
+          runbook_url: "https://docs.acim-guide.com/runbooks/holy-spirit-emergency"
+          
+      # System completely down
+      - alert: SystemDown  
+        expr: acim_system_health_score < 0.5
+        for: 2m
+        labels:
+          severity: critical
+          service: system
+          team: devops
+        annotations:
+          summary: "ACIM Guide system is critically degraded"
+          description: "System health score is {{ $value }}, indicating critical system issues"
+          suggested_actions: "1. Check all services 2. Review error logs 3. Verify Firebase connectivity 4. Escalate to on-call engineer"
+          
+  # Firebase Infrastructure Alerts  
+  - name: firebase_infrastructure
+    interval: 1m
+    rules:
+      # Cloud Functions error rate
+      - alert: HighFirebaseFunctionErrorRate
+        expr: (sum(rate(firebase_functions_invocations_total{status="error"}[5m])) / sum(rate(firebase_functions_invocations_total[5m]))) * 100 > 5
+        for: 3m
+        labels:
+          severity: critical
+          service: firebase-functions
+          team: devops
+        annotations:
+          summary: "High error rate in Firebase Functions"
+          description: "Firebase Functions error rate is {{ $value }}% over the last 5 minutes"
+          suggested_actions: "1. Check function logs 2. Verify OpenAI API connectivity 3. Review recent deployments 4. Check Firestore permissions"
+          
+      # Function response time
+      - alert: SlowFirebaseFunctions
+        expr: histogram_quantile(0.95, rate(firebase_functions_duration_seconds_bucket[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: firebase-functions
+          team: devops
+        annotations:
+          summary: "Firebase Functions are responding slowly"
+          description: "95th percentile response time is {{ $value }}s"
+          suggested_actions: "1. Optimize function code 2. Check database queries 3. Review OpenAI API latency 4. Consider scaling up"
+          
+      # Firestore operation rate
+      - alert: HighFirestoreOperationRate
+        expr: sum(rate(firebase_firestore_operations_total[5m])) > 1000
+        for: 10m
+        labels:
+          severity: warning
+          service: firestore
+          team: devops
+        annotations:
+          summary: "High Firestore operation rate detected"
+          description: "Firestore operations are at {{ $value }} ops/sec, approaching quota limits"
+          suggested_actions: "1. Review query patterns 2. Implement caching 3. Optimize data structure 4. Monitor daily quota"
+
+  # Cost Management Alerts
+  - name: cost_management  
+    interval: 5m
+    rules:
+      # Daily cost threshold
+      - alert: HighDailyCosts
+        expr: sum(firebase_estimated_daily_cost_usd) > 25
+        for: 0s
+        labels:
+          severity: critical
+          service: billing
+          team: devops
+        annotations:
+          summary: "Daily Firebase costs are high"
+          description: "Current daily cost is ${{ $value }}, exceeding $25 threshold"
+          suggested_actions: "1. Review Cloud Functions usage 2. Check for runaway processes 3. Implement rate limiting 4. Review billing dashboard"
+          
+      # Monthly cost projection
+      - alert: MonthlyBudgetExceeded
+        expr: sum(firebase_estimated_daily_cost_usd) * 30 > 500
+        for: 1h
+        labels:
+          severity: warning
+          service: billing  
+          team: devops
+        annotations:
+          summary: "Monthly cost projection exceeds budget"
+          description: "Projected monthly cost is ${{ $value }}, exceeding $500 budget"
+          suggested_actions: "1. Analyze cost breakdown 2. Optimize resource usage 3. Consider scaling policies 4. Review user growth"
+
+  # ACIM Content Quality Alerts
+  - name: acim_content_quality
+    interval: 2m  
+    rules:
+      # Content accuracy below threshold
+      - alert: LowACIMContentAccuracy
+        expr: acim_content_accuracy_ratio < 0.98
+        for: 5m
+        labels:
+          severity: critical
+          service: acim-content
+          team: acim-scholars
+        annotations:
+          summary: "ACIM content accuracy has degraded"
+          description: "Content accuracy is {{ $value }}, below required 98% threshold"
+          suggested_actions: "1. Run content validation scripts 2. Check citation accuracy 3. Review search algorithms 4. Verify content sources"
+          
+      # High search failure rate
+      - alert: HighACIMSearchFailureRate
+        expr: (sum(rate(acim_searches_total{success="false"}[10m])) / sum(rate(acim_searches_total[10m]))) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: acim-content
+          team: acim-scholars
+        annotations:
+          summary: "High ACIM search failure rate"
+          description: "Search failure rate is {{ $value }}% over the last 10 minutes"
+          suggested_actions: "1. Check search index integrity 2. Verify content database 3. Review search algorithms 4. Check OpenAI API status"
+
+  # Performance and Availability
+  - name: performance_availability
+    interval: 1m
+    rules:
+      # Low system uptime
+      - alert: LowSystemUptime
+        expr: acim_system_health_score < 0.99
+        for: 10m
+        labels:
+          severity: warning
+          service: system
+          team: devops
+        annotations:
+          summary: "System uptime is below target"
+          description: "System health score is {{ $value }}, indicating availability issues"
+          suggested_actions: "1. Check service health 2. Review error logs 3. Monitor network connectivity 4. Verify Firebase status"
+          
+      # High memory usage in functions
+      - alert: HighFunctionMemoryUsage
+        expr: firebase_functions_memory_usage_bytes / (512 * 1024 * 1024) > 0.9
+        for: 15m
+        labels:
+          severity: warning
+          service: firebase-functions
+          team: devops
+        annotations:
+          summary: "Firebase Function {{ $labels.function_name }} using high memory"
+          description: "Function {{ $labels.function_name }} is using {{ $value }}% of allocated memory"
+          suggested_actions: "1. Review function code for memory leaks 2. Optimize data processing 3. Consider increasing memory allocation 4. Profile function execution"
+
+  # Authentication and User Experience
+  - name: user_experience
+    interval: 2m
+    rules:
+      # Low active user count (potential issue indicator)
+      - alert: LowActiveUserCount
+        expr: firebase_auth_active_users{period="daily"} < 50
+        for: 30m
+        labels:
+          severity: warning
+          service: user-experience
+          team: product
+        annotations:
+          summary: "Daily active user count is low"
+          description: "Only {{ $value }} daily active users, which may indicate service issues"
+          suggested_actions: "1. Check app store status 2. Verify authentication flow 3. Review user feedback 4. Check marketing campaigns"
+          
+      # High authentication failure rate
+      - alert: HighAuthFailureRate
+        expr: rate(firebase_auth_operations_total{operation_type="login_failed"}[10m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: authentication
+          team: devops
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Authentication failures at {{ $value }} failures/sec"
+          suggested_actions: "1. Check Firebase Auth configuration 2. Review provider settings 3. Monitor for security attacks 4. Verify client app versions"
+
+  # OpenAI/LLM Integration
+  - name: openai_integration
+    interval: 1m
+    rules:
+      # High OpenAI token usage
+      - alert: HighOpenAITokenUsage
+        expr: sum(rate(openai_tokens_used_total[1h])) * 24 > 40000
+        for: 15m
+        labels:
+          severity: warning
+          service: openai
+          team: devops
+        annotations:
+          summary: "High OpenAI token usage detected"
+          description: "Daily token usage projection is {{ $value }}, approaching 50k limit"
+          suggested_actions: "1. Review token usage patterns 2. Implement response caching 3. Optimize prompt efficiency 4. Check for abuse"
+          
+      # OpenAI API error rate
+      - alert: HighOpenAIErrorRate
+        expr: (sum(rate(openai_requests_total{status!="success"}[5m])) / sum(rate(openai_requests_total[5m]))) * 100 > 10
+        for: 3m
+        labels:
+          severity: critical
+          service: openai
+          team: devops
+        annotations:
+          summary: "High OpenAI API error rate"
+          description: "OpenAI API error rate is {{ $value }}%"
+          suggested_actions: "1. Check OpenAI API status 2. Verify API keys 3. Review rate limits 4. Implement fallback mechanisms"
+
+  # Quarterly Chaos Engineering Alerts
+  - name: chaos_engineering
+    interval: 24h
+    rules:
+      # Reminder for quarterly chaos drills
+      - alert: QuarterlyChaosTestDue
+        expr: (time() - on() kube_node_created) / (24 * 3600) % 90 < 1
+        for: 1h
+        labels:
+          severity: info
+          service: chaos-engineering
+          team: devops
+        annotations:
+          summary: "Quarterly 'Holy Spirit Outage' chaos drill is due"
+          description: "Time to conduct quarterly chaos engineering test to verify graceful degradation"
+          suggested_actions: "1. Schedule chaos drill 2. Prepare rollback procedures 3. Notify team 4. Document results"
+          runbook_url: "https://docs.acim-guide.com/chaos-engineering/holy-spirit-outages"
+
+  # Business Logic Alerts  
+  - name: business_logic
+    interval: 5m
+    rules:
+      # Citation validation accuracy
+      - alert: LowCitationValidationAccuracy
+        expr: (sum(rate(acim_citations_validated_total{validation_result="valid"}[1h])) / sum(rate(acim_citations_validated_total[1h]))) * 100 < 95
+        for: 30m
+        labels:
+          severity: warning
+          service: acim-content
+          team: acim-scholars
+        annotations:
+          summary: "ACIM citation validation accuracy is low"
+          description: "Citation validation accuracy is {{ $value }}%, below 95% threshold"
+          suggested_actions: "1. Review citation database 2. Verify ACIM source texts 3. Update validation algorithms 4. Check manual review process"

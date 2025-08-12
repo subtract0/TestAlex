@@ -125,6 +125,66 @@
             margin: 20px 0;
         }
         
+        .message.assistant .message-content h1 {
+            color: #007bff;
+            font-size: 1.4em;
+            margin: 20px 0 15px 0;
+            font-weight: 600;
+        }
+        
+        .message.assistant .message-content h2 {
+            color: #007bff;
+            font-size: 1.3em;
+            margin: 18px 0 12px 0;
+            font-weight: 600;
+        }
+        
+        .message.assistant .message-content h3 {
+            color: #007bff;
+            font-size: 1.2em;
+            margin: 15px 0 10px 0;
+            font-weight: 600;
+        }
+        
+        .message.assistant .message-content .acim-quote {
+            background: #f0f8ff;
+            border-left: 4px solid #007bff;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-style: italic;
+            color: #2c3e50;
+            position: relative;
+        }
+        
+        .message.assistant .message-content .acim-quote cite {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .message.assistant .message-content ul {
+            margin: 15px 0;
+            padding-left: 0;
+        }
+        
+        .message.assistant .message-content li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+            list-style: none;
+        }
+        
+        .message.assistant .message-content li:before {
+            content: '•';
+            color: #007bff;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
         .message.assistant .message-content p {
             margin: 12px 0;
             line-height: 1.6;
@@ -467,43 +527,66 @@
             
             // Enhanced formatting for assistant messages
             if (!isUser) {
-                // Robust formatting that handles CourseGPT responses properly
                 let formattedContent = content;
                 
-                // First, split content into paragraphs and format each
-                let paragraphs = formattedContent.split(/\n\s*\n/);
-                let formattedParagraphs = paragraphs.map(paragraph => {
-                    if (!paragraph.trim()) return '';
-                    
-                    // Handle bold text
-                    paragraph = paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                    
-                    // Handle italic text
-                    paragraph = paragraph.replace(/\*(.*?)\*/g, '<em>$1</em>');
-                    
-                    // Handle bullet points
-                    paragraph = paragraph.replace(/^- (.+)/gm, '• $1');
-                    
-                    // Handle numbered lists
-                    paragraph = paragraph.replace(/^(\d+\.\s)/gm, '<strong>$1</strong>');
-                    
-                    // Handle Course quotes
-                    paragraph = paragraph.replace(/"([^"]*?)"/g, '<span class="course-quote">"$1"</span>');
-                    
-                    // Handle blockquotes
-                    paragraph = paragraph.replace(/^>\s*(.+)/gm, '<blockquote>$1</blockquote>');
-                    
-                    // Add line breaks for single newlines within paragraphs
-                    paragraph = paragraph.replace(/\n/g, '<br>');
-                    
-                    return `<p>${paragraph}</p>`;
-                }).filter(p => p !== '<p></p>');
+                // First handle section breaks that are standalone
+                formattedContent = formattedContent.replace(/^---$/gm, '<hr class="section-break">');
                 
-                // Join paragraphs with spacing
-                formattedContent = formattedParagraphs.join('');
+                // Handle headers (### Header Text)
+                formattedContent = formattedContent.replace(/^###\s*(.+)$/gm, '<h3>$1</h3>');
+                formattedContent = formattedContent.replace(/^##\s*(.+)$/gm, '<h2>$1</h2>');
+                formattedContent = formattedContent.replace(/^#\s*(.+)$/gm, '<h1>$1</h1>');
                 
-                // Handle section breaks
-                formattedContent = formattedContent.replace(/---/g, '<hr style="margin: 20px 0; border: none; height: 2px; background: linear-gradient(to right, transparent, #007bff, transparent);">');
+                // Handle bold text **text**
+                formattedContent = formattedContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                
+                // Handle italic text *text* (but not if already inside ** or in quotes)
+                formattedContent = formattedContent.replace(/(?<!\*)\*([^*]+?)\*(?!\*)/g, '<em>$1</em>');
+                
+                // Handle Course quotes with special styling
+                formattedContent = formattedContent.replace(/"([^"]*?)"/g, '<span class="course-quote">"$1"</span>');
+                
+                // Handle blockquotes that start with **"text"** pattern
+                formattedContent = formattedContent.replace(/\*\*"([^"]*?)"\*\*\s*\*\(([^)]+)\)\*/g, '<blockquote class="acim-quote">"$1" <cite>($2)</cite></blockquote>');
+                
+                // Handle regular quotes with citations *"text"* *(citation)*
+                formattedContent = formattedContent.replace(/\*"([^"]*?)"\*\s*\*\(([^)]+)\)\*/g, '<blockquote class="acim-quote">"$1" <cite>($2)</cite></blockquote>');
+                
+                // Handle bullet points
+                formattedContent = formattedContent.replace(/^- (.+)$/gm, '<li>$1</li>');
+                
+                // Wrap consecutive <li> elements in <ul>
+                formattedContent = formattedContent.replace(/(<li>.*<\/li>)/gs, function(match) {
+                    // Split by line breaks and wrap each group of consecutive <li> items
+                    return '<ul>' + match + '</ul>';
+                });
+                
+                // Handle numbered lists
+                formattedContent = formattedContent.replace(/^(\d+\.\s)(.+)$/gm, '<li><strong>$1</strong>$2</li>');
+                
+                // Convert double line breaks to paragraph separations, but preserve existing HTML
+                let parts = formattedContent.split(/\n\s*\n/);
+                let formattedParts = parts.map(part => {
+                    part = part.trim();
+                    if (!part) return '';
+                    
+                    // Don't wrap HTML block elements in paragraphs
+                    if (part.match(/^<(h[1-6]|hr|blockquote|ul|ol|li|div)/)) {
+                        return part;
+                    }
+                    
+                    // Handle single line breaks within content
+                    part = part.replace(/\n/g, '<br>');
+                    
+                    // Wrap in paragraph if it's not already wrapped
+                    if (!part.startsWith('<')) {
+                        return `<p>${part}</p>`;
+                    }
+                    
+                    return part;
+                }).filter(p => p);
+                
+                formattedContent = formattedParts.join('\n\n');
                 
                 contentDiv.innerHTML = formattedContent;
             } else {
