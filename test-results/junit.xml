@@ -1,0 +1,748 @@
+<testsuites id="" name="" tests="55" failures="35" skipped="0" errors="0" time="28.605724000000002">
+<testsuite name="tests/acim-guide-debug.spec.ts" timestamp="2025-08-12T21:47:04.442Z" hostname="chromium" tests="11" failures="1" skipped="0" time="82.784" errors="0">
+<testcase name="ACIM Guide - Debug and UX Testing › ✅ Page loads successfully with correct title and branding" classname="tests/acim-guide-debug.spec.ts" time="9.302">
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔧 Firebase authentication and connection status" classname="tests/acim-guide-debug.spec.ts" time="14.293">
+<failure message="acim-guide-debug.spec.ts:29:7 🔧 Firebase authentication and connection status" type="FAILURE">
+<![CDATA[  [chromium] › tests/acim-guide-debug.spec.ts:29:7 › ACIM Guide - Debug and UX Testing › 🔧 Firebase authentication and connection status 
+
+    Error: Timed out 5000ms waiting for expect(locator).toContainText(expected)
+
+    Locator: locator('#status')
+    Expected string: "Initializing ACIMguide"
+    Received string: "✅ Connected! Your spiritual companion is ready."
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for locator('#status')
+        9 × locator resolved to <div id="status" class="status">✅ Connected! Your spiritual companion is ready.</div>
+          - unexpected value "✅ Connected! Your spiritual companion is ready."
+
+
+      33 |     
+      34 |     // Check initial loading state
+    > 35 |     await expect(statusElement).toContainText('Initializing ACIMguide');
+         |                                 ^
+      36 |     
+      37 |     // Wait for authentication to complete (up to 10 seconds)
+      38 |     await page.waitForFunction(() => {
+        at /home/am/TestAlex/e2e/tests/acim-guide-debug.spec.ts:35:33
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/tests-acim-guide-debug-ACI-93ac1-ation-and-connection-status-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/tests-acim-guide-debug-ACI-93ac1-ation-and-connection-status-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/tests-acim-guide-debug-ACI-93ac1-ation-and-connection-status-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|tests-acim-guide-debug-ACI-93ac1-ation-and-connection-status-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|tests-acim-guide-debug-ACI-93ac1-ation-and-connection-status-chromium/video.webm]]
+
+[[ATTACHMENT|tests-acim-guide-debug-ACI-93ac1-ation-and-connection-status-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 💬 Chat interface is functional and accessible" classname="tests/acim-guide-debug.spec.ts" time="9.356">
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🎯 Quick action buttons are present and functional" classname="tests/acim-guide-debug.spec.ts" time="9.505">
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 📱 Responsive design works on mobile" classname="tests/acim-guide-debug.spec.ts" time="9.552">
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔍 Debug actual chat functionality with Firebase" classname="tests/acim-guide-debug.spec.ts" time="9.628">
+<system-out>
+<![CDATA[✅ Assistant responded successfully
+Response preview: ❌ Error connecting to CourseGPT: internalPlease try again or contact support if the issue persists....
+
+=== DEBUG INFORMATION ===
+Console logs: [
+  [32m'error: Failed to load resource: the server responded with a status of 400 ()'[39m,
+  [32m"warning: [2025-08-12T21:47:14.613Z]  @firebase/firestore: Firestore (10.7.1): WebChannelConnection RPC 'Listen' stream 0x5abee09e transport errored: Yn"[39m,
+  [32m"error: Access to fetch at 'https://us-central1-acim-guide-production.cloudfunctions.net/chatWithAssistant' from origin 'https://acim-guide-production.web.app' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource."[39m,
+  [32m'error: Failed to load resource: net::ERR_FAILED'[39m,
+  [32m'error: ❌ Error calling CourseGPT: FirebaseError: internal'[39m
+]
+Network requests: [
+  [32m'POST https://us-central1-acim-guide-production.cloudfunctions.net/chatWithAssistant'[39m
+]
+]]>
+</system-out>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🎨 Visual design and styling check" classname="tests/acim-guide-debug.spec.ts" time="3.037">
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › ♿ Accessibility and usability check" classname="tests/acim-guide-debug.spec.ts" time="2.714">
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔧 Performance and loading check" classname="tests/acim-guide-debug.spec.ts" time="5.625">
+<system-out>
+<![CDATA[Page load time: 919ms
+Console errors found: [
+  [32m'Failed to load resource: the server responded with a status of 400 ()'[39m,
+  [32m'Failed to load resource: the server responded with a status of 400 ()'[39m
+]
+]]>
+</system-out>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 📸 Visual regression test - take screenshots" classname="tests/acim-guide-debug.spec.ts" time="2.796">
+<system-out>
+<![CDATA[Screenshots saved for visual review
+]]>
+</system-out>
+</testcase>
+<testcase name="ACIM Guide - Specific Firebase Debug › 🔥 Debug Firebase Functions specifically" classname="tests/acim-guide-debug.spec.ts" time="6.976">
+<system-out>
+<![CDATA[Firebase function calls: []
+❌ No Firebase function call detected
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="tests/acim-guide-debug.spec.ts" timestamp="2025-08-12T21:47:04.442Z" hostname="firefox" tests="11" failures="11" skipped="0" time="0.023" errors="0">
+<testcase name="ACIM Guide - Debug and UX Testing › ✅ Page loads successfully with correct title and branding" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:15:7 ✅ Page loads successfully with correct title and branding" type="FAILURE">
+<![CDATA[  [firefox] › tests/acim-guide-debug.spec.ts:15:7 › ACIM Guide - Debug and UX Testing › ✅ Page loads successfully with correct title and branding 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/firefox-1489/firefox/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔧 Firebase authentication and connection status" classname="tests/acim-guide-debug.spec.ts" time="0.003">
+<failure message="acim-guide-debug.spec.ts:29:7 🔧 Firebase authentication and connection status" type="FAILURE">
+<![CDATA[  [firefox] › tests/acim-guide-debug.spec.ts:29:7 › ACIM Guide - Debug and UX Testing › 🔧 Firebase authentication and connection status 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/firefox-1489/firefox/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 💬 Chat interface is functional and accessible" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:60:7 💬 Chat interface is functional and accessible" type="FAILURE">
+<![CDATA[  [firefox] › tests/acim-guide-debug.spec.ts:60:7 › ACIM Guide - Debug and UX Testing › 💬 Chat interface is functional and accessible 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/firefox-1489/firefox/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🎯 Quick action buttons are present and functional" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:85:7 🎯 Quick action buttons are present and functional" type="FAILURE">
+<![CDATA[  [firefox] › tests/acim-guide-debug.spec.ts:85:7 › ACIM Guide - Debug and UX Testing › 🎯 Quick action buttons are present and functional 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/firefox-1489/firefox/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 📱 Responsive design works on mobile" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:109:7 📱 Responsive design works on mobile" type="FAILURE">
+<![CDATA[  [firefox] › tests/acim-guide-debug.spec.ts:109:7 › ACIM Guide - Debug and UX Testing › 📱 Responsive design works on mobile 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/firefox-1489/firefox/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔍 Debug actual chat functionality with Firebase" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:131:7 🔍 Debug actual chat functionality with Firebase" type="FAILURE">
+<![CDATA[  [firefox] › tests/acim-guide-debug.spec.ts:131:7 › ACIM Guide - Debug and UX Testing › 🔍 Debug actual chat functionality with Firebase 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/firefox-1489/firefox/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🎨 Visual design and styling check" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:201:7 🎨 Visual design and styling check" type="FAILURE">
+<![CDATA[  [firefox] › tests/acim-guide-debug.spec.ts:201:7 › ACIM Guide - Debug and UX Testing › 🎨 Visual design and styling check 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/firefox-1489/firefox/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › ♿ Accessibility and usability check" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:226:7 ♿ Accessibility and usability check" type="FAILURE">
+<![CDATA[  [firefox] › tests/acim-guide-debug.spec.ts:226:7 › ACIM Guide - Debug and UX Testing › ♿ Accessibility and usability check 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/firefox-1489/firefox/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔧 Performance and loading check" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:251:7 🔧 Performance and loading check" type="FAILURE">
+<![CDATA[  [firefox] › tests/acim-guide-debug.spec.ts:251:7 › ACIM Guide - Debug and UX Testing › 🔧 Performance and loading check 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/firefox-1489/firefox/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 📸 Visual regression test - take screenshots" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:288:7 📸 Visual regression test - take screenshots" type="FAILURE">
+<![CDATA[  [firefox] › tests/acim-guide-debug.spec.ts:288:7 › ACIM Guide - Debug and UX Testing › 📸 Visual regression test - take screenshots 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/firefox-1489/firefox/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Specific Firebase Debug › 🔥 Debug Firebase Functions specifically" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:310:7 🔥 Debug Firebase Functions specifically" type="FAILURE">
+<![CDATA[  [firefox] › tests/acim-guide-debug.spec.ts:310:7 › ACIM Guide - Specific Firebase Debug › 🔥 Debug Firebase Functions specifically 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/firefox-1489/firefox/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+</testsuite>
+<testsuite name="tests/acim-guide-debug.spec.ts" timestamp="2025-08-12T21:47:04.442Z" hostname="webkit" tests="11" failures="11" skipped="0" time="0.027" errors="0">
+<testcase name="ACIM Guide - Debug and UX Testing › ✅ Page loads successfully with correct title and branding" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:15:7 ✅ Page loads successfully with correct title and branding" type="FAILURE">
+<![CDATA[  [webkit] › tests/acim-guide-debug.spec.ts:15:7 › ACIM Guide - Debug and UX Testing › ✅ Page loads successfully with correct title and branding 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔧 Firebase authentication and connection status" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:29:7 🔧 Firebase authentication and connection status" type="FAILURE">
+<![CDATA[  [webkit] › tests/acim-guide-debug.spec.ts:29:7 › ACIM Guide - Debug and UX Testing › 🔧 Firebase authentication and connection status 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 💬 Chat interface is functional and accessible" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:60:7 💬 Chat interface is functional and accessible" type="FAILURE">
+<![CDATA[  [webkit] › tests/acim-guide-debug.spec.ts:60:7 › ACIM Guide - Debug and UX Testing › 💬 Chat interface is functional and accessible 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🎯 Quick action buttons are present and functional" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:85:7 🎯 Quick action buttons are present and functional" type="FAILURE">
+<![CDATA[  [webkit] › tests/acim-guide-debug.spec.ts:85:7 › ACIM Guide - Debug and UX Testing › 🎯 Quick action buttons are present and functional 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 📱 Responsive design works on mobile" classname="tests/acim-guide-debug.spec.ts" time="0.003">
+<failure message="acim-guide-debug.spec.ts:109:7 📱 Responsive design works on mobile" type="FAILURE">
+<![CDATA[  [webkit] › tests/acim-guide-debug.spec.ts:109:7 › ACIM Guide - Debug and UX Testing › 📱 Responsive design works on mobile 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔍 Debug actual chat functionality with Firebase" classname="tests/acim-guide-debug.spec.ts" time="0.003">
+<failure message="acim-guide-debug.spec.ts:131:7 🔍 Debug actual chat functionality with Firebase" type="FAILURE">
+<![CDATA[  [webkit] › tests/acim-guide-debug.spec.ts:131:7 › ACIM Guide - Debug and UX Testing › 🔍 Debug actual chat functionality with Firebase 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🎨 Visual design and styling check" classname="tests/acim-guide-debug.spec.ts" time="0.003">
+<failure message="acim-guide-debug.spec.ts:201:7 🎨 Visual design and styling check" type="FAILURE">
+<![CDATA[  [webkit] › tests/acim-guide-debug.spec.ts:201:7 › ACIM Guide - Debug and UX Testing › 🎨 Visual design and styling check 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › ♿ Accessibility and usability check" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:226:7 ♿ Accessibility and usability check" type="FAILURE">
+<![CDATA[  [webkit] › tests/acim-guide-debug.spec.ts:226:7 › ACIM Guide - Debug and UX Testing › ♿ Accessibility and usability check 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔧 Performance and loading check" classname="tests/acim-guide-debug.spec.ts" time="0.003">
+<failure message="acim-guide-debug.spec.ts:251:7 🔧 Performance and loading check" type="FAILURE">
+<![CDATA[  [webkit] › tests/acim-guide-debug.spec.ts:251:7 › ACIM Guide - Debug and UX Testing › 🔧 Performance and loading check 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 📸 Visual regression test - take screenshots" classname="tests/acim-guide-debug.spec.ts" time="0.003">
+<failure message="acim-guide-debug.spec.ts:288:7 📸 Visual regression test - take screenshots" type="FAILURE">
+<![CDATA[  [webkit] › tests/acim-guide-debug.spec.ts:288:7 › ACIM Guide - Debug and UX Testing › 📸 Visual regression test - take screenshots 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Specific Firebase Debug › 🔥 Debug Firebase Functions specifically" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:310:7 🔥 Debug Firebase Functions specifically" type="FAILURE">
+<![CDATA[  [webkit] › tests/acim-guide-debug.spec.ts:310:7 › ACIM Guide - Specific Firebase Debug › 🔥 Debug Firebase Functions specifically 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+</testsuite>
+<testsuite name="tests/acim-guide-debug.spec.ts" timestamp="2025-08-12T21:47:04.442Z" hostname="Mobile Chrome" tests="11" failures="1" skipped="0" time="47.17" errors="0">
+<testcase name="ACIM Guide - Debug and UX Testing › ✅ Page loads successfully with correct title and branding" classname="tests/acim-guide-debug.spec.ts" time="3.333">
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔧 Firebase authentication and connection status" classname="tests/acim-guide-debug.spec.ts" time="8.505">
+<failure message="acim-guide-debug.spec.ts:29:7 🔧 Firebase authentication and connection status" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › tests/acim-guide-debug.spec.ts:29:7 › ACIM Guide - Debug and UX Testing › 🔧 Firebase authentication and connection status 
+
+    Error: Timed out 5000ms waiting for expect(locator).toContainText(expected)
+
+    Locator: locator('#status')
+    Expected string: "Initializing ACIMguide"
+    Received string: "✅ Connected! Your spiritual companion is ready."
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for locator('#status')
+        9 × locator resolved to <div id="status" class="status">✅ Connected! Your spiritual companion is ready.</div>
+          - unexpected value "✅ Connected! Your spiritual companion is ready."
+
+
+      33 |     
+      34 |     // Check initial loading state
+    > 35 |     await expect(statusElement).toContainText('Initializing ACIMguide');
+         |                                 ^
+      36 |     
+      37 |     // Wait for authentication to complete (up to 10 seconds)
+      38 |     await page.waitForFunction(() => {
+        at /home/am/TestAlex/e2e/tests/acim-guide-debug.spec.ts:35:33
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/tests-acim-guide-debug-ACI-93ac1-ation-and-connection-status-Mobile-Chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/tests-acim-guide-debug-ACI-93ac1-ation-and-connection-status-Mobile-Chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/tests-acim-guide-debug-ACI-93ac1-ation-and-connection-status-Mobile-Chrome/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|tests-acim-guide-debug-ACI-93ac1-ation-and-connection-status-Mobile-Chrome/test-failed-1.png]]
+
+[[ATTACHMENT|tests-acim-guide-debug-ACI-93ac1-ation-and-connection-status-Mobile-Chrome/video.webm]]
+
+[[ATTACHMENT|tests-acim-guide-debug-ACI-93ac1-ation-and-connection-status-Mobile-Chrome/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 💬 Chat interface is functional and accessible" classname="tests/acim-guide-debug.spec.ts" time="3.373">
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🎯 Quick action buttons are present and functional" classname="tests/acim-guide-debug.spec.ts" time="2.997">
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 📱 Responsive design works on mobile" classname="tests/acim-guide-debug.spec.ts" time="3.074">
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔍 Debug actual chat functionality with Firebase" classname="tests/acim-guide-debug.spec.ts" time="3.035">
+<system-out>
+<![CDATA[✅ Assistant responded successfully
+Response preview: ❌ Error connecting to CourseGPT: internalPlease try again or contact support if the issue persists....
+
+=== DEBUG INFORMATION ===
+Console logs: [
+  [32m"error: Access to fetch at 'https://us-central1-acim-guide-production.cloudfunctions.net/chatWithAssistant' from origin 'https://acim-guide-production.web.app' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource."[39m,
+  [32m'error: Failed to load resource: net::ERR_FAILED'[39m,
+  [32m'error: ❌ Error calling CourseGPT: FirebaseError: internal'[39m
+]
+Network requests: [
+  [32m'POST https://us-central1-acim-guide-production.cloudfunctions.net/chatWithAssistant'[39m
+]
+]]>
+</system-out>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🎨 Visual design and styling check" classname="tests/acim-guide-debug.spec.ts" time="2.689">
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › ♿ Accessibility and usability check" classname="tests/acim-guide-debug.spec.ts" time="2.544">
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔧 Performance and loading check" classname="tests/acim-guide-debug.spec.ts" time="6.2">
+<system-out>
+<![CDATA[Page load time: 1052ms
+Console errors found: [
+  [32m'Failed to load resource: the server responded with a status of 400 ()'[39m
+]
+]]>
+</system-out>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 📸 Visual regression test - take screenshots" classname="tests/acim-guide-debug.spec.ts" time="4.573">
+<system-out>
+<![CDATA[Screenshots saved for visual review
+]]>
+</system-out>
+</testcase>
+<testcase name="ACIM Guide - Specific Firebase Debug › 🔥 Debug Firebase Functions specifically" classname="tests/acim-guide-debug.spec.ts" time="6.847">
+<system-out>
+<![CDATA[Firebase function calls: [
+  {
+    url: [32m'https://acim-guide-production.firebaseapp.com/__/auth/iframe?apiKey=AIzaSyCyGw7AioVfQ3sfxlW1kWnlsNnrQAmymwU&appName=%5BDEFAULT%5D&v=10.7.1&eid=p&usegapi=1&jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.iFs_Bhrqdio.O%2Fd%3D1%2Frs%3DAHpOoo-IvlQWaLHZdUKQFbafXd_3OEvU9Q%2Fm%3D__features__'[39m,
+    status: [33m200[39m,
+    statusText: [32m''[39m
+  },
+  {
+    url: [32m'https://acim-guide-production.firebaseapp.com/__/auth/iframe.js'[39m,
+    status: [33m200[39m,
+    statusText: [32m''[39m
+  }
+]
+❌ No Firebase function call detected
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="tests/acim-guide-debug.spec.ts" timestamp="2025-08-12T21:47:04.442Z" hostname="Mobile Safari" tests="11" failures="11" skipped="0" time="0.025" errors="0">
+<testcase name="ACIM Guide - Debug and UX Testing › ✅ Page loads successfully with correct title and branding" classname="tests/acim-guide-debug.spec.ts" time="0.003">
+<failure message="acim-guide-debug.spec.ts:15:7 ✅ Page loads successfully with correct title and branding" type="FAILURE">
+<![CDATA[  [Mobile Safari] › tests/acim-guide-debug.spec.ts:15:7 › ACIM Guide - Debug and UX Testing › ✅ Page loads successfully with correct title and branding 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔧 Firebase authentication and connection status" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:29:7 🔧 Firebase authentication and connection status" type="FAILURE">
+<![CDATA[  [Mobile Safari] › tests/acim-guide-debug.spec.ts:29:7 › ACIM Guide - Debug and UX Testing › 🔧 Firebase authentication and connection status 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 💬 Chat interface is functional and accessible" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:60:7 💬 Chat interface is functional and accessible" type="FAILURE">
+<![CDATA[  [Mobile Safari] › tests/acim-guide-debug.spec.ts:60:7 › ACIM Guide - Debug and UX Testing › 💬 Chat interface is functional and accessible 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🎯 Quick action buttons are present and functional" classname="tests/acim-guide-debug.spec.ts" time="0.003">
+<failure message="acim-guide-debug.spec.ts:85:7 🎯 Quick action buttons are present and functional" type="FAILURE">
+<![CDATA[  [Mobile Safari] › tests/acim-guide-debug.spec.ts:85:7 › ACIM Guide - Debug and UX Testing › 🎯 Quick action buttons are present and functional 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 📱 Responsive design works on mobile" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:109:7 📱 Responsive design works on mobile" type="FAILURE">
+<![CDATA[  [Mobile Safari] › tests/acim-guide-debug.spec.ts:109:7 › ACIM Guide - Debug and UX Testing › 📱 Responsive design works on mobile 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔍 Debug actual chat functionality with Firebase" classname="tests/acim-guide-debug.spec.ts" time="0.003">
+<failure message="acim-guide-debug.spec.ts:131:7 🔍 Debug actual chat functionality with Firebase" type="FAILURE">
+<![CDATA[  [Mobile Safari] › tests/acim-guide-debug.spec.ts:131:7 › ACIM Guide - Debug and UX Testing › 🔍 Debug actual chat functionality with Firebase 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🎨 Visual design and styling check" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:201:7 🎨 Visual design and styling check" type="FAILURE">
+<![CDATA[  [Mobile Safari] › tests/acim-guide-debug.spec.ts:201:7 › ACIM Guide - Debug and UX Testing › 🎨 Visual design and styling check 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › ♿ Accessibility and usability check" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:226:7 ♿ Accessibility and usability check" type="FAILURE">
+<![CDATA[  [Mobile Safari] › tests/acim-guide-debug.spec.ts:226:7 › ACIM Guide - Debug and UX Testing › ♿ Accessibility and usability check 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 🔧 Performance and loading check" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:251:7 🔧 Performance and loading check" type="FAILURE">
+<![CDATA[  [Mobile Safari] › tests/acim-guide-debug.spec.ts:251:7 › ACIM Guide - Debug and UX Testing › 🔧 Performance and loading check 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Debug and UX Testing › 📸 Visual regression test - take screenshots" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:288:7 📸 Visual regression test - take screenshots" type="FAILURE">
+<![CDATA[  [Mobile Safari] › tests/acim-guide-debug.spec.ts:288:7 › ACIM Guide - Debug and UX Testing › 📸 Visual regression test - take screenshots 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+<testcase name="ACIM Guide - Specific Firebase Debug › 🔥 Debug Firebase Functions specifically" classname="tests/acim-guide-debug.spec.ts" time="0.002">
+<failure message="acim-guide-debug.spec.ts:310:7 🔥 Debug Firebase Functions specifically" type="FAILURE">
+<![CDATA[  [Mobile Safari] › tests/acim-guide-debug.spec.ts:310:7 › ACIM Guide - Specific Firebase Debug › 🔥 Debug Firebase Functions specifically 
+
+    Error: browserType.launch: Executable doesn't exist at /home/am/.cache/ms-playwright/webkit-2191/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>
