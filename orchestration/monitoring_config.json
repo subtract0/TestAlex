@@ -1,0 +1,18 @@
+{
+  "cycle_interval_minutes": 30,
+  "max_concurrent_tasks": 3,
+  "min_time_between_cycles": 15,
+  "critical_priority_interval": 5,
+  "health_check_interval": 5,
+  "metrics_retention_days": 7,
+  "enable_email_alerts": false,
+  "enable_slack_alerts": false,
+  "thresholds": {
+    "response_time_critical": 3.0,
+    "error_rate_critical": 0.01,
+    "conversion_rate_critical": 0.02,
+    "bounce_rate_critical": 0.4,
+    "citation_accuracy_critical": 0.85,
+    "uptime_critical": 0.95
+  }
+}
