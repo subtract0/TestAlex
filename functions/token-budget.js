@@ -18,8 +18,20 @@ const BUDGET_CONFIG = {
   // Monthly budget in EUR
   monthlyBudgetEUR: 500,
   
-  // OpenAI pricing (as of 2024 - adjust as needed)
+  // OpenAI pricing (as of 2025 - adjust as needed)
   pricing: {
+    'gpt-5-chat-latest': {
+      inputTokens: 0.05 / 1000,   // €0.05 per 1K input tokens (estimated)
+      outputTokens: 0.10 / 1000   // €0.10 per 1K output tokens (estimated)
+    },
+    'gpt-5-mini': {
+      inputTokens: 0.015 / 1000,  // €0.015 per 1K input tokens (estimated)
+      outputTokens: 0.03 / 1000   // €0.03 per 1K output tokens (estimated)
+    },
+    'gpt-4o': {
+      inputTokens: 0.025 / 1000,  // €0.025 per 1K input tokens
+      outputTokens: 0.05 / 1000   // €0.05 per 1K output tokens
+    },
     gpt4: {
       inputTokens: 0.03 / 1000,   // €0.03 per 1K input tokens
       outputTokens: 0.06 / 1000   // €0.06 per 1K output tokens
@@ -60,8 +72,8 @@ const BUDGET_CONFIG = {
     // Switch to cheaper models when budget is constrained
     modelFallback: {
       normal: 'gpt-5-chat-latest',
-      budgetConstrained: 'gpt-4o',
-      emergency: 'gpt-4-turbo'
+      budgetConstrained: 'gpt-5-mini',
+      emergency: 'gpt-4o'
     }
   }
 };
