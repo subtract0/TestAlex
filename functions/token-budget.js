@@ -18,6 +18,22 @@ const BUDGET_CONFIG = {
   // Monthly budget in EUR
   monthlyBudgetEUR: 500,
   
+  // Promotional token allocations
+  promotionalTokens: {
+    primaryModel: {
+      allocation: 250000,     // 250k tokens for GPT-5-chat-latest
+      used: 0,
+      model: 'gpt-5-chat-latest',
+      priority: 'high-value-users'
+    },
+    budgetModels: {
+      allocation: 2500000,    // 2.5M tokens for budget models
+      used: 0,
+      models: ['gpt-5-mini', 'gpt-4o'],
+      priority: 'optimization-tasks'
+    }
+  },
+  
   // OpenAI pricing (as of 2025 - adjust as needed)
   pricing: {
     'gpt-5-chat-latest': {

@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 import openai
-from dotenv import load_dotenv
+from smart_token_allocator import SmartTokenAllocator, TokenAllocation, UserTier, TaskPriority
 
 # Import Firebase Admin SDK
 try:
@@ -39,12 +39,18 @@ class LiveOrchestrationSystem:
         self.agents_registry = {}
         self.task_queue = []
         self.metrics_history = []
+        self.token_allocations = {
+            'premium_tokens': 250000,      # 250k GPT-5-chat-latest tokens
+            'budget_tokens': 2500000,      # 2.5M budget model tokens
+            'premium_used': 0,
+            'budget_used': 0
+        }
         
         # Initialize components
         self._load_environment()
         self._setup_openai_client()
         self._load_agents_registry()
-        self._setup_firebase()
+        self.token_allocator = SmartTokenAllocator()
         
     def _load_environment(self):
         """Load and validate environment variables."""
@@ -128,6 +134,50 @@ class LiveOrchestrationSystem:
         logger.info("📈 Production metrics collected")
         return current_metrics
         
+    async def _analyze_with_gpt5_thinking(self, analysis_task: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Use GPT-5-thinking for complex reasoning and strategic analysis."""
+        try:
+            thinking_prompt = f"""You are using GPT-5-thinking to provide deep analysis for ACIM Guide platform optimization.
+
+Analysis Task: {analysis_task}
+
+Context Data:
+{json.dumps(context, indent=2)}
+
+Think through this systematically:
+1. What patterns do you see in the data?
+2. What are the highest-impact opportunities?
+3. What would provide the most spiritual value to users?
+4. How can we optimize both business metrics and spiritual authenticity?
+5. What specific, actionable recommendations do you have?
+
+Provide detailed reasoning and specific recommendations."""
+
+            response = self.openai_client.chat.completions.create(
+                model="gpt-5-thinking",
+                messages=[
+                    {"role": "system", "content": "You are an expert AI strategist specializing in spiritual guidance platforms and ACIM principles."},
+                    {"role": "user", "content": thinking_prompt}
+                ],
+                max_tokens=3000,
+                temperature=0.1  # Low temperature for consistent strategic thinking
+            )
+
+            return {
+                "success": True,
+                "analysis": response.choices[0].message.content,
+                "tokens_used": response.usage.total_tokens,
+                "reasoning_quality": "deep"
+            }
+
+        except Exception as e:
+            logger.error(f"GPT-5-thinking analysis failed: {e}")
+            return {
+                "success": False,
+                "analysis": f"Reasoning analysis failed: {str(e)}",
+                "fallback": True
+            }
+
     async def identify_improvement_opportunities(self, metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Identify opportunities for autonomous improvement."""
         opportunities = []
