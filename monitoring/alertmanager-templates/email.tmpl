@@ -1,0 +1,36 @@
+{{ define "email.default" }}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ACIM Guide Alert</title>
+</head>
+<body>
+    <h2>🚨 ACIM Guide System Alert</h2>
+    
+    {{ range .Alerts }}
+    <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
+        <h3 style="color: {{ if eq .Status "firing" }}red{{ else }}green{{ end }};">
+            {{ .Annotations.summary }}
+        </h3>
+        <p><strong>Description:</strong> {{ .Annotations.description }}</p>
+        <p><strong>Severity:</strong> {{ .Labels.severity }}</p>
+        <p><strong>Instance:</strong> {{ .Labels.instance }}</p>
+        <p><strong>Started:</strong> {{ .StartsAt }}</p>
+        
+        {{ if .Annotations.suggested_actions }}
+        <h4>Suggested Actions:</h4>
+        <p>{{ .Annotations.suggested_actions }}</p>
+        {{ end }}
+        
+        {{ if .Annotations.runbook_url }}
+        <p><a href="{{ .Annotations.runbook_url }}">📖 View Runbook</a></p>
+        {{ end }}
+    </div>
+    {{ end }}
+    
+    <hr>
+    <p><em>"The truth needs no defense; it merely is." - ACIM</em></p>
+    <p>Dashboard: <a href="https://monitoring.acim-guide.com">https://monitoring.acim-guide.com</a></p>
+</body>
+</html>
+{{ end }}
