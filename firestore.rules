@@ -20,6 +20,11 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
+    // Health checks collection - temporary for deployment validation
+    match /health-checks/{checkId} {
+      allow read, write: if request.auth != null;
+    }
+    
     // Admin-only collections (for future use)
     match /admin/{document=**} {
       allow read, write: if false; // Only server-side access
