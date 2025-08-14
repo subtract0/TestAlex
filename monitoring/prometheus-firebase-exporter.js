@@ -324,7 +324,7 @@ class FirebaseMetricsCollector {
       
       const response = await axios.post(config.grafanaCloudUrl, metricsString, {
         headers: {
-          'Content-Type': 'text/plain',
+          'Content-Type': 'text/plain'
         },
         auth: {
           username: config.grafanaCloudUser,

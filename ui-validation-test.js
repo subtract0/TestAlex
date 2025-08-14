@@ -382,9 +382,9 @@ test.describe('ACIM Guide UI Optimization Validation', () => {
     
     console.log(`\n🏆 FINAL UI SCORE: ${score}/${maxScore}`);
     console.log(score >= 8 ? '🌟 EXCELLENT - ACIM aligned!' : 
-                score >= 6 ? '✅ GOOD - Minor improvements needed' :
-                score >= 4 ? '⚠️ NEEDS IMPROVEMENT' : 
-                '❌ MAJOR REDESIGN REQUIRED');
+      score >= 6 ? '✅ GOOD - Minor improvements needed' :
+        score >= 4 ? '⚠️ NEEDS IMPROVEMENT' : 
+          '❌ MAJOR REDESIGN REQUIRED');
     
     // Assert minimum score
     expect(score).toBeGreaterThanOrEqual(6); // Should be at least "Good"

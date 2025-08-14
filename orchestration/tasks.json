@@ -489,5 +489,26 @@
       "revenue_potential": 569,
       "value_category": "conversion_optimization"
     }
+  },
+  "task_1bfc4a65": {
+    "id": "task_1bfc4a65",
+    "title": "Critical ACIM Issue",
+    "description": "Critical content validation issue",
+    "priority": "critical",
+    "category": "content",
+    "assignee": null,
+    "dependencies": [],
+    "tags": [
+      "acim",
+      "critical"
+    ],
+    "capability_tags": [],
+    "status": "pending",
+    "created_at": "2025-08-14T15:38:32.597278",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": null,
+    "actual_hours": null,
+    "metadata": {}
   }
 }

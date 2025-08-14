@@ -1,11 +1,13 @@
 # Page snapshot
 
 ```yaml
-- heading "ACIMguide" [level=1]
-- paragraph: Your AI Companion for A Course in Miracles
-- text: ✅ Connected! Your spiritual companion is ready. Welcome! I'm here to help you with your study and practice of A Course in Miracles. Ask me anything about the Course, or use one of the quick actions below to get started.
-- heading "Quick Actions" [level=3]
-- text: 📚 Main Teaching 🕊️ Forgiveness Practice ☮️ Inner Peace 📖 Workbook Lesson
+- img
+- heading "ACIM Guide" [level=1]
+- paragraph: AI-powered study companion for A Course in Miracles
+- strong: Welcome to ACIM Guide.
+- text: I can help you study and understand A Course in Miracles. Ask me questions about the Course, or choose one of the topics below to get started. "Nothing real can be threatened. Nothing unreal exists. Herein lies the peace of God." - A Course in Miracles, Introduction
+- heading "Get Started" [level=3]
+- text: Core Teaching Forgiveness Practice Inner Peace Daily Lesson
 - textbox "Ask about A Course in Miracles..."
 - button "Send"
 ```
