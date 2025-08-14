@@ -20,7 +20,7 @@
     1.  Create a new file: `manage_assistant.py`.
     2.  Implement command-line argument parsing (using Python's `argparse`) to support distinct actions:
         -   `python manage_assistant.py create`: Performs the full setup, creating a new vector store and assistant. It will first check for an existing `ASSISTANT_ID` in `.env` and require a `--force` flag to overwrite, preventing accidental deletion.
-        -   `python manage_assistant.py update --model gpt-4o`: Updates the existing assistant's properties.
+        -   `python manage_assistant.py update --model gpt-5-chat-latest`: Updates the existing assistant's properties.
         -   `python manage_assistant.py sync-files`: **(New Feature)** This command will intelligently synchronize the files in your local `data/` directory with the OpenAI Vector Store, adding new files and removing obsolete ones without recreating the entire store.
     3.  Once the new script is verified, delete `setup_assistant.py` and `update_assistant.py`.
     4.  Update the `README.md` to document the new `manage_assistant.py` script and its commands.

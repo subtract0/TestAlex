@@ -326,7 +326,7 @@ class AgentExecutor:
             
             try:
                 response = self.openai_client.chat.completions.create(
-                    model="gpt-4",
+                    model="gpt-5-chat-latest",
                     messages=messages,
                     max_tokens=2000,
                     temperature=0.1  # Low temperature for consistency
@@ -548,7 +548,7 @@ class AgentExecutor:
             
             try:
                 response = self.openai_client.chat.completions.create(
-                    model="gpt-4",
+                    model="gpt-5-chat-latest",
                     messages=messages,
                     max_tokens=2000,
                     temperature=0.1

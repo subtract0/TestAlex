@@ -59,8 +59,8 @@ const BUDGET_CONFIG = {
     },
     // Switch to cheaper models when budget is constrained
     modelFallback: {
-      normal: 'gpt-4',
-      budgetConstrained: 'gpt-4-turbo',
+      normal: 'gpt-5-chat-latest',
+      budgetConstrained: 'gpt-4o',
       emergency: 'gpt-4-turbo'
     }
   }
@@ -129,7 +129,7 @@ async function getCurrentBudgetUtilization() {
 /**
  * Calculate cost for OpenAI API usage
  */
-function calculateOpenAICost(tokensIn, tokensOut, model = 'gpt-4') {
+function calculateOpenAICost(tokensIn, tokensOut, model = 'gpt-5-chat-latest') {
   const pricing = BUDGET_CONFIG.pricing[model] || BUDGET_CONFIG.pricing.gpt4;
   
   const inputCost = (tokensIn / 1000) * pricing.inputTokens;
@@ -149,7 +149,7 @@ function calculateOpenAICost(tokensIn, tokensOut, model = 'gpt-4') {
 /**
  * Record token usage and cost
  */
-async function recordTokenUsage(userId, tokensIn, tokensOut, model, userTier = 'free') {
+async function recordTokenUsage(userId, tokensIn, tokensOut, model = 'gpt-5-chat-latest', userTier = 'free') {
   try {
     const cost = calculateOpenAICost(tokensIn, tokensOut, model);
     

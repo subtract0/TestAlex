@@ -40,7 +40,7 @@ LOG_LEVEL=INFO
 
 ```bash
 # Create assistant with knowledge base
-python manage_assistant.py create --name "CourseGPT" --model gpt-4o
+python manage_assistant.py create --name "CourseGPT" --model gpt-5-chat-latest
 
 # This will automatically populate ASSISTANT_ID and VECTOR_STORE_ID in .env
 ```

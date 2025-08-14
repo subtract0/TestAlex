@@ -29,7 +29,7 @@ ACIMguide provides authentic spiritual guidance based exclusively on *A Course i
 
 ### **✅ Technical Foundation (STABLE)**
 - **Frontend**: ✅ React-style UI with Firebase real-time listeners
-- **Backend**: ✅ Firebase Cloud Functions with OpenAI GPT-4o integration
+- **Backend**: ✅ Firebase Cloud Functions with OpenAI GPT-5-chat-latest integration
 - **Database**: ✅ Firestore with optimized indexes and security rules
 - **Features**: ✅ Rate limiting, token management, spiritual guidance optimization
 - **Security**: ✅ Production-ready authentication and user privacy protection
@@ -163,7 +163,7 @@ python main.py "What is forgiveness according to ACIM?"
 ### **Assistant Management**
 ```bash
 # Create CourseGPT assistant (first time)
-python manage_assistant.py create --name "CourseGPT" --model gpt-4o
+python manage_assistant.py create --name "CourseGPT" --model gpt-5-chat-latest
 
 # Update system prompt with CourseGPT
 python manage_assistant.py update --prompt /data/CourseGPT.md

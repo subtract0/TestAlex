@@ -137,7 +137,7 @@ class AssistantManager:
                     f.close()
             self.logger.debug("All file streams closed")
 
-    def create_assistant(self, name: str = "CourseGPT", model: str = "gpt-4o", 
+    def create_assistant(self, name: str = "CourseGPT", model: str = "gpt-5-chat-latest", 
                         vector_store_id: str = None) -> str:
         """Create a new assistant with the specified configuration."""
         try:
@@ -257,8 +257,8 @@ Examples:
                              help='Force creation even if assistant already exists')
     create_parser.add_argument('--name', default='CourseGPT', 
                              help='Assistant name (default: CourseGPT)')
-    create_parser.add_argument('--model', default='gpt-4o', 
-                             help='Model to use (default: gpt-4o)')
+    create_parser.add_argument('--model', default='gpt-5-chat-latest', 
+                             help='Model to use (default: gpt-5-chat-latest)')
     create_parser.add_argument('--files', nargs='*', default=DEFAULT_FILE_PATHS,
                              help='Files to upload to vector store')
     

@@ -316,7 +316,7 @@ Focus on delivering practical, high-value solutions that align with ACIM princip
 
             # Call OpenAI API
             response = self.openai_client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-5-chat-latest",
                 messages=[
                     {"role": "system", "content": agent_prompt},
                     {"role": "user", "content": user_message}
