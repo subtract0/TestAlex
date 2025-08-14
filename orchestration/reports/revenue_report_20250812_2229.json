@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-08-12T22:29:48.047900",
+  "current_metrics": {
+    "mrr": 1725,
+    "total_users": 2847,
+    "paying_users": 89,
+    "conversion_rate": 0.031,
+    "churn_rate": 0.05,
+    "ltv": 180.5,
+    "funnel_data": {
+      

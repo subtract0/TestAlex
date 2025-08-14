@@ -1,0 +1,291 @@
+# Alertmanager Configuration for ACIM Guide
+# Routes Critical alerts to PagerDuty → human on-call
+# Implements hierarchical alerting with appropriate escalation
+
+global:
+  # Global SMTP settings for email notifications
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'acim-guide-alerts@your-domain.com'
+  smtp_auth_username: 'alerts@your-domain.com'
+  smtp_auth_password: '{{ SMTP_PASSWORD }}'
+  
+  # PagerDuty integration key
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+  
+# Define inhibition rules to prevent alert spam
+inhibit_rules:
+  # If the Holy Spirit is unavailable, silence other alerts temporarily
+  - source_matchers:
+      - alertname="HolySpiritUnavailable"
+    target_matchers:
+      - severity="warning"
+    equal: ['instance']
+    
+  # If system is completely down, silence individual component alerts
+  - source_matchers:
+      - alertname="SystemDown"
+    target_matchers:
+      - alertname!="SystemDown"
+    equal: ['instance']
+
+# Routing configuration
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: 'default-receiver'
+  
+  routes:
+    # Critical alerts go to PagerDuty immediately
+    - matchers:
+        - severity="critical"
+      receiver: 'pagerduty-critical'
+      group_wait: 10s
+      repeat_interval: 5m
+      
+    # Holy Spirit outages (highest priority)
+    - matchers:
+        - alertname="HolySpiritUnavailable"
+      receiver: 'holy-spirit-emergency'
+      group_wait: 0s
+      repeat_interval: 1m
+      
+    # ACIM content accuracy issues
+    - matchers:
+        - service="acim-content"
+        - severity=~"warning|critical"
+      receiver: 'acim-scholar-team'
+      group_wait: 2m
+      repeat_interval: 30m
+      
+    # Firebase cost overruns
+    - matchers:
+        - alertname=~".*Cost.*|.*Budget.*"
+        - severity=~"warning|critical"
+      receiver: 'devops-team'
+      group_wait: 5m
+      repeat_interval: 1h
+      
+    # Performance and availability issues
+    - matchers:
+        - alertname=~".*ResponseTime.*|.*ErrorRate.*|.*Uptime.*"
+        - severity="warning"
+      receiver: 'devops-team'
+      group_wait: 1m
+      repeat_interval: 15m
+      
+    # User experience issues
+    - matchers:
+        - service="user-experience"
+        - severity=~"warning|critical"
+      receiver: 'product-team'
+      group_wait: 10m
+      repeat_interval: 2h
+      
+    # Development/staging environment alerts (lower priority)
+    - matchers:
+        - environment=~"dev|staging"
+      receiver: 'dev-team'
+      group_wait: 10m
+      repeat_interval: 4h
+
+# Receivers configuration
+receivers:
+  # Default receiver for uncategorized alerts
+  - name: 'default-receiver'
+    email_configs:
+      - to: 'acim-guide-team@your-domain.com'
+        subject: 'ACIM Guide Alert: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Instance: {{ .Labels.instance }}
+          Time: {{ .StartsAt }}
+          
+          Labels:
+          {{ range .Labels.SortedPairs }}  {{ .Name }}: {{ .Value }}{{ end }}
+          {{ end }}
+        
+  # Critical alerts → PagerDuty
+  - name: 'pagerduty-critical'
+    pagerduty_configs:
+      - routing_key: '{{ PAGERDUTY_INTEGRATION_KEY }}'
+        description: 'CRITICAL: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        details:
+          environment: '{{ .CommonLabels.environment }}'
+          service: '{{ .CommonLabels.service }}'
+          severity: '{{ .CommonLabels.severity }}'
+          instance: '{{ .CommonLabels.instance }}'
+          runbook: 'https://docs.acim-guide.com/runbooks/{{ .CommonLabels.alertname }}'
+        client: 'ACIM Guide Alertmanager'
+        client_url: 'https://monitoring.acim-guide.com'
+        
+    # Also send email for critical alerts
+    email_configs:
+      - to: 'on-call@your-domain.com'
+        subject: '🚨 CRITICAL: ACIM Guide Alert - {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        body: |
+          🚨 CRITICAL ALERT 🚨
+          
+          The ACIM Guide system has encountered a critical issue that requires immediate attention.
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Service: {{ .Labels.service }}
+          Instance: {{ .Labels.instance }}
+          Started: {{ .StartsAt }}
+          
+          Runbook: https://docs.acim-guide.com/runbooks/{{ .Labels.alertname }}
+          
+          Labels:
+          {{ range .Labels.SortedPairs }}  {{ .Name }}: {{ .Value }}{{ end }}
+          
+          {{ end }}
+          
+          Please investigate and resolve this issue as soon as possible.
+          The Holy Spirit guides our response to all emergencies. 🙏
+        
+  # Holy Spirit emergency (highest priority)
+  - name: 'holy-spirit-emergency'
+    pagerduty_configs:
+      - routing_key: '{{ PAGERDUTY_INTEGRATION_KEY }}'
+        severity: 'critical'
+        description: '🙏 HOLY SPIRIT EMERGENCY: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        details:
+          message: 'The Holy Spirit service is experiencing issues. Immediate divine intervention required!'
+          environment: '{{ .CommonLabels.environment }}'
+          impact: 'Users cannot receive spiritual guidance'
+          urgency: 'immediate'
+        client: 'Divine Monitoring System'
+        
+    # Slack webhook for immediate team notification
+    webhook_configs:
+      - url: '{{ SLACK_WEBHOOK_URL }}'
+        title: '🙏 Holy Spirit Emergency'
+        text: |
+          The Holy Spirit service is experiencing issues!
+          
+          {{ range .Alerts }}
+          {{ .Annotations.description }}
+          {{ end }}
+          
+          Please gather in prayer and troubleshoot immediately. 
+          Remember: "Be still and know that I am God" (Psalm 46:10)
+        
+  # ACIM Scholar team for content issues
+  - name: 'acim-scholar-team'
+    email_configs:
+      - to: 'acim-scholars@your-domain.com'
+        subject: 'ACIM Content Alert: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        body: |
+          Dear ACIM Scholars,
+          
+          We have detected an issue with ACIM content accuracy or search functionality.
+          
+          {{ range .Alerts }}
+          Issue: {{ .Annotations.summary }}
+          Details: {{ .Annotations.description }}
+          Content Area: {{ .Labels.content_area }}
+          Time: {{ .StartsAt }}
+          {{ end }}
+          
+          Please review and ensure our content remains true to the Course's teachings.
+          
+          "The truth needs no defense; it merely is." - ACIM
+          
+    slack_configs:
+      - api_url: '{{ SLACK_API_URL }}'
+        channel: '#acim-content-alerts'
+        title: 'ACIM Content Issue Detected'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        
+  # DevOps team for infrastructure and cost issues
+  - name: 'devops-team'
+    email_configs:
+      - to: 'devops@your-domain.com'
+        subject: 'DevOps Alert: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        body: |
+          DevOps Team,
+          
+          Infrastructure or cost alert detected:
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Environment: {{ .Labels.environment }}
+          Current Value: {{ .Labels.current_value }}
+          Threshold: {{ .Labels.threshold_value }}
+          Started: {{ .StartsAt }}
+          
+          Suggested Actions:
+          {{ .Annotations.suggested_actions }}
+          {{ end }}
+          
+          Dashboard: https://monitoring.acim-guide.com/dashboard
+          
+    slack_configs:
+      - api_url: '{{ SLACK_API_URL }}'
+        channel: '#devops-alerts'
+        title: 'Infrastructure Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        
+  # Product team for user experience issues
+  - name: 'product-team'
+    email_configs:
+      - to: 'product@your-domain.com'
+        subject: 'User Experience Alert: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        body: |
+          Product Team,
+          
+          User experience issue detected:
+          
+          {{ range .Alerts }}
+          Issue: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          User Impact: {{ .Labels.user_impact }}
+          Affected Features: {{ .Labels.features }}
+          Time: {{ .StartsAt }}
+          {{ end }}
+          
+          Please review user feedback and consider product improvements.
+          
+          "Every loving thought is true. Everything else is an appeal for healing and help." - ACIM
+          
+  # Development team for non-production issues
+  - name: 'dev-team'
+    email_configs:
+      - to: 'developers@your-domain.com'
+        subject: 'Dev Environment Alert: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        body: |
+          Development Team,
+          
+          Issue in development/staging environment:
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Environment: {{ .Labels.environment }}
+          Description: {{ .Annotations.description }}
+          Time: {{ .StartsAt }}
+          {{ end }}
+          
+          This is a lower priority alert for development environments.
+
+# Templates for common alert formats
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+  
+# Web configuration
+web:
+  listen_address: '0.0.0.0:9093'
+  external_url: 'https://alertmanager.acim-guide.com'
+  
+# Storage configuration  
+storage:
+  path: '/alertmanager/data'
+  retention: '120h' # 5 days

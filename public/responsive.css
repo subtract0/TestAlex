@@ -1,0 +1,544 @@
+/* ============================================================================
+   TRULY RESPONSIVE DESIGN SYSTEM - MOBILE FIRST APPROACH
+   Built for excellent UX across all device sizes
+   ============================================================================ */
+
+/* Base Mobile Styles (320px and up) */
+body {
+    padding: 0;
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* Optimized Header for Mobile */
+.header {
+    padding: 12px 16px 10px 16px;
+    min-height: auto;
+}
+
+.logo {
+    width: 28px;
+    height: 28px;
+    margin: 0 auto 6px auto;
+}
+
+.header h1 {
+    font-size: 1.3rem;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+}
+
+.header .subtitle {
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+/* Status repositioned for mobile */
+.status {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    top: unset;
+    background: rgba(33, 150, 243, 0.95);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    z-index: 1000;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Chat container optimized for mobile viewport */
+.chat-container {
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+}
+
+/* Mobile message layout */
+.message.user {
+    padding: 16px 16px 8px 60px;
+}
+
+.message.user .message-content {
+    max-width: 280px;
+    padding: 12px 16px;
+    font-size: 15px;
+    border-radius: 20px;
+    border-bottom-right-radius: 6px;
+}
+
+.message.assistant {
+    padding: 20px 16px;
+}
+
+.message.assistant .message-content {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* ACIM quotes responsive */
+.message.assistant .message-content .acim-quote {
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 16px;
+}
+
+/* Quick actions mobile layout */
+.quick-actions {
+    padding: 16px;
+}
+
+.quick-action-buttons {
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.quick-action {
+    padding: 16px 20px;
+    font-size: 0.9rem;
+}
+
+/* Input container mobile layout */
+.input-container {
+    padding: 16px;
+    gap: 12px;
+    flex-direction: row;
+}
+
+.message-input {
+    flex: 1;
+    padding: 12px 16px;
+    font-size: 16px; /* Prevents zoom on iOS */
+}
+
+.send-button {
+    padding: 12px 20px;
+    min-width: 80px;
+    font-size: 0.9rem;
+}
+
+/* ============================================================================
+   SMALL MOBILE (up to 375px)
+   ============================================================================ */
+@media (max-width: 375px) {
+    .header {
+        padding: 10px 12px 8px 12px;
+    }
+    
+    .header h1 {
+        font-size: 1.2rem;
+    }
+    
+    .message.user {
+        padding: 12px 12px 6px 40px;
+    }
+    
+    .message.user .message-content {
+        max-width: 240px;
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+    
+    .message.assistant {
+        padding: 16px 12px;
+    }
+    
+    .input-container {
+        padding: 12px;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .send-button {
+        width: 100%;
+    }
+}
+
+/* ============================================================================
+   PHABLET / LARGE MOBILE (376px - 480px)
+   ============================================================================ */
+@media (min-width: 376px) and (max-width: 480px) {
+    .header h1 {
+        font-size: 1.4rem;
+    }
+    
+    .message.user .message-content {
+        max-width: 300px;
+    }
+    
+    .quick-action-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ============================================================================
+   SMALL TABLET / LARGE PHABLET (481px - 768px)
+   ============================================================================ */
+@media (min-width: 481px) and (max-width: 768px) {
+    .container {
+        border-radius: 8px;
+        margin: 8px;
+        width: calc(100vw - 16px);
+        height: calc(100vh - 16px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header {
+        padding: 16px 24px 12px 24px;
+    }
+    
+    .logo {
+        width: 36px;
+        height: 36px;
+        margin: 0 auto 8px auto;
+    }
+    
+    .header h1 {
+        font-size: 1.5rem;
+        margin: 0 0 6px 0;
+    }
+    
+    .header .subtitle {
+        font-size: 0.85rem;
+    }
+    
+    .message.user {
+        padding: 18px 24px 10px 80px;
+    }
+    
+    .message.user .message-content {
+        max-width: 350px;
+        padding: 14px 18px;
+        font-size: 15px;
+    }
+    
+    .message.assistant {
+        padding: 24px;
+    }
+    
+    .quick-action-buttons {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+    
+    .input-container {
+        padding: 20px;
+    }
+}
+
+/* ============================================================================
+   TABLET PORTRAIT (769px - 1024px)
+   ============================================================================ */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        max-width: 800px;
+        margin: 16px auto;
+        height: calc(100vh - 32px);
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+    
+    .header {
+        padding: 20px 32px 16px 32px;
+    }
+    
+    .logo {
+        width: 40px;
+        height: 40px;
+        margin: 0 auto 10px auto;
+    }
+    
+    .header h1 {
+        font-size: 1.6rem;
+        margin: 0 0 6px 0;
+    }
+    
+    .header .subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .status {
+        position: absolute;
+        top: 16px;
+        right: 24px;
+        bottom: unset;
+        background: rgba(209, 236, 241, 0.9);
+        color: #0C5460;
+        border: 1px solid rgba(12, 84, 96, 0.2);
+    }
+    
+    .message.user {
+        padding: 20px 32px 12px 120px;
+    }
+    
+    .message.user .message-content {
+        max-width: 400px;
+        padding: 16px 20px;
+        font-size: 16px;
+    }
+    
+    .message.assistant {
+        padding: 28px 32px;
+    }
+    
+    .quick-action-buttons {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+}
+
+/* ============================================================================
+   SMALL LAPTOP (1025px - 1366px)
+   ============================================================================ */
+@media (min-width: 1025px) and (max-width: 1366px) {
+    body {
+        padding: 8px;
+    }
+    
+    .container {
+        max-width: 900px;
+        height: calc(100vh - 16px);
+        border-radius: 16px;
+    }
+    
+    .header {
+        padding: 20px 32px 16px 32px;
+    }
+    
+    .logo {
+        width: 42px;
+        height: 42px;
+        margin: 0 auto 10px auto;
+    }
+    
+    .header h1 {
+        font-size: 1.7rem;
+    }
+    
+    .status {
+        position: absolute;
+        top: 12px;
+        right: 20px;
+        font-size: 0.75rem;
+    }
+    
+    .quick-action-buttons {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+/* ============================================================================
+   LARGE LAPTOP/DESKTOP (1367px and up)
+   ============================================================================ */
+@media (min-width: 1367px) {
+    body {
+        padding: 16px;
+    }
+    
+    .container {
+        max-width: 1000px;
+        height: calc(100vh - 32px);
+    }
+    
+    .header {
+        padding: 24px 32px 20px 32px;
+    }
+    
+    .logo {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 12px auto;
+    }
+    
+    .header h1 {
+        font-size: 1.8rem;
+        margin: 0 0 6px 0;
+    }
+    
+    .header .subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .quick-action-buttons {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+}
+
+/* ============================================================================
+   ULTRA-WIDE SCREENS (1920px and up)
+   ============================================================================ */
+@media (min-width: 1920px) {
+    .container {
+        max-width: 1200px;
+    }
+    
+    .message.assistant {
+        padding: 32px 48px;
+    }
+    
+    .message.assistant .message-content {
+        font-size: 18px;
+        line-height: 1.8;
+    }
+}
+
+/* ============================================================================
+   LANDSCAPE MOBILE OPTIMIZATIONS
+   ============================================================================ */
+@media (max-height: 500px) and (orientation: landscape) {
+    .header {
+        padding: 8px 16px 6px 16px;
+    }
+    
+    .logo {
+        width: 24px;
+        height: 24px;
+        margin: 0 auto 4px auto;
+    }
+    
+    .header h1 {
+        font-size: 1.1rem;
+        margin: 0 0 2px 0;
+    }
+    
+    .header .subtitle {
+        font-size: 0.75rem;
+    }
+    
+    .quick-actions {
+        padding: 12px 16px;
+    }
+    
+    .quick-action-buttons {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+    
+    .quick-action {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .input-container {
+        padding: 12px 16px;
+    }
+    
+    .message.assistant {
+        padding: 16px;
+    }
+}
+
+/* ============================================================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ============================================================================ */
+@media (hover: none) and (pointer: coarse) {
+    .quick-action {
+        min-height: 44px; /* iOS accessibility guideline */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .send-button {
+        min-height: 44px;
+    }
+    
+    .message-input {
+        min-height: 44px;
+    }
+}
+
+/* ============================================================================
+   HIGH DPI / RETINA DISPLAY OPTIMIZATIONS
+   ============================================================================ */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .logo {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+    
+    .container {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.12);
+    }
+}
+
+/* ============================================================================
+   FLUID TYPOGRAPHY SYSTEM
+   For ultra-responsive text scaling across all viewports
+   ============================================================================ */
+:root {
+    /* Fluid typography variables */
+    --fluid-min-width: 320;
+    --fluid-max-width: 1920;
+    --fluid-min-size: 14;
+    --fluid-max-size: 18;
+    --fluid-min-header: 18;
+    --fluid-max-header: 28;
+}
+
+@media screen and (min-width: 320px) {
+    html {
+        font-size: calc(var(--fluid-min-size) * 1px);
+    }
+    
+    .header h1 {
+        font-size: calc(var(--fluid-min-header) * 1px);
+    }
+}
+
+@media screen and (min-width: 1920px) {
+    html {
+        font-size: calc(var(--fluid-max-size) * 1px);
+    }
+    
+    .header h1 {
+        font-size: calc(var(--fluid-max-header) * 1px);
+    }
+}
+
+@media screen and (min-width: 320px) and (max-width: 1920px) {
+    html {
+        font-size: calc(var(--fluid-min-size) * 1px + (var(--fluid-max-size) - var(--fluid-min-size)) * (100vw - var(--fluid-min-width) * 1px) / (var(--fluid-max-width) - var(--fluid-min-width)));
+    }
+    
+    .header h1 {
+        font-size: calc(var(--fluid-min-header) * 1px + (var(--fluid-max-header) - var(--fluid-min-header)) * (100vw - var(--fluid-min-width) * 1px) / (var(--fluid-max-width) - var(--fluid-min-width)));
+    }
+}
+
+/* ============================================================================
+   SPECIAL RESPONSIVE ENHANCEMENTS
+   ============================================================================ */
+
+/* Viewport height considerations for mobile browsers (addressing the 100vh issue) */
+@supports (-webkit-touch-callout: none) {
+    /* iOS specific fix for 100vh issue */
+    .container {
+        height: -webkit-fill-available;
+        max-height: -webkit-fill-available;
+    }
+}
+
+/* Better position sticky support for Safari */
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: white;
+}
+
+/* Improved overflow scrolling on iOS */
+.chat-container {
+    -webkit-overflow-scrolling: touch;
+}

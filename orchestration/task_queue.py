@@ -43,6 +43,10 @@ class AgentRole(Enum):
     CLOUD_FUNCTIONS_ENGINEER = "cloud_functions_engineer"
     UI_UX_DESIGNER = "ui_ux_designer"
     TECHNICAL_WRITER = "technical_writer"
+    # New dynamic agents from registry
+    EXA_SEARCHER = "exa_searcher"
+    PLAYWRIGHT_TESTER = "playwright_tester"
+    REVENUE_ANALYST = "revenue_analyst"
 
 @dataclass
 class Task:
@@ -55,6 +59,7 @@ class Task:
     assignee: Optional[AgentRole] = None
     dependencies: List[str] = None
     tags: List[str] = None
+    capability_tags: List[str] = None  # New: capability-based routing tags
     status: TaskStatus = TaskStatus.PENDING
     created_at: datetime = None
     assigned_at: Optional[datetime] = None
@@ -68,6 +73,8 @@ class Task:
             self.dependencies = []
         if self.tags is None:
             self.tags = []
+        if self.capability_tags is None:
+            self.capability_tags = []
         if self.created_at is None:
             self.created_at = datetime.now()
         if self.metadata is None:
@@ -76,11 +83,29 @@ class Task:
 class TaskQueue:
     """Manages the autonomous improvement task queue with intelligent prioritization."""
     
-    def __init__(self, storage_path: str = "orchestration/tasks.json"):
+    def __init__(self, storage_path: str = "orchestration/tasks.json", registry_path: str = "agents/registry.json"):
         self.storage_path = Path(storage_path)
+        self.registry_path = Path(registry_path)
         self.tasks: Dict[str, Task] = {}
         self.agent_workload: Dict[AgentRole, int] = {role: 0 for role in AgentRole}
+        self.routing_rules = {}
+        self.load_agent_registry()
         self.load_tasks()
+    
+    def load_agent_registry(self):
+        """Load agent registry for capability-based routing."""
+        if self.registry_path.exists():
+            try:
+                with open(self.registry_path, 'r') as f:
+                    registry_data = json.load(f)
+                    self.routing_rules = registry_data.get('routing_rules', {})
+                logger.info(f"✅ Loaded routing rules from agent registry")
+            except Exception as e:
+                logger.error(f"❌ Failed to load agent registry: {e}")
+                self.routing_rules = {}
+        else:
+            logger.warning(f"⚠️ Agent registry not found at {self.registry_path}")
+            self.routing_rules = {}
     
     def generate_task_id(self) -> str:
         """Generate a unique task identifier."""
@@ -95,6 +120,7 @@ class TaskQueue:
         assignee: Optional[AgentRole] = None,
         dependencies: List[str] = None,
         tags: List[str] = None,
+        capability_tags: List[str] = None,
         estimated_hours: Optional[int] = None,
         metadata: Dict[str, Any] = None
     ) -> Task:
@@ -108,6 +134,7 @@ class TaskQueue:
             assignee=assignee,
             dependencies=dependencies or [],
             tags=tags or [],
+            capability_tags=capability_tags or [],
             estimated_hours=estimated_hours,
             metadata=metadata or {}
         )
@@ -198,6 +225,78 @@ class TaskQueue:
             return None
         
         # Sort by priority (critical first) then by creation time
+        priority_order = {Priority.CRITICAL: 0, Priority.HIGH: 1, Priority.MEDIUM: 2, Priority.LOW: 3}
+        available_tasks.sort(key=lambda t: (priority_order[t.priority], t.created_at))
+        
+        return available_tasks[0]
+    
+    def auto_route_task(self, task: Task) -> Optional[AgentRole]:
+        """Auto-route task based on capability tags using registry rules."""
+        if not task.capability_tags or not self.routing_rules:
+            return None
+        
+        capability_routing = self.routing_rules.get('capability_tags', {})
+        
+        # Find agents that can handle the task's capability tags
+        suitable_agents = set()
+        for cap_tag in task.capability_tags:
+            if cap_tag in capability_routing:
+                agent_keys = capability_routing[cap_tag]
+                for agent_key in agent_keys:
+                    # Convert agent key to AgentRole enum if it exists
+                    try:
+                        agent_role = AgentRole(agent_key)
+                        suitable_agents.add(agent_role)
+                    except ValueError:
+                        # Skip unknown agent roles
+                        continue
+        
+        if not suitable_agents:
+            return None
+        
+        # Apply load balancing strategy
+        load_balancing = self.routing_rules.get('load_balancing', {})
+        strategy = load_balancing.get('strategy', 'least_loaded')
+        
+        if strategy == 'least_loaded':
+            # Choose agent with lowest workload
+            return min(suitable_agents, key=lambda agent: self.agent_workload[agent])
+        else:
+            # Fallback to first suitable agent
+            return list(suitable_agents)[0]
+    
+    def get_next_task_with_routing(self, agent: Optional[AgentRole] = None) -> Optional[Task]:
+        """Get the next task with intelligent capability-based routing."""
+        available_tasks = []
+        
+        for task in self.tasks.values():
+            if task.status != TaskStatus.PENDING:
+                continue
+            
+            if not self.are_dependencies_met(task):
+                continue
+            
+            # If requesting for specific agent
+            if agent:
+                # Check if task is already assigned to this agent
+                if task.assignee and task.assignee == agent:
+                    available_tasks.append(task)
+                # Check if agent can handle task capabilities
+                elif task.capability_tags:
+                    auto_assigned = self.auto_route_task(task)
+                    if auto_assigned == agent:
+                        available_tasks.append(task)
+                # Fallback to existing logic
+                elif not task.assignee:
+                    available_tasks.append(task)
+            else:
+                # General task retrieval
+                available_tasks.append(task)
+        
+        if not available_tasks:
+            return None
+        
+        # Sort by priority and creation time
         priority_order = {Priority.CRITICAL: 0, Priority.HIGH: 1, Priority.MEDIUM: 2, Priority.LOW: 3}
         available_tasks.sort(key=lambda t: (priority_order[t.priority], t.created_at))
         

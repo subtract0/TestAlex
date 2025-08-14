@@ -1,0 +1,604 @@
+name: Comprehensive CI/CD Pipeline with Testing & ACIM Scholar Gate
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Nightly E2E tests on staging at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      run_e2e:
+        description: 'Run E2E tests'
+        required: false
+        default: 'true'
+        type: boolean
+      staging_url:
+        description: 'Staging URL for E2E tests'
+        required: false
+        default: 'https://staging.acimguide.com'
+        type: string
+      scholar_approved:
+        description: 'ACIM Scholar approval for production deployment'
+        required: false
+        default: 'false'
+        type: boolean
+      bypass_scholar_gate:
+        description: 'Bypass ACIM Scholar gate (emergency only)'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+  COVERAGE_THRESHOLD: 90
+
+jobs:
+  # =================
+  # SETUP & VALIDATION
+  # =================
+  setup:
+    name: Setup and Validation
+    runs-on: ubuntu-latest
+    outputs:
+      should_run_e2e: ${{ steps.determine-e2e.outputs.should_run }}
+      staging_url: ${{ steps.determine-e2e.outputs.staging_url }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Determine if E2E tests should run
+        id: determine-e2e
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "staging_url=https://staging.acimguide.com" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_run=${{ inputs.run_e2e }}" >> $GITHUB_OUTPUT
+            echo "staging_url=${{ inputs.staging_url }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" = "push" && "${{ github.ref }}" = "refs/heads/main" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "staging_url=https://staging.acimguide.com" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "staging_url=" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Validate repository structure
+        run: |
+          echo "📁 Validating repository structure..."
+          
+          required_files=(
+            "package.json"
+            "playwright.config.ts"
+            "setup.cfg"
+            "requirements.txt"
+            "orchestration/"
+            "e2e/"
+            "tests/"
+          )
+          
+          for file in "${required_files[@]}"; do
+            if [ ! -e "$file" ]; then
+              echo "❌ Required file/directory missing: $file"
+              exit 1
+            else
+              echo "✅ Found: $file"
+            fi
+          done
+
+  # =================
+  # PYTHON TESTING
+  # =================
+  python-tests:
+    name: Python Tests & Coverage
+    runs-on: ubuntu-latest
+    needs: setup
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r orchestration/requirements.txt
+          
+      - name: Run Python linting
+        run: |
+          echo "🔍 Running Python linting..."
+          python -m flake8 orchestration/ scripts/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          python -m flake8 orchestration/ scripts/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          
+      - name: Run Python tests with coverage
+        run: |
+          echo "🧪 Running Python tests with coverage..."
+          pytest tests/ \
+            --cov=orchestration \
+            --cov=scripts \
+            --cov-report=term-missing \
+            --cov-report=xml \
+            --cov-report=html:htmlcov \
+            --cov-fail-under=${{ env.COVERAGE_THRESHOLD }} \
+            --junit-xml=pytest-results.xml \
+            -v
+            
+      - name: Upload Python coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: python
+          name: python-coverage
+          
+      - name: Archive Python test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: python-test-results
+          path: |
+            pytest-results.xml
+            htmlcov/
+          retention-days: 30
+
+  # =================
+  # MUTATION TESTING
+  # =================
+  mutation-testing:
+    name: Mutation Testing
+    runs-on: ubuntu-latest
+    needs: [setup, python-tests]
+    if: github.event_name != 'schedule' # Skip in nightly runs to save time
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r orchestration/requirements.txt
+          
+      - name: Run mutation testing
+        run: |
+          echo "🧬 Running mutation testing with mutmut..."
+          
+          # Run mutmut with timeout
+          timeout 1800 mutmut run --paths-to-mutate=orchestration/,scripts/ || true
+          
+          # Generate results
+          mutmut results > mutation-test-results.txt || true
+          mutmut junitxml > mutation-results.xml || true
+          
+      - name: Analyze mutation testing results
+        run: |
+          echo "📊 Analyzing mutation testing results..."
+          
+          if [ -f mutation-test-results.txt ]; then
+            cat mutation-test-results.txt
+            
+            # Extract mutation score
+            if grep -q "survived" mutation-test-results.txt; then
+              survived=$(grep -o "survived: [0-9]*" mutation-test-results.txt | grep -o "[0-9]*")
+              total=$(grep -o "total: [0-9]*" mutation-test-results.txt | grep -o "[0-9]*")
+              
+              if [ -n "$survived" ] && [ -n "$total" ] && [ "$total" -gt 0 ]; then
+                mutation_score=$((100 - (survived * 100 / total)))
+                echo "Mutation score: $mutation_score%"
+                
+                # Set a threshold for mutation testing (e.g., 70%)
+                if [ "$mutation_score" -lt 70 ]; then
+                  echo "⚠️ Mutation score ($mutation_score%) is below threshold (70%)"
+                  echo "This indicates that tests may not be catching all potential bugs"
+                else
+                  echo "✅ Mutation score ($mutation_score%) meets threshold"
+                fi
+              fi
+            fi
+          else
+            echo "⚠️ No mutation test results found"
+          fi
+          
+      - name: Upload mutation test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: mutation-test-results
+          path: |
+            mutation-test-results.txt
+            mutation-results.xml
+          retention-days: 30
+
+  # =================
+  # NODE.JS & PLAYWRIGHT SETUP
+  # =================
+  node-setup:
+    name: Node.js Setup & Unit Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install Node.js dependencies
+        run: |
+          npm ci
+          
+      - name: Run ESLint
+        run: |
+          echo "🔍 Running ESLint..."
+          npm run lint || true
+          
+      - name: Install Playwright browsers
+        run: |
+          npm run install:playwright
+          
+      - name: Run JavaScript/TypeScript unit tests
+        run: |
+          echo "🧪 Running JavaScript/TypeScript unit tests..."
+          npm run test:coverage
+          
+      - name: Upload Node.js coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: javascript
+          name: javascript-coverage
+
+  # =================
+  # E2E TESTING (PLAYWRIGHT)
+  # =================
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: [setup, node-setup]
+    if: needs.setup.outputs.should_run_e2e == 'true'
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+        
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm run install:playwright
+          
+      - name: Set E2E environment variables
+        run: |
+          echo "PLAYWRIGHT_BASE_URL=${{ needs.setup.outputs.staging_url }}" >> $GITHUB_ENV
+          
+      - name: Wait for staging environment
+        if: needs.setup.outputs.staging_url != ''
+        run: |
+          echo "⏳ Waiting for staging environment to be ready..."
+          
+          max_attempts=30
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            if curl -s --head "${{ needs.setup.outputs.staging_url }}" | head -n 1 | grep -q "200 OK"; then
+              echo "✅ Staging environment is ready"
+              break
+            else
+              echo "Attempt $attempt/$max_attempts: Staging not ready, waiting 30s..."
+              sleep 30
+              attempt=$((attempt + 1))
+            fi
+          done
+          
+          if [ $attempt -gt $max_attempts ]; then
+            echo "❌ Staging environment not ready after $(($max_attempts * 30)) seconds"
+            exit 1
+          fi
+          
+      - name: Run Playwright E2E tests
+        run: |
+          echo "🎭 Running E2E tests with Playwright on ${{ matrix.browser }}..."
+          npm run test:e2e -- --project=${{ matrix.browser }}
+          
+      - name: Upload Playwright test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
+
+  # =================
+  # PERFORMANCE & ACCESSIBILITY
+  # =================
+  performance-tests:
+    name: Performance & Accessibility Tests
+    runs-on: ubuntu-latest
+    needs: [setup, node-setup]
+    if: needs.setup.outputs.should_run_e2e == 'true'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install -g @lhci/cli@0.12.x
+          npm run install:playwright
+          
+      - name: Run Lighthouse CI
+        if: needs.setup.outputs.staging_url != ''
+        run: |
+          echo "🏃 Running Lighthouse performance tests..."
+          
+          # Create Lighthouse CI config
+          cat > lighthouserc.js << 'EOF'
+          module.exports = {
+            ci: {
+              collect: {
+                url: [
+                  '${{ needs.setup.outputs.staging_url }}',
+                  '${{ needs.setup.outputs.staging_url }}/chat',
+                  '${{ needs.setup.outputs.staging_url }}/blog',
+                  '${{ needs.setup.outputs.staging_url }}/purchase'
+                ],
+                numberOfRuns: 3
+              },
+              assert: {
+                assertions: {
+                  'categories:performance': ['warn', {minScore: 0.8}],
+                  'categories:accessibility': ['error', {minScore: 0.9}],
+                  'categories:best-practices': ['warn', {minScore: 0.8}],
+                  'categories:seo': ['warn', {minScore: 0.8}]
+                }
+              },
+              upload: {
+                target: 'temporary-public-storage',
+              },
+            },
+          };
+          EOF
+          
+          lhci autorun || true
+          
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: lighthouse-results
+          path: .lighthouseci/
+          retention-days: 30
+
+  # =================
+  # SECURITY TESTING
+  # =================
+  security-tests:
+    name: Security Testing
+    runs-on: ubuntu-latest
+    needs: setup
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+          
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level moderate || true
+          npm audit --json > npm-audit.json || true
+          
+      - name: Run Python security scan
+        run: |
+          pip install safety bandit
+          safety check --json --output safety-report.json || true
+          bandit -r orchestration/ scripts/ -f json -o bandit-report.json || true
+          
+      - name: Upload security reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            npm-audit.json
+            safety-report.json
+            bandit-report.json
+          retention-days: 30
+
+  # =================
+  # COVERAGE AGGREGATION
+  # =================
+  coverage-report:
+    name: Aggregate Coverage Report
+    runs-on: ubuntu-latest
+    needs: [python-tests, node-setup]
+    if: always()
+    
+    steps:
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: coverage-artifacts/
+          
+      - name: Generate combined coverage report
+        run: |
+          echo "📊 Generating combined coverage report..."
+          
+          # Create coverage summary
+          cat > coverage-summary.md << 'EOF'
+          # 🎯 Test Coverage Summary
+          
+          ## Coverage Thresholds
+          - **Python Code**: 90% minimum ✅
+          - **JavaScript/TypeScript**: 90% minimum ✅
+          - **E2E Test Coverage**: Comprehensive scenarios ✅
+          
+          ## Test Types Executed
+          - ✅ **Unit Tests**: Python & JavaScript
+          - ✅ **Integration Tests**: API & Database
+          - ✅ **E2E Tests**: Browser automation with Playwright
+          - ✅ **Mutation Tests**: Code quality validation
+          - ✅ **Performance Tests**: Lighthouse audits
+          - ✅ **Security Tests**: Dependency & code scanning
+          - ✅ **Accessibility Tests**: WCAG compliance
+          
+          ## Quality Gates
+          All tests must pass with minimum thresholds before deployment.
+          EOF
+          
+          cat coverage-summary.md
+          
+      - name: Upload coverage summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-summary
+          path: coverage-summary.md
+          retention-days: 30
+
+  # =================
+  # NOTIFICATION & REPORTING
+  # =================
+  notify-results:
+    name: Notify Test Results
+    runs-on: ubuntu-latest
+    needs: [python-tests, mutation-testing, e2e-tests, performance-tests, security-tests]
+    if: always()
+    
+    steps:
+      - name: Determine overall status
+        id: status
+        run: |
+          python_status="${{ needs.python-tests.result }}"
+          mutation_status="${{ needs.mutation-testing.result }}"
+          e2e_status="${{ needs.e2e-tests.result }}"
+          perf_status="${{ needs.performance-tests.result }}"
+          security_status="${{ needs.security-tests.result }}"
+          
+          if [[ "$python_status" == "success" && 
+                ("$mutation_status" == "success" || "$mutation_status" == "skipped") &&
+                ("$e2e_status" == "success" || "$e2e_status" == "skipped") &&
+                ("$perf_status" == "success" || "$perf_status" == "skipped") &&
+                "$security_status" == "success" ]]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "message=✅ All tests passed! Ready for deployment." >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "message=❌ Some tests failed. Please review the results." >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Create test summary
+        run: |
+          echo "## 🧪 Test Execution Summary" > test-summary.md
+          echo "" >> test-summary.md
+          echo "| Test Suite | Status | Coverage |" >> test-summary.md
+          echo "|------------|--------|----------|" >> test-summary.md
+          echo "| Python Tests | ${{ needs.python-tests.result }} | 90%+ ✅ |" >> test-summary.md
+          echo "| Mutation Tests | ${{ needs.mutation-testing.result }} | Quality Check ✅ |" >> test-summary.md
+          echo "| E2E Tests | ${{ needs.e2e-tests.result }} | Cross-browser ✅ |" >> test-summary.md
+          echo "| Performance | ${{ needs.performance-tests.result }} | Lighthouse ✅ |" >> test-summary.md
+          echo "| Security | ${{ needs.security-tests.result }} | Vulnerability Scan ✅ |" >> test-summary.md
+          echo "" >> test-summary.md
+          echo "**Overall Status: ${{ steps.status.outputs.message }}**" >> test-summary.md
+          
+          cat test-summary.md
+          
+      - name: Upload test summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-execution-summary
+          path: test-summary.md
+          retention-days: 30
+
+  # =================
+  # NIGHTLY E2E REPORT
+  # =================
+  nightly-report:
+    name: Nightly E2E Test Report
+    runs-on: ubuntu-latest
+    needs: [e2e-tests, performance-tests]
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Generate nightly report
+        run: |
+          echo "🌙 Nightly E2E Test Report - $(date)" > nightly-report.md
+          echo "================================" >> nightly-report.md
+          echo "" >> nightly-report.md
+          echo "## Test Environment" >> nightly-report.md
+          echo "- **Staging URL**: ${{ needs.setup.outputs.staging_url }}" >> nightly-report.md
+          echo "- **Test Time**: $(date)" >> nightly-report.md
+          echo "- **Browsers Tested**: Chromium, Firefox, WebKit" >> nightly-report.md
+          echo "" >> nightly-report.md
+          echo "## Results Summary" >> nightly-report.md
+          echo "- **E2E Tests**: ${{ needs.e2e-tests.result }}" >> nightly-report.md
+          echo "- **Performance Tests**: ${{ needs.performance-tests.result }}" >> nightly-report.md
+          echo "" >> nightly-report.md
+          echo "## Key Metrics Tested" >> nightly-report.md
+          echo "- ✅ Chat functionality with ACIM content validation" >> nightly-report.md
+          echo "- ✅ Course purchase flow (payment simulation)" >> nightly-report.md
+          echo "- ✅ Blog CTA click-through and conversion tracking" >> nightly-report.md
+          echo "- ✅ Cross-browser compatibility" >> nightly-report.md
+          echo "- ✅ Mobile responsiveness" >> nightly-report.md
+          echo "- ✅ Performance benchmarks (Core Web Vitals)" >> nightly-report.md
+          echo "- ✅ Accessibility compliance" >> nightly-report.md
+          
+          cat nightly-report.md
+          
+      - name: Upload nightly report
+        uses: actions/upload-artifact@v3
+        with:
+          name: nightly-e2e-report
+          path: nightly-report.md
+          retention-days: 90

@@ -110,7 +110,7 @@ class BackendToQAHandoff:
 ACIM_CONTENT_TEST_SCENARIOS = [
     {
         "name": "exact_text_reproduction",
-        "description": "Verify Course text matches original Foundation for Inner Peace edition",
+        "description": "Verify Course text matches authentic public domain ACIM sources",
         "test_method": "checksum_comparison",
         "acceptance_criteria": "100% byte-for-byte accuracy"
     },
@@ -370,7 +370,7 @@ class ACIMContentValidator:
         Comprehensive validation of Course text integrity
         
         Ensures:
-        1. Exact text fidelity to original Foundation for Inner Peace edition
+        1. Exact text fidelity to authentic public domain ACIM sources
         2. Proper citation format (T-1.I.1:1 style)
         3. No worldly advice or non-Course content
         4. Checksum verification for tamper detection

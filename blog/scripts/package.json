@@ -1,0 +1,38 @@
+{
+  "name": "acim-blog-automation",
+  "version": "1.0.0",
+  "description": "Automated blog post generation and SEO optimization for ACIM Coach",
+  "main": "generate-daily-post.js",
+  "scripts": {
+    "generate": "node generate-daily-post.js",
+    "seo": "node seo-optimizer.js",
+    "test": "node test-system.js",
+    "daily": "npm run generate && npm run seo",
+    "setup": "mkdir -p ../content ../site && echo 'Blog directories created'"
+  },
+  "keywords": [
+    "ACIM",
+    "blog",
+    "automation",
+    "SEO",
+    "spiritual-guidance",
+    "Course-in-Miracles"
+  ],
+  "author": "Alex Monas",
+  "license": "MIT",
+  "dependencies": {
+    "markdown-it": "^13.0.2",
+    "front-matter": "^4.0.2",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/acim-blog-automation"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

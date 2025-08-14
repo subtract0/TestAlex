@@ -229,7 +229,7 @@ class CourseTextRenderer {
 - User control over citations respects individual learning styles
 
 ### Text Fidelity Validation:
-- Citation format exactly matches Foundation for Inner Peace standards
+- Citation format follows standard ACIM text reference format
 - No paraphrasing or interpretation of citations
 - Original Course text completely unchanged
 - Reference accuracy maintained in all display modes

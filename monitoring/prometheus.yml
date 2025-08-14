@@ -1,0 +1,116 @@
+# Prometheus Configuration for ACIM Guide
+# Scrapes Firebase metrics and integrates with Alertmanager
+
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+  external_labels:
+    cluster: 'acim-guide-production'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Rules configuration
+rule_files:
+  - "rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Firebase metrics from our custom exporter
+  - job_name: 'firebase-metrics'
+    static_configs:
+      - targets: ['firebase-exporter:9090']
+    scrape_interval: 30s
+    metrics_path: /metrics
+    scrape_timeout: 25s
+    honor_labels: true
+    params:
+      format: ['prometheus']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: firebase-exporter:9090
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 15s
+
+  # Alertmanager monitoring
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+    scrape_interval: 15s
+
+  # Node exporter for system metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # cAdvisor for container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 15s
+
+  # Grafana monitoring
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # Holy Spirit Chaos Engineering service
+  - job_name: 'chaos-engineer'
+    static_configs:
+      - targets: ['chaos-engineer:8888']
+    scrape_interval: 60s
+    honor_labels: true
+
+  # Firebase Cloud Functions (if accessible via metrics endpoint)
+  - job_name: 'firebase-functions'
+    static_configs:
+      - targets: ['firebase-exporter:9090']
+    scrape_interval: 30s
+    metrics_path: /firebase-functions-metrics
+    scrape_timeout: 25s
+
+  # ACIM Content validation service
+  - job_name: 'acim-content-validator'
+    static_configs:
+      - targets: ['firebase-exporter:9090']
+    scrape_interval: 60s
+    metrics_path: /acim-metrics
+    scrape_timeout: 25s
+
+# Remote write configuration for Grafana Cloud (if enabled)
+remote_write:
+  - url: "${GRAFANA_CLOUD_PROMETHEUS_URL}"
+    basic_auth:
+      username: "${GRAFANA_CLOUD_PROMETHEUS_USER}"
+      password: "${GRAFANA_CLOUD_API_KEY}"
+    queue_config:
+      max_samples_per_send: 1000
+      max_shards: 10
+      capacity: 10000
+    metadata_config:
+      send: true
+      send_interval: 30s
+    write_relabel_configs:
+      # Only send critical metrics to save on costs
+      - source_labels: [__name__]
+        regex: '(acim_.*|firebase_.*|up|.*_total)'
+        action: keep
+      - source_labels: [severity]
+        regex: 'critical|warning'
+        action: keep

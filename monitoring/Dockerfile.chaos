@@ -1,0 +1,69 @@
+# ACIM Guide Holy Spirit Chaos Engineering Service
+# Python-based chaos engineering system for quarterly resilience testing
+
+FROM python:3.11-slim AS builder
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+FROM python:3.11-slim AS runtime
+
+# Create non-root user
+RUN groupadd -r acim && useradd -r -g acim acim
+
+WORKDIR /app
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy Python packages from builder
+COPY --from=builder /root/.local /home/acim/.local
+
+# Copy application code
+COPY holy-spirit-chaos-drill.py ./
+COPY requirements.txt ./
+
+# Create directories for logs and reports
+RUN mkdir -p /app/logs /app/reports /app/data && \
+    chown -R acim:acim /app
+
+# Switch to non-root user
+USER acim
+
+# Add local packages to PATH
+ENV PATH=/home/acim/.local/bin:$PATH
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Health check
+HEALTHCHECK --interval=60s --timeout=30s --start-period=120s --retries=3 \
+  CMD python3 -c "import asyncio; print('Chaos Engineer healthy')" || exit 1
+
+# Expose chaos management port (optional web interface)
+EXPOSE 8888
+
+# Environment variables
+ENV CHAOS_LOG_LEVEL=INFO
+ENV FIREBASE_PROJECT_ID=acim-guide-test
+
+# Labels
+LABEL maintainer="ACIM Guide Team <devops@acim-guide.com>"
+LABEL version="1.0.0" 
+LABEL description="Holy Spirit Chaos Engineering system for ACIM Guide resilience testing"
+LABEL org.opencontainers.image.source="https://github.com/acim-guide/monitoring"
+
+# Default command runs in daemon mode
+CMD ["python3", "holy-spirit-chaos-drill.py", "schedule", "--quarter", "1"]
