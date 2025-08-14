@@ -40,17 +40,17 @@ const SEO_CONFIG = {
   },
   structuredData: {
     organization: {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "ACIM Coach",
-      "url": "https://acimcoach.com",
-      "description": "Authentic spiritual guidance through A Course in Miracles teachings and CourseGPT AI assistance",
-      "founder": {
-        "@type": "Person",
-        "name": "Alex Monas"
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      'name': 'ACIM Coach',
+      'url': 'https://acimcoach.com',
+      'description': 'Authentic spiritual guidance through A Course in Miracles teachings and CourseGPT AI assistance',
+      'founder': {
+        '@type': 'Person',
+        'name': 'Alex Monas'
       },
-      "sameAs": [
-        "https://acimguide.com"
+      'sameAs': [
+        'https://acimguide.com'
       ]
     }
   }
@@ -107,26 +107,26 @@ function generateSEOMetadata(post) {
       description: description
     },
     structuredData: {
-      "@context": "https://schema.org",
-      "@type": "BlogPosting",
-      "headline": title,
-      "description": description,
-      "author": {
-        "@type": "Person",
-        "name": SEO_CONFIG.author,
-        "url": `https://${SEO_CONFIG.domain}`
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      'headline': title,
+      'description': description,
+      'author': {
+        '@type': 'Person',
+        'name': SEO_CONFIG.author,
+        'url': `https://${SEO_CONFIG.domain}`
       },
-      "publisher": SEO_CONFIG.structuredData.organization,
-      "datePublished": publishDate,
-      "dateModified": publishDate,
-      "mainEntityOfPage": canonicalUrl,
-      "url": canonicalUrl,
-      "keywords": lessonKeywords,
-      "articleSection": "Spiritual Guidance",
-      "about": {
-        "@type": "Thing",
-        "name": "A Course in Miracles",
-        "description": "Spiritual curriculum focused on forgiveness and inner peace"
+      'publisher': SEO_CONFIG.structuredData.organization,
+      'datePublished': publishDate,
+      'dateModified': publishDate,
+      'mainEntityOfPage': canonicalUrl,
+      'url': canonicalUrl,
+      'keywords': lessonKeywords,
+      'articleSection': 'Spiritual Guidance',
+      'about': {
+        '@type': 'Thing',
+        'name': 'A Course in Miracles',
+        'description': 'Spiritual curriculum focused on forgiveness and inner peace'
       }
     }
   };

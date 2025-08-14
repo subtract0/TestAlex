@@ -37,21 +37,21 @@ const RATE_LIMIT_RPM = 10; // Requests per minute per user
 const AUTO_SCALE_CONFIG = {
   // Base configuration
   minInstances: 0,
-  maxInstancesLow: 5,    // Off-peak hours
-  maxInstancesPeak: 20,  // Peak hours (9 AM - 9 PM)
-  maxInstancesHigh: 35,  // High usage periods
-  
+  maxInstancesLow: 5, // Off-peak hours
+  maxInstancesPeak: 20, // Peak hours (9 AM - 9 PM)
+  maxInstancesHigh: 35, // High usage periods
+
   // Usage thresholds for scaling decisions
   thresholds: {
-    dailyTokensLow: 10000,    // < 10K tokens/day = low usage
-    dailyTokensMedium: 30000, // 10K-30K tokens/day = medium usage  
-    dailyTokensHigh: 45000,   // > 30K tokens/day = high usage
+    dailyTokensLow: 10000, // < 10K tokens/day = low usage
+    dailyTokensMedium: 30000, // 10K-30K tokens/day = medium usage
+    dailyTokensHigh: 45000, // > 30K tokens/day = high usage
     requestsPerMinute: {
       low: 10,
       medium: 30,
-      high: 60
-    }
-  }
+      high: 60,
+    },
+  },
 };
 
 /**
@@ -63,29 +63,29 @@ async function calculateOptimalMaxInstances() {
     const now = new Date();
     const hour = now.getHours();
     const dayStart = new Date().setHours(0, 0, 0, 0);
-    
+
     // Get current daily token usage across all users
-    const rateLimitsSnapshot = await admin.firestore().collection('rateLimits').get();
+    const rateLimitsSnapshot = await admin.firestore().collection("rateLimits").get();
     let totalDailyTokens = 0;
     let activeUsers = 0;
-    
-    rateLimitsSnapshot.docs.forEach(doc => {
+
+    rateLimitsSnapshot.docs.forEach((doc) => {
       const data = doc.data();
       if (data.lastReset >= dayStart) {
         totalDailyTokens += data.dailyTokens || 0;
         if (data.dailyTokens > 0) activeUsers++;
       }
     });
-    
+
     // Get recent request rate (last 10 minutes)
     const recentMetricsSnapshot = await admin.firestore()
-      .collection('metrics')
-      .doc('requests')
-      .get();
-    
+        .collection("metrics")
+        .doc("requests")
+        .get();
+
     const recentData = recentMetricsSnapshot.exists ? recentMetricsSnapshot.data() : {};
     const recentRequests = recentData.last10Minutes || 0;
-    
+
     // Determine time-based scaling
     let timeBasedMax;
     if (hour >= 9 && hour <= 21) {
@@ -95,7 +95,7 @@ async function calculateOptimalMaxInstances() {
       // Off-peak hours
       timeBasedMax = AUTO_SCALE_CONFIG.maxInstancesLow;
     }
-    
+
     // Determine usage-based scaling
     let usageBasedMax;
     if (totalDailyTokens >= AUTO_SCALE_CONFIG.thresholds.dailyTokensHigh) {
@@ -105,12 +105,12 @@ async function calculateOptimalMaxInstances() {
     } else {
       usageBasedMax = AUTO_SCALE_CONFIG.maxInstancesLow;
     }
-    
+
     // Take the minimum of time-based and usage-based scaling for cost control
     const optimalMax = Math.min(timeBasedMax, usageBasedMax);
-    
+
     // Log scaling decision for monitoring
-    logger.info('Auto-scaling calculation', {
+    logger.info("Auto-scaling calculation", {
       hour,
       totalDailyTokens,
       activeUsers,
@@ -118,15 +118,14 @@ async function calculateOptimalMaxInstances() {
       timeBasedMax,
       usageBasedMax,
       optimalMax,
-      currentBudgetUtilization: totalDailyTokens / DAILY_OUT_TOKENS_CAP
+      currentBudgetUtilization: totalDailyTokens / DAILY_OUT_TOKENS_CAP,
     });
-    
+
     return Math.max(1, optimalMax); // Always allow at least 1 instance
-    
   } catch (error) {
-    logger.warn('Auto-scaling calculation failed, using default', {
+    logger.warn("Auto-scaling calculation failed, using default", {
       error: error.message,
-      defaultMax: AUTO_SCALE_CONFIG.maxInstancesLow
+      defaultMax: AUTO_SCALE_CONFIG.maxInstancesLow,
     });
     return AUTO_SCALE_CONFIG.maxInstancesLow;
   }
@@ -250,50 +249,50 @@ function extractCitations(message) {
  */
 function detectLanguage(message) {
   try {
-    if (!message || typeof message !== 'string' || message.trim().length === 0) {
-      return 'en'; // Default to English for empty/invalid messages
+    if (!message || typeof message !== "string" || message.trim().length === 0) {
+      return "en"; // Default to English for empty/invalid messages
     }
 
     const text = message.toLowerCase().trim();
-    
+
     // Language detection patterns based on common words, phrases, and character patterns
     const languagePatterns = {
-      'es': {
+      "es": {
         // Spanish indicators
-        words: ['el', 'la', 'de', 'que', 'y', 'es', 'en', 'un', 'una', 'con', 'no', 'se', 'te', 'lo', 'le', 'da', 'su', 'por', 'son', 'como', 'para', 'del', 'está', 'todo', 'pero', 'más', 'hacer', 'muy', 'puede', 'dios', 'amor', 'vida', 'curso', 'milagros'],
+        words: ["el", "la", "de", "que", "y", "es", "en", "un", "una", "con", "no", "se", "te", "lo", "le", "da", "su", "por", "son", "como", "para", "del", "está", "todo", "pero", "más", "hacer", "muy", "puede", "dios", "amor", "vida", "curso", "milagros"],
         patterns: [/¿.*?\?/, /¡.*?!/, /ñ/, /á|é|í|ó|ú/, /ción$/, /dad$/, /mente$/],
-        greeting: ['hola', 'buenos días', 'buenas tardes', 'buenas noches']
+        greeting: ["hola", "buenos días", "buenas tardes", "buenas noches"],
       },
-      'fr': {
+      "fr": {
         // French indicators
-        words: ['le', 'de', 'et', 'à', 'un', 'il', 'être', 'et', 'en', 'avoir', 'que', 'pour', 'dans', 'ce', 'son', 'une', 'sur', 'avec', 'ne', 'se', 'pas', 'tout', 'plus', 'par', 'grand', 'il', 'me', 'même', 'faire', 'elle', 'dieu', 'amour', 'vie', 'cours', 'miracles'],
+        words: ["le", "de", "et", "à", "un", "il", "être", "et", "en", "avoir", "que", "pour", "dans", "ce", "son", "une", "sur", "avec", "ne", "se", "pas", "tout", "plus", "par", "grand", "il", "me", "même", "faire", "elle", "dieu", "amour", "vie", "cours", "miracles"],
         patterns: [/ç/, /à|é|è|ê|î|ô|ù|û/, /tion$/, /ment$/, /ique$/],
-        greeting: ['bonjour', 'bonsoir', 'salut']
+        greeting: ["bonjour", "bonsoir", "salut"],
       },
-      'de': {
-        // German indicators  
-        words: ['der', 'die', 'und', 'in', 'den', 'von', 'zu', 'das', 'mit', 'sich', 'des', 'auf', 'für', 'ist', 'im', 'dem', 'nicht', 'ein', 'eine', 'als', 'auch', 'es', 'an', 'werden', 'aus', 'er', 'hat', 'daß', 'sie', 'nach', 'wird', 'bei', 'gott', 'liebe', 'leben', 'kurs', 'wunder'],
+      "de": {
+        // German indicators
+        words: ["der", "die", "und", "in", "den", "von", "zu", "das", "mit", "sich", "des", "auf", "für", "ist", "im", "dem", "nicht", "ein", "eine", "als", "auch", "es", "an", "werden", "aus", "er", "hat", "daß", "sie", "nach", "wird", "bei", "gott", "liebe", "leben", "kurs", "wunder"],
         patterns: [/ä|ö|ü|ß/, /ung$/, /keit$/, /lich$/],
-        greeting: ['hallo', 'guten tag', 'guten morgen', 'guten abend']
+        greeting: ["hallo", "guten tag", "guten morgen", "guten abend"],
       },
-      'pt': {
+      "pt": {
         // Portuguese indicators
-        words: ['o', 'de', 'e', 'do', 'a', 'em', 'um', 'para', 'é', 'com', 'não', 'uma', 'os', 'no', 'se', 'na', 'por', 'mais', 'as', 'dos', 'como', 'mas', 'foi', 'ao', 'ele', 'das', 'tem', 'à', 'seu', 'sua', 'ou', 'ser', 'quando', 'muito', 'há', 'nos', 'já', 'está', 'eu', 'também', 'deus', 'amor', 'vida', 'curso', 'milagres'],
+        words: ["o", "de", "e", "do", "a", "em", "um", "para", "é", "com", "não", "uma", "os", "no", "se", "na", "por", "mais", "as", "dos", "como", "mas", "foi", "ao", "ele", "das", "tem", "à", "seu", "sua", "ou", "ser", "quando", "muito", "há", "nos", "já", "está", "eu", "também", "deus", "amor", "vida", "curso", "milagres"],
         patterns: [/ã|õ|ç/, /ção$/, /dade$/, /mente$/],
-        greeting: ['olá', 'oi', 'bom dia', 'boa tarde', 'boa noite']
+        greeting: ["olá", "oi", "bom dia", "boa tarde", "boa noite"],
       },
-      'it': {
+      "it": {
         // Italian indicators
-        words: ['il', 'di', 'che', 'e', 'la', 'per', 'un', 'in', 'con', 'del', 'da', 'a', 'al', 'le', 'si', 'dei', 'come', 'lo', 'se', 'gli', 'alla', 'più', 'nel', 'dalla', 'sua', 'suo', 'ci', 'anche', 'tutto', 'ancora', 'fatto', 'dopo', 'vita', 'tempo', 'anni', 'stato', 'dio', 'amore', 'corso', 'miracoli'],
+        words: ["il", "di", "che", "e", "la", "per", "un", "in", "con", "del", "da", "a", "al", "le", "si", "dei", "come", "lo", "se", "gli", "alla", "più", "nel", "dalla", "sua", "suo", "ci", "anche", "tutto", "ancora", "fatto", "dopo", "vita", "tempo", "anni", "stato", "dio", "amore", "corso", "miracoli"],
         patterns: [/à|è|é|ì|í|î|ò|ó|ù|ú/, /zione$/, /mente$/, /ario$/],
-        greeting: ['ciao', 'salve', 'buongiorno', 'buonasera']
-      }
+        greeting: ["ciao", "salve", "buongiorno", "buonasera"],
+      },
     };
 
     const scores = {};
-    
+
     // Initialize scores for each language
-    Object.keys(languagePatterns).forEach(lang => {
+    Object.keys(languagePatterns).forEach((lang) => {
       scores[lang] = 0;
     });
 
@@ -301,20 +300,20 @@ function detectLanguage(message) {
     const words = text.split(/\s+/);
     Object.entries(languagePatterns).forEach(([lang, patterns]) => {
       // Word matching (higher weight)
-      patterns.words.forEach(word => {
-        const regex = new RegExp(`\\b${word}\\b`, 'gi');
+      patterns.words.forEach((word) => {
+        const regex = new RegExp(`\\b${word}\\b`, "gi");
         const matches = (text.match(regex) || []).length;
         scores[lang] += matches * 3;
       });
-      
+
       // Pattern matching (medium weight)
-      patterns.patterns.forEach(pattern => {
+      patterns.patterns.forEach((pattern) => {
         const matches = (text.match(pattern) || []).length;
         scores[lang] += matches * 2;
       });
-      
+
       // Greeting detection (high weight)
-      patterns.greeting.forEach(greeting => {
+      patterns.greeting.forEach((greeting) => {
         if (text.includes(greeting)) {
           scores[lang] += 5;
         }
@@ -322,9 +321,9 @@ function detectLanguage(message) {
     });
 
     // Find the language with highest score
-    let detectedLang = 'en'; // Default to English
+    let detectedLang = "en"; // Default to English
     let maxScore = 0;
-    
+
     Object.entries(scores).forEach(([lang, score]) => {
       if (score > maxScore) {
         maxScore = score;
@@ -337,30 +336,29 @@ function detectLanguage(message) {
       // Check for non-English character patterns
       if (/[àáâãäèéêëìíîïòóôõöùúûüç]/i.test(text)) {
         // Romance language indicators - default to Spanish for ACIM context
-        detectedLang = 'es';
+        detectedLang = "es";
       } else if (/[äöüß]/i.test(text)) {
-        detectedLang = 'de';
+        detectedLang = "de";
       }
     }
 
     // Log detection for monitoring (only in non-production)
-    if (process.env.NODE_ENV !== 'production') {
-      logger.info('Language detection', {
-        message: text.substring(0, 50) + '...',
+    if (process.env.NODE_ENV !== "production") {
+      logger.info("Language detection", {
+        message: text.substring(0, 50) + "...",
         detected: detectedLang,
         scores: scores,
-        messageLength: text.length
+        messageLength: text.length,
       });
     }
 
     return detectedLang;
-    
   } catch (error) {
-    logger.warn('Language detection error, defaulting to English', {
+    logger.warn("Language detection error, defaulting to English", {
       error: error.message,
-      message: message ? message.substring(0, 50) + '...' : 'undefined'
+      message: message ? message.substring(0, 50) + "..." : "undefined",
     });
-    return 'en'; // Safe fallback to English
+    return "en"; // Safe fallback to English
   }
 }
 
@@ -369,15 +367,15 @@ function detectLanguage(message) {
  * Responds in the user's detected language for authentic ACIM guidance
  */
 exports.chatWithAssistant = onCall({
-  memory: '512MB',
+  memory: "512MB",
   timeoutSeconds: 60,
-  maxInstances: 10
+  maxInstances: 10,
 }, async (request) => {
   const startTime = Date.now();
   let tokenIn = 0;
   let tokenOut = 0;
   let budgetAllowed = true;
-  let serviceLevel = 'normal';
+  let serviceLevel = "normal";
   let maxTokens = 500;
 
   try {
@@ -401,50 +399,49 @@ exports.chatWithAssistant = onCall({
       const budgetCheck = await admin.firestore().runTransaction(async (transaction) => {
         // Simulate budget check (in production, this would call the budget microservice)
         const budgetDoc = await transaction.get(
-          admin.firestore().collection('budget_status').doc('current')
+            admin.firestore().collection("budget_status").doc("current"),
         );
-        
-        const budgetData = budgetDoc.exists ? budgetDoc.data() : { utilization: 0.5 };
-        
+
+        const budgetData = budgetDoc.exists ? budgetDoc.data() : {utilization: 0.5};
+
         // Determine service parameters based on budget
         if (budgetData.utilization >= 1.0) {
-          return { allowed: false, serviceLevel: 'shutoff', maxTokens: 0, reason: 'Monthly budget exhausted' };
+          return {allowed: false, serviceLevel: "shutoff", maxTokens: 0, reason: "Monthly budget exhausted"};
         } else if (budgetData.utilization >= 0.95) {
-          return { 
-            allowed: userTier !== 'free', 
-            serviceLevel: 'emergency', 
+          return {
+            allowed: userTier !== "free",
+            serviceLevel: "emergency",
             maxTokens: 150,
-            reason: userTier === 'free' ? 'Budget constraints: Free tier temporarily limited' : null
+            reason: userTier === "free" ? "Budget constraints: Free tier temporarily limited" : null,
           };
         } else if (budgetData.utilization >= 0.85) {
-          return { allowed: true, serviceLevel: 'slowdown', maxTokens: 300 };
+          return {allowed: true, serviceLevel: "slowdown", maxTokens: 300};
         } else if (budgetData.utilization >= 0.7) {
-          return { 
-            allowed: true, 
-            serviceLevel: 'warning', 
-            maxTokens: userTier === 'free' ? 300 : 500 
+          return {
+            allowed: true,
+            serviceLevel: "warning",
+            maxTokens: userTier === "free" ? 300 : 500,
           };
         } else {
-          return { allowed: true, serviceLevel: 'normal', maxTokens: 500 };
+          return {allowed: true, serviceLevel: "normal", maxTokens: 500};
         }
       });
-      
+
       budgetAllowed = budgetCheck.allowed;
       serviceLevel = budgetCheck.serviceLevel;
       maxTokens = budgetCheck.maxTokens;
-      
+
       if (!budgetAllowed) {
-        throw new Error(budgetCheck.reason || 'Service temporarily unavailable due to budget constraints');
+        throw new Error(budgetCheck.reason || "Service temporarily unavailable due to budget constraints");
       }
-      
     } catch (budgetError) {
-      logger.warn('Budget check failed, proceeding with caution', {
+      logger.warn("Budget check failed, proceeding with caution", {
         error: budgetError.message,
-        userId
+        userId,
       });
       // Continue with reduced service in case of budget check failure
       maxTokens = 300;
-      serviceLevel = 'warning';
+      serviceLevel = "warning";
     }
 
     // Detect user's language for multilingual response
@@ -462,8 +459,8 @@ exports.chatWithAssistant = onCall({
     const currentDailyTokens = await checkRateLimit(userId);
 
     // Get or create thread for user
-    let userThreadId = await getOrCreateThread(userId);
-    
+    const userThreadId = await getOrCreateThread(userId);
+
     if (!userThreadId) {
       throw new Error("Failed to create or retrieve thread ID");
     }
@@ -509,11 +506,11 @@ exports.chatWithAssistant = onCall({
 
     while (["queued", "in_progress"].includes(runStatus.status) && pollCount < maxPolls) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       // Store parameters in local variables to prevent scoping issues
       const currentThreadId = userThreadId;
       const currentRunId = run.id;
-      
+
       // Ensure parameters are still valid before making API call
       if (!currentThreadId) {
         throw new Error("Thread ID became undefined during polling");
@@ -521,17 +518,17 @@ exports.chatWithAssistant = onCall({
       if (!currentRunId) {
         throw new Error("Run ID became undefined during polling");
       }
-      
+
       logger.info("Polling run status", {threadId: currentThreadId, runId: currentRunId, pollCount});
-      
+
       // Debug log to verify parameters before API call
       logger.info("API call parameters", {
         param1_threadId: currentThreadId,
         param2_runId: currentRunId,
         threadIdType: typeof currentThreadId,
-        runIdType: typeof currentRunId
+        runIdType: typeof currentRunId,
       });
-      
+
       // Fix: Use correct OpenAI v4 SDK syntax with object parameters
       runStatus = await openai.beta.threads.runs.retrieve(currentThreadId, currentRunId);
       pollCount++;
@@ -649,7 +646,7 @@ async function getOrCreateThread(userId) {
 
     // Create new thread
     const thread = await openai.beta.threads.create();
-    
+
     if (!thread || !thread.id) {
       throw new Error("Failed to create OpenAI thread - no thread ID returned");
     }
@@ -674,9 +671,9 @@ async function getOrCreateThread(userId) {
  * Callable HTTPS Function as specified in specs.md
  */
 exports.clearThread = onCall({
-  memory: '256MB',
+  memory: "256MB",
   timeoutSeconds: 30,
-  maxInstances: 5
+  maxInstances: 5,
 }, async (request) => {
   try {
     const userId = request.auth && request.auth.uid;

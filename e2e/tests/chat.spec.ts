@@ -19,7 +19,7 @@ test.describe('Chat Interface E2E Tests', () => {
   });
 
   test('should send and receive messages', async ({ page }) => {
-    const testMessage = "What is lesson 1 of ACIM about?";
+    const testMessage = 'What is lesson 1 of ACIM about?';
     
     await chatPage.sendMessage(testMessage);
     const response = await chatPage.waitForAIResponse();
@@ -54,7 +54,7 @@ test.describe('Chat Interface E2E Tests', () => {
 
   test('should allow clearing chat history', async ({ page }) => {
     // Send a test message first
-    await chatPage.sendMessage("Test message for clearing");
+    await chatPage.sendMessage('Test message for clearing');
     await chatPage.waitForAIResponse();
     
     // Then clear chat
@@ -63,11 +63,11 @@ test.describe('Chat Interface E2E Tests', () => {
 
   test('should handle special ACIM queries', async ({ page }) => {
     const specialQueries = [
-      "Show me today's workbook lesson",
-      "What does the Course say about the Holy Spirit?",
-      "Help me understand forgiveness",
-      "Explain the difference between perception and knowledge",
-      "What is a miracle according to ACIM?"
+      'Show me today\'s workbook lesson',
+      'What does the Course say about the Holy Spirit?',
+      'Help me understand forgiveness',
+      'Explain the difference between perception and knowledge',
+      'What is a miracle according to ACIM?'
     ];
 
     for (const query of specialQueries) {
@@ -77,7 +77,7 @@ test.describe('Chat Interface E2E Tests', () => {
       // Verify response quality
       expect(response.length).toBeGreaterThan(50);
       expect(response).not.toContain('error');
-      expect(response).not.toContain("I don't know");
+      expect(response).not.toContain('I don\'t know');
       
       // Verify ACIM-specific content
       expect(response.toLowerCase()).toMatch(/course|acim|lesson|holy spirit|forgiveness|miracle/);
@@ -86,11 +86,11 @@ test.describe('Chat Interface E2E Tests', () => {
 
   test('should maintain conversation context', async ({ page }) => {
     // Send initial message
-    await chatPage.sendMessage("Tell me about ACIM lesson 1");
+    await chatPage.sendMessage('Tell me about ACIM lesson 1');
     const firstResponse = await chatPage.waitForAIResponse();
     
     // Send follow-up that requires context
-    await chatPage.sendMessage("Can you explain that in simpler terms?");
+    await chatPage.sendMessage('Can you explain that in simpler terms?');
     const secondResponse = await chatPage.waitForAIResponse();
     
     expect(firstResponse.length).toBeGreaterThan(20);
@@ -101,11 +101,11 @@ test.describe('Chat Interface E2E Tests', () => {
   test('should handle long conversations', async ({ page }) => {
     // Simulate a longer conversation
     const conversationFlow = [
-      "What is ACIM?",
-      "How many lessons are in the workbook?",
-      "What's the main goal of the course?",
-      "Tell me about forgiveness",
-      "How do I practice daily lessons?"
+      'What is ACIM?',
+      'How many lessons are in the workbook?',
+      'What\'s the main goal of the course?',
+      'Tell me about forgiveness',
+      'How do I practice daily lessons?'
     ];
 
     for (let i = 0; i < conversationFlow.length; i++) {
@@ -122,7 +122,7 @@ test.describe('Chat Interface E2E Tests', () => {
     // Test offline scenario simulation
     await page.context().setOffline(true);
     
-    await chatPage.sendMessage("Test message while offline");
+    await chatPage.sendMessage('Test message while offline');
     
     // Wait a bit for error handling
     await page.waitForTimeout(3000);
@@ -131,7 +131,7 @@ test.describe('Chat Interface E2E Tests', () => {
     await page.context().setOffline(false);
     
     // Should recover and work normally
-    await chatPage.sendMessage("Test message after reconnection");
+    await chatPage.sendMessage('Test message after reconnection');
     const response = await chatPage.waitForAIResponse();
     
     expect(response.length).toBeGreaterThan(0);

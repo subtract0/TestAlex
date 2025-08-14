@@ -76,11 +76,11 @@ export class ChatPage {
   async testACIMConversation(): Promise<void> {
     // Test different types of ACIM queries
     const acimQueries = [
-      "What is lesson 1 about?",
-      "Explain forgiveness according to ACIM",
-      "Tell me about the Holy Spirit",
-      "How do I practice today's lesson?",
-      "What does ACIM say about miracles?"
+      'What is lesson 1 about?',
+      'Explain forgiveness according to ACIM',
+      'Tell me about the Holy Spirit',
+      'How do I practice today\'s lesson?',
+      'What does ACIM say about miracles?'
     ];
 
     for (const query of acimQueries) {
@@ -128,9 +128,9 @@ export class ChatPage {
     
     // Send multiple messages quickly
     const messages = [
-      "Test message 1",
-      "Test message 2", 
-      "Test message 3"
+      'Test message 1',
+      'Test message 2', 
+      'Test message 3'
     ];
     
     for (const msg of messages) {
@@ -154,7 +154,7 @@ export class ChatPage {
    */
   async testErrorHandling(): Promise<void> {
     // Test very long message
-    const longMessage = "A".repeat(5000);
+    const longMessage = 'A'.repeat(5000);
     await this.messageInput.fill(longMessage);
     await this.sendButton.click();
     
@@ -162,7 +162,7 @@ export class ChatPage {
     await this.page.waitForTimeout(2000);
     
     // Test empty message
-    await this.messageInput.fill("");
+    await this.messageInput.fill('');
     const isDisabled = await this.sendButton.isDisabled();
     expect(isDisabled).toBeTruthy(); // Send button should be disabled for empty messages
   }
@@ -218,7 +218,7 @@ export class ChatPage {
     await expect(this.sendButton).toBeVisible();
     
     // Test mobile-specific interactions
-    await this.sendMessage("Mobile test message");
+    await this.sendMessage('Mobile test message');
     const response = await this.waitForAIResponse();
     expect(response.length).toBeGreaterThan(0);
   }

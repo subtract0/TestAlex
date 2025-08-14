@@ -138,7 +138,7 @@ export class TestHelpers {
       offline: false,
       downloadThroughput: 200 * 1024 / 8, // 200kb/s
       uploadThroughput: 200 * 1024 / 8,
-      latency: 100,
+      latency: 100
     });
   }
 
@@ -151,7 +151,7 @@ export class TestHelpers {
       offline: false,
       downloadThroughput: -1,
       uploadThroughput: -1,
-      latency: 0,
+      latency: 0
     });
   }
 }

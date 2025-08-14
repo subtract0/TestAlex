@@ -12,7 +12,7 @@ const path = require('path');
 // ACIM Lesson Data (sample - would be extended to all 365 lessons)
 const ACIM_LESSONS = {
   1: {
-    title: "Nothing I see means anything",
+    title: 'Nothing I see means anything',
     content: `The first lesson of A Course in Miracles begins our journey toward true vision. When the Course states "Nothing I see in this room [on this street, from this window, in this place] means anything," it's not asking us to dismiss the world but to recognize that our interpretations give everything its meaning.
 
 This lesson challenges our fundamental assumptions about reality. We believe we see objects, people, and situations that have inherent meaning, but the Course teaches us that meaning is something we assign, not something that exists independently.
@@ -35,7 +35,7 @@ Many students find this first lesson challenging. The ego mind rebels against th
 The power of this lesson lies not in understanding it intellectually, but in practicing it with willingness. Each time you apply the idea, you're taking a step away from the ego's world of separate meanings toward the unified vision of love.`
   },
   2: {
-    title: "I have given everything I see all the meaning that it has for me",
+    title: 'I have given everything I see all the meaning that it has for me',
     content: `Today's lesson builds directly on yesterday's recognition that nothing we see has inherent meaning. Now we take responsibility for the meanings we've assigned to everything in our experience.
 
 This is perhaps one of the most liberating recognitions in the Course: you are not at the mercy of external circumstances because you are the one giving them their meaning. The situation itself is neutral - your interpretation makes it "good" or "bad," "threatening" or "safe."
@@ -62,14 +62,14 @@ CourseGPT can help you identify the meanings you've unconsciously assigned to pe
 };
 
 const SEO_KEYWORDS = [
-  "ACIM lesson",
-  "A Course in Miracles",
-  "daily spiritual guidance",
-  "spiritual practice",
-  "inner peace",
-  "forgiveness practice",
-  "CourseGPT",
-  "spiritual awakening"
+  'ACIM lesson',
+  'A Course in Miracles',
+  'daily spiritual guidance',
+  'spiritual practice',
+  'inner peace',
+  'forgiveness practice',
+  'CourseGPT',
+  'spiritual awakening'
 ];
 
 function getCurrentDate() {

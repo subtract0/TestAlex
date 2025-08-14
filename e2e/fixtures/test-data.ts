@@ -22,31 +22,31 @@ export const TestUsers = {
 
 export const TestMessages = {
   acimQuestions: [
-    "What is lesson 1 of ACIM?",
-    "Tell me about forgiveness in the Course",
-    "What does the Holy Spirit teach us?",
-    "How do I practice today's lesson?",
-    "Explain the concept of miracles in ACIM",
-    "What is the difference between perception and knowledge?",
-    "How does ACIM define the ego?",
-    "What is the purpose of the workbook?",
-    "Tell me about the manual for teachers",
-    "What does ACIM say about fear?"
+    'What is lesson 1 of ACIM?',
+    'Tell me about forgiveness in the Course',
+    'What does the Holy Spirit teach us?',
+    'How do I practice today\'s lesson?',
+    'Explain the concept of miracles in ACIM',
+    'What is the difference between perception and knowledge?',
+    'How does ACIM define the ego?',
+    'What is the purpose of the workbook?',
+    'Tell me about the manual for teachers',
+    'What does ACIM say about fear?'
   ],
   generalQuestions: [
-    "Hello",
-    "How are you?",
-    "What can you help me with?",
-    "Tell me a joke",
-    "What's the weather like?"
+    'Hello',
+    'How are you?',
+    'What can you help me with?',
+    'Tell me a joke',
+    'What\'s the weather like?'
   ],
   invalidInputs: [
-    "", // empty message
-    "A".repeat(5000), // very long message
-    "<script>alert('xss')</script>", // potential XSS
-    "SELECT * FROM users", // SQL injection attempt
-    "\n\n\n", // just newlines
-    "   ", // just spaces
+    '', // empty message
+    'A'.repeat(5000), // very long message
+    '<script>alert(\'xss\')</script>', // potential XSS
+    'SELECT * FROM users', // SQL injection attempt
+    '\n\n\n', // just newlines
+    '   ' // just spaces
   ]
 };
 
@@ -80,29 +80,29 @@ export const PaymentTestData = {
 export const BlogTestData = {
   samplePosts: [
     {
-      title: "Daily ACIM Lesson: Finding Peace",
-      slug: "daily-acim-lesson-finding-peace",
-      excerpt: "Today's lesson from A Course in Miracles teaches us about finding inner peace through forgiveness.",
-      content: "A Course in Miracles lesson about peace and forgiveness...",
-      date: "2024-01-15",
-      tags: ["acim", "peace", "forgiveness", "daily-lesson"]
+      title: 'Daily ACIM Lesson: Finding Peace',
+      slug: 'daily-acim-lesson-finding-peace',
+      excerpt: 'Today\'s lesson from A Course in Miracles teaches us about finding inner peace through forgiveness.',
+      content: 'A Course in Miracles lesson about peace and forgiveness...',
+      date: '2024-01-15',
+      tags: ['acim', 'peace', 'forgiveness', 'daily-lesson']
     },
     {
-      title: "Understanding the Holy Spirit's Voice",
-      slug: "understanding-holy-spirit-voice", 
-      excerpt: "Learn how to distinguish between the ego's voice and the Holy Spirit's guidance.",
-      content: "The Holy Spirit speaks to us in ways that bring peace...",
-      date: "2024-01-14",
-      tags: ["holy-spirit", "guidance", "acim", "spiritual-practice"]
+      title: 'Understanding the Holy Spirit\'s Voice',
+      slug: 'understanding-holy-spirit-voice', 
+      excerpt: 'Learn how to distinguish between the ego\'s voice and the Holy Spirit\'s guidance.',
+      content: 'The Holy Spirit speaks to us in ways that bring peace...',
+      date: '2024-01-14',
+      tags: ['holy-spirit', 'guidance', 'acim', 'spiritual-practice']
     }
   ],
   ctaVariations: [
-    "Start with CourseGPT",
-    "Try CourseGPT Free",
-    "Begin Your ACIM Journey",
-    "Access CourseGPT Now",
-    "Start Learning ACIM",
-    "Get CourseGPT"
+    'Start with CourseGPT',
+    'Try CourseGPT Free',
+    'Begin Your ACIM Journey',
+    'Access CourseGPT Now',
+    'Start Learning ACIM',
+    'Get CourseGPT'
   ]
 };
 
