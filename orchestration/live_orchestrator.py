@@ -14,6 +14,15 @@ from pathlib import Path
 import openai
 from dotenv import load_dotenv
 
+# Import Firebase Admin SDK
+try:
+    import firebase_admin
+    from firebase_admin import credentials, firestore
+    FIREBASE_AVAILABLE = True
+except ImportError:
+    logger.warning("Firebase Admin SDK not available - orchestration will use local storage only")
+    FIREBASE_AVAILABLE = False
+
 # Load environment variables
 load_dotenv()
 
@@ -35,6 +44,7 @@ class LiveOrchestrationSystem:
         self._load_environment()
         self._setup_openai_client()
         self._load_agents_registry()
+        self._setup_firebase()
         
     def _load_environment(self):
         """Load and validate environment variables."""
@@ -306,7 +316,7 @@ Focus on delivering practical, high-value solutions that align with ACIM princip
 
             # Call OpenAI API
             response = self.openai_client.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": agent_prompt},
                     {"role": "user", "content": user_message}
@@ -409,18 +419,146 @@ Focus on delivering practical, high-value solutions that align with ACIM princip
             
         return "; ".join(summary) if summary else "Qualitative improvements"
         
+    def _setup_firebase(self):
+        """Initialize Firebase Admin SDK if available."""
+        self.db = None
+        
+        if not FIREBASE_AVAILABLE:
+            logger.info("🔧 Firebase not available - using local storage only")
+            return
+            
+        try:
+            # Initialize Firebase Admin if not already done
+            if not firebase_admin._apps:
+                firebase_admin.initialize_app()
+                logger.info("🔥 Firebase Admin SDK initialized")
+            
+            # Get Firestore client
+            self.db = firestore.client()
+            logger.info("✅ Firestore client connected")
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Firebase initialization failed: {e}")
+            logger.info("📁 Falling back to local storage")
+            self.db = None
+    
     async def save_cycle_results(self, cycle_summary: Dict[str, Any]):
-        """Save orchestration results to local storage."""
-        # Create results directory
+        """Save orchestration results to Firebase and local storage."""
+        # Always save locally as backup
         results_dir = self.project_root / "orchestration" / "results"
         results_dir.mkdir(parents=True, exist_ok=True)
         
-        # Save cycle results
         cycle_file = results_dir / f"cycle_{cycle_summary['cycle_id']}.json"
         with open(cycle_file, 'w') as f:
             json.dump(cycle_summary, f, indent=2)
             
-        logger.info(f"💾 Cycle results saved to {cycle_file}")
+        logger.info(f"💾 Local backup saved to {cycle_file}")
+        
+        # Save to Firebase if available
+        if self.db:
+            try:
+                # Save to orchestration_cycles collection
+                doc_ref = self.db.collection('orchestration_cycles').document(cycle_summary['cycle_id'])
+                doc_ref.set(cycle_summary)
+                
+                # Also save metrics to separate collection for analytics
+                metrics_doc = {
+                    'timestamp': cycle_summary['timestamp'],
+                    'cycle_id': cycle_summary['cycle_id'],
+                    'metrics': cycle_summary['metrics'],
+                    'opportunities_identified': cycle_summary['opportunities_identified'],
+                    'tasks_executed': cycle_summary['tasks_executed'],
+                    'success_rate': cycle_summary['success_rate'],
+                    'total_potential_value': cycle_summary['total_potential_value']
+                }
+                
+                self.db.collection('orchestration_metrics').document(cycle_summary['cycle_id']).set(metrics_doc)
+                
+                logger.info(f"🔥 Cycle results saved to Firebase")
+                
+            except Exception as e:
+                logger.error(f"❌ Failed to save to Firebase: {e}")
+                logger.info("📁 Results saved locally only")
+        else:
+            logger.info("📄 Cycle results saved locally (Firebase not available)")
+    
+    async def save_task_result(self, task_result: Dict[str, Any]):
+        """Save individual task results to Firebase."""
+        if self.db:
+            try:
+                # Save to orchestration_tasks collection
+                doc_ref = self.db.collection('orchestration_tasks').document(task_result['task_id'])
+                doc_ref.set(task_result)
+                
+                logger.info(f"🔥 Task result saved to Firebase: {task_result['task_id']}")
+                
+            except Exception as e:
+                logger.error(f"❌ Failed to save task to Firebase: {e}")
+    
+    async def get_recent_cycles(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get recent orchestration cycles from Firebase."""
+        if not self.db:
+            logger.warning("Firebase not available - cannot fetch recent cycles")
+            return []
+            
+        try:
+            # Query recent cycles ordered by timestamp
+            cycles_ref = self.db.collection('orchestration_cycles')
+            query = cycles_ref.order_by('timestamp', direction=firestore.Query.DESCENDING).limit(limit)
+            
+            docs = query.stream()
+            cycles = [doc.to_dict() for doc in docs]
+            
+            logger.info(f"📊 Retrieved {len(cycles)} recent orchestration cycles")
+            return cycles
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to fetch recent cycles: {e}")
+            return []
+    
+    async def get_orchestration_metrics(self, days: int = 7) -> Dict[str, Any]:
+        """Get orchestration performance metrics from Firebase."""
+        if not self.db:
+            logger.warning("Firebase not available - cannot fetch metrics")
+            return {}
+            
+        try:
+            # Calculate date range
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=days)
+            
+            # Query metrics within date range
+            metrics_ref = self.db.collection('orchestration_metrics')
+            query = metrics_ref.where('timestamp', '>=', start_date.isoformat()).where('timestamp', '<=', end_date.isoformat())
+            
+            docs = query.stream()
+            all_metrics = [doc.to_dict() for doc in docs]
+            
+            if not all_metrics:
+                return {'total_cycles': 0, 'average_success_rate': 0, 'total_opportunities': 0}
+            
+            # Aggregate metrics
+            total_cycles = len(all_metrics)
+            total_opportunities = sum(m.get('opportunities_identified', 0) for m in all_metrics)
+            total_tasks = sum(m.get('tasks_executed', 0) for m in all_metrics)
+            average_success_rate = sum(m.get('success_rate', 0) for m in all_metrics) / total_cycles
+            
+            summary = {
+                'total_cycles': total_cycles,
+                'total_opportunities': total_opportunities,
+                'total_tasks_executed': total_tasks,
+                'average_success_rate': average_success_rate,
+                'date_range_days': days,
+                'period_start': start_date.isoformat(),
+                'period_end': end_date.isoformat()
+            }
+            
+            logger.info(f"📈 Orchestration metrics calculated for {days} days: {total_cycles} cycles, {average_success_rate:.2%} success rate")
+            return summary
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to calculate orchestration metrics: {e}")
+            return {}
 
 
 async def main():

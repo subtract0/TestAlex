@@ -195,7 +195,14 @@ exports.chatWithAssistant = onCall({
       );
 
       if (assistantMessage) {
-        const response = assistantMessage.content[0]?.text?.value || "No response generated";
+        let response = assistantMessage.content[0]?.text?.value || "No response generated";
+        
+        // Clean up HTML tags that should not be displayed
+        response = response
+          .replace(/\*"section-break"\*>|"section-break">|<section-break>/gi, '\n\n---\n\n')
+          .replace(/<\/?[^>]+(>|$)/g, '') // Remove any remaining HTML tags
+          .replace(/\n{3,}/g, '\n\n') // Clean up excessive line breaks
+          .trim();
 
         // Update message document if we created one
         if (messageRef) {
