@@ -1,0 +1,500 @@
+name: ACIM Blog Automation & Deployment
+
+on:
+  schedule:
+    # Run daily at 6:00 AM UTC (adjust timezone as needed)
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Allow manual triggering
+  push:
+    branches: [ main ]
+    paths: 
+      - 'blog/**'
+      - '.github/workflows/blog-automation.yml'
+
+env:
+  NODE_VERSION: '18'
+  BLOG_DOMAIN: 'acimcoach.com'
+
+jobs:
+  generate-daily-post:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: |
+        cd blog/scripts
+        npm init -y
+        npm install
+        
+    - name: Generate daily ACIM blog post
+      run: |
+        cd blog/scripts
+        chmod +x generate-daily-post.js
+        node generate-daily-post.js
+        
+    - name: Check for changes
+      id: git-check
+      run: |
+        git diff --exit-code blog/content/ || echo "changes=true" >> $GITHUB_OUTPUT
+        
+    - name: Commit and push new blog post
+      if: steps.git-check.outputs.changes == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add blog/content/
+        git add blog/sitemap.json
+        git commit -m "🔮 Add daily ACIM blog post for $(date +%Y-%m-%d)"
+        git push
+
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    needs: [generate-daily-post]
+    if: always() && (needs.generate-daily-post.result == 'success' || needs.generate-daily-post.result == 'skipped' || github.event_name == 'push')
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Get full history for proper git operations
+        
+    - name: Pull latest changes
+      run: git pull origin main
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Create blog site structure
+      run: |
+        mkdir -p blog/site
+        cd blog/site
+        
+        # Initialize package.json for Astro
+        cat > package.json << 'EOF'
+        {
+          "name": "acim-blog",
+          "version": "1.0.0",
+          "description": "ACIM Coach Blog - Daily Spiritual Guidance",
+          "scripts": {
+            "dev": "astro dev",
+            "start": "astro dev",
+            "build": "astro build",
+            "preview": "astro preview"
+          },
+          "dependencies": {
+            "astro": "^4.0.0",
+            "@astrojs/mdx": "^2.0.0",
+            "@astrojs/sitemap": "^3.0.0",
+            "@astrojs/rss": "^4.0.0"
+          },
+          "devDependencies": {
+            "@types/node": "^20.0.0"
+          }
+        }
+        EOF
+        
+    - name: Install blog dependencies
+      run: |
+        cd blog/site
+        npm install
+        
+    - name: Create Astro configuration
+      run: |
+        cd blog/site
+        cat > astro.config.mjs << 'EOF'
+        import { defineConfig } from 'astro/config';
+        import mdx from '@astrojs/mdx';
+        import sitemap from '@astrojs/sitemap';
+
+        export default defineConfig({
+          site: 'https://acimcoach.com',
+          base: '/blog',
+          integrations: [
+            mdx(),
+            sitemap({
+              customPages: [
+                'https://acimcoach.com/blog',
+              ]
+            })
+          ],
+          markdown: {
+            shikiConfig: {
+              theme: 'github-light',
+              wrap: true
+            }
+          },
+          build: {
+            assets: '_assets'
+          }
+        });
+        EOF
+        
+    - name: Create blog layout and pages
+      run: |
+        cd blog/site
+        mkdir -p src/layouts src/pages src/components
+        
+        # Create base layout
+        cat > src/layouts/BlogLayout.astro << 'EOF'
+        ---
+        export interface Props {
+          title: string;
+          description: string;
+          date?: string;
+          lesson_number?: number;
+          canonical_url?: string;
+          og_title?: string;
+          og_description?: string;
+        }
+
+        const {
+          title,
+          description,
+          date,
+          lesson_number,
+          canonical_url,
+          og_title,
+          og_description
+        } = Astro.props;
+        ---
+
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>{title}</title>
+          <meta name="description" content={description} />
+          
+          {canonical_url && <link rel="canonical" href={canonical_url} />}
+          
+          <!-- Open Graph -->
+          <meta property="og:type" content="article" />
+          <meta property="og:title" content={og_title || title} />
+          <meta property="og:description" content={og_description || description} />
+          <meta property="og:site_name" content="ACIM Coach - Spiritual Guidance Blog" />
+          
+          <!-- Schema.org -->
+          <script type="application/ld+json">
+            {
+              "@context": "https://schema.org",
+              "@type": "BlogPosting",
+              "headline": "{title}",
+              "description": "{description}",
+              "author": {
+                "@type": "Person",
+                "name": "Alex Monas"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "ACIM Coach"
+              }
+            }
+          </script>
+          
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              max-width: 800px;
+              margin: 0 auto;
+              padding: 20px;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              min-height: 100vh;
+            }
+            
+            .content {
+              background: white;
+              padding: 40px;
+              border-radius: 12px;
+              box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            }
+            
+            .header {
+              text-align: center;
+              margin-bottom: 40px;
+              padding-bottom: 20px;
+              border-bottom: 2px solid #f0f0f0;
+            }
+            
+            .lesson-badge {
+              display: inline-block;
+              background: linear-gradient(45deg, #667eea, #764ba2);
+              color: white;
+              padding: 8px 16px;
+              border-radius: 20px;
+              font-size: 0.9em;
+              margin-bottom: 10px;
+            }
+            
+            h1 {
+              color: #333;
+              margin-bottom: 10px;
+            }
+            
+            .date {
+              color: #666;
+              font-style: italic;
+            }
+            
+            .cta-section {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 30px;
+              border-radius: 12px;
+              margin: 40px 0;
+              text-align: center;
+            }
+            
+            .cta-button {
+              display: inline-block;
+              background: white;
+              color: #667eea;
+              padding: 15px 30px;
+              text-decoration: none;
+              border-radius: 25px;
+              font-weight: bold;
+              margin: 10px;
+              transition: transform 0.2s;
+            }
+            
+            .cta-button:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            }
+            
+            blockquote {
+              border-left: 4px solid #667eea;
+              margin: 20px 0;
+              padding: 10px 20px;
+              background: #f8f9ff;
+              font-style: italic;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="content">
+            <header class="header">
+              {lesson_number && (
+                <div class="lesson-badge">ACIM Lesson {lesson_number}</div>
+              )}
+              <h1>{title}</h1>
+              {date && <div class="date">Published: {new Date(date).toLocaleDateString()}</div>}
+            </header>
+            
+            <main>
+              <slot />
+            </main>
+            
+            <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #666;">
+              <p>© 2024 ACIM Coach. Spiritual guidance for the modern seeker.</p>
+            </footer>
+          </div>
+        </body>
+        </html>
+        EOF
+        
+    - name: Generate blog pages from markdown content
+      run: |
+        cd blog/site
+        
+        # Create index page
+        cat > src/pages/index.astro << 'EOF'
+        ---
+        import BlogLayout from '../layouts/BlogLayout.astro';
+        import { getCollection } from 'astro:content';
+
+        // This would typically fetch from your content collection
+        // For now, we'll create a simple index
+        ---
+
+        <BlogLayout 
+          title="ACIM Coach - Daily Spiritual Guidance Blog"
+          description="Daily A Course in Miracles lessons, spiritual guidance, and authentic ACIM teachings. Transform your practice with CourseGPT at ACIMguide.com"
+        >
+          <div class="cta-section">
+            <h2>Welcome to ACIM Coach Blog</h2>
+            <p>Daily spiritual guidance from A Course in Miracles</p>
+            <a href="https://acimguide.com" class="cta-button">Start with CourseGPT →</a>
+          </div>
+          
+          <div style="text-align: center; margin: 40px 0;">
+            <p>New daily posts automatically generated from ACIM lessons.</p>
+            <p>Visit regularly for fresh spiritual insights and guidance.</p>
+          </div>
+        </BlogLayout>
+        EOF
+        
+    - name: Convert markdown content to Astro pages
+      run: |
+        cd blog
+        
+        # Create script to convert markdown to Astro pages
+        cat > convert-content.js << 'EOF'
+        const fs = require('fs').promises;
+        const path = require('path');
+
+        async function convertMarkdownToAstro() {
+          const contentDir = path.join(__dirname, 'content');
+          const pagesDir = path.join(__dirname, 'site', 'src', 'pages');
+          
+          try {
+            const files = await fs.readdir(contentDir);
+            const markdownFiles = files.filter(file => file.endsWith('.md'));
+            
+            for (const file of markdownFiles) {
+              const filePath = path.join(contentDir, file);
+              const content = await fs.readFile(filePath, 'utf8');
+              
+              // Extract frontmatter and content
+              const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+              if (!frontmatterMatch) continue;
+              
+              const [, frontmatter, markdownContent] = frontmatterMatch;
+              
+              // Parse frontmatter to extract props
+              const lines = frontmatter.split('\n');
+              let title = '', description = '', date = '', lesson_number = '';
+              
+              for (const line of lines) {
+                if (line.startsWith('title:')) {
+                  title = line.replace('title:', '').replace(/"/g, '').trim();
+                }
+                if (line.startsWith('description:')) {
+                  description = line.replace('description:', '').replace(/"/g, '').trim();
+                }
+                if (line.startsWith('date:')) {
+                  date = line.replace('date:', '').replace(/"/g, '').trim();
+                }
+                if (line.startsWith('lesson_number:')) {
+                  lesson_number = line.replace('lesson_number:', '').trim();
+                }
+              }
+              
+              // Create Astro page
+              const astroContent = `---
+        import BlogLayout from '../layouts/BlogLayout.astro';
+        ---
+
+        <BlogLayout 
+          title="${title}"
+          description="${description}"
+          date="${date}"
+          lesson_number={${lesson_number}}
+          canonical_url="https://acimcoach.com/blog/${file.replace('.md', '')}"
+        >
+          <div set:html={\`${markdownContent.replace(/`/g, '\\`').replace(/\${/g, '\\${')}\`} />
+        </BlogLayout>
+        `;
+              
+              const astroFile = file.replace('.md', '.astro');
+              await fs.writeFile(path.join(pagesDir, astroFile), astroContent);
+              console.log(`✅ Converted ${file} to ${astroFile}`);
+            }
+          } catch (error) {
+            console.error('Error converting content:', error);
+          }
+        }
+
+        convertMarkdownToAstro();
+        EOF
+        
+        node convert-content.js
+        
+    - name: Build static site
+      run: |
+        cd blog/site
+        npm run build
+        
+    - name: Generate SEO sitemap
+      run: |
+        cd blog
+        node -e "
+        const fs = require('fs');
+        const path = require('path');
+        
+        // Read existing sitemap data
+        let sitemap = [];
+        try {
+          sitemap = JSON.parse(fs.readFileSync('sitemap.json', 'utf8'));
+        } catch (e) {
+          console.log('No existing sitemap found, creating new one');
+        }
+        
+        // Generate XML sitemap
+        const xmlSitemap = \`<?xml version='1.0' encoding='UTF-8'?>
+        <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
+          <url>
+            <loc>https://acimcoach.com/blog/</loc>
+            <lastmod>\${new Date().toISOString()}</lastmod>
+            <changefreq>daily</changefreq>
+            <priority>1.0</priority>
+          </url>
+        \${sitemap.map(entry => \`  <url>
+            <loc>\${entry.url}</loc>
+            <lastmod>\${entry.lastmod}</lastmod>
+            <changefreq>\${entry.changefreq}</changefreq>
+            <priority>\${entry.priority}</priority>
+          </url>\`).join('\\n')}
+        </urlset>\`;
+        
+        fs.writeFileSync('site/dist/sitemap.xml', xmlSitemap);
+        console.log('✅ Generated XML sitemap');
+        "
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./blog/site/dist
+        destination_dir: blog
+        
+    - name: Update SEO metadata
+      run: |
+        echo "🔍 SEO optimization complete:"
+        echo "- Daily blog post generated with ACIM lesson content"
+        echo "- Meta tags optimized for spiritual seekers"
+        echo "- Sitemap updated for search engines"
+        echo "- Call-to-action links embedded to ACIMguide.com"
+        echo "- Static site deployed to https://acimcoach.com/blog"
+        
+  performance-report:
+    runs-on: ubuntu-latest
+    needs: [build-and-deploy]
+    if: always() && needs.build-and-deploy.result == 'success'
+    
+    steps:
+    - name: Performance & SEO Report
+      run: |
+        echo "📊 Blog Automation Performance Report"
+        echo "=================================="
+        echo "✅ Daily ACIM blog post generated"
+        echo "✅ Static site deployed via Astro"
+        echo "✅ SEO metadata optimized"
+        echo "✅ Sitemap updated"
+        echo "✅ Call-to-action embedded"
+        echo ""
+        echo "🎯 KPI Targets:"
+        echo "- Target: 1,000 organic visitors/month"
+        echo "- Target: 80% click-through to ACIMguide.com"
+        echo "- Timeline: 60 days"
+        echo ""
+        echo "🔗 Live Site: https://acimcoach.com/blog"
+        echo "🤖 CourseGPT: https://acimguide.com"

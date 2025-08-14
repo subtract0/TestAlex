@@ -1,13 +1,10 @@
 /**
- * ACIMguide Cloud Functions
- * Chat endpoint for CourseGPT Assistant with enhanced token management
+ * ACIM Guide Cloud Functions - Streamlined Version
+ * Real CourseGPT integration with robust error handling
  */
 
-/* eslint-disable max-len */
-
 require("dotenv").config();
-const {setGlobalOptions} = require("firebase-functions");
-const {onCall} = require("firebase-functions/v2/https");
+const {onCall} = require("firebase-functions/https");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
 const OpenAI = require("openai");
@@ -17,28 +14,10 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-// Get configuration from Firebase functions.config() (legacy format)
-const functions = require("firebase-functions");
-const config = functions.config();
+// Environment variables
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const ASSISTANT_ID = process.env.ASSISTANT_ID;
 
-// Initialize OpenAI client - try both new and legacy config formats
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || (config.openai && config.openai.key);
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-});
-
-// Configuration constants - try both new and legacy config formats
-const ASSISTANT_ID = process.env.ASSISTANT_ID || (config.assistant && config.assistant.id);
-const VECTOR_STORE_ID = process.env.VECTOR_STORE_ID || (config.vector && config.vector.store_id);
-const DAILY_OUT_TOKENS_CAP = parseInt(process.env.DAILY_OUT_TOKENS_CAP || (config.tokens && config.tokens.daily_cap)) || 10000;
-const RATE_LIMIT_RPM = 10; // Requests per minute per user
-
-// For cost control, set maximum containers
-setGlobalOptions({maxInstances: 10});
-
-/**
- * Validate environment variables on startup
- */
 if (!OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY environment variable is required");
 }
@@ -46,124 +25,84 @@ if (!ASSISTANT_ID) {
   throw new Error("ASSISTANT_ID environment variable is required");
 }
 
-logger.info("Cloud Functions initialized", {
-  assistantId: ASSISTANT_ID,
-  vectorStoreId: VECTOR_STORE_ID,
-  dailyTokenCap: DAILY_OUT_TOKENS_CAP,
-  rateLimitRpm: RATE_LIMIT_RPM,
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: OPENAI_API_KEY,
+});
+
+logger.info("ACIM Guide Functions initialized", {
+  hasApiKey: !!OPENAI_API_KEY,
+  hasAssistantId: !!ASSISTANT_ID,
+  timestamp: new Date().toISOString()
 });
 
 /**
- * Check rate limit for user
- * @param {string} userId - The user ID to check rate limits for
- * @return {Promise<number>} Current daily token usage
+ * Get or create thread for user
  */
-async function checkRateLimit(userId) {
-  const now = Date.now();
-  const windowStart = now - (60 * 1000); // 1 minute window
-
-  const rateLimitDoc = admin.firestore().collection("rateLimits").doc(userId);
-
-  return admin.firestore().runTransaction(async (transaction) => {
-    const doc = await transaction.get(rateLimitDoc);
-    const data = doc.exists ? doc.data() :
-      {requests: [], dailyTokens: 0, lastReset: now};
-
-    // Reset daily tokens if it's a new day
-    const dayStart = new Date().setHours(0, 0, 0, 0);
-    if (data.lastReset < dayStart) {
-      data.dailyTokens = 0;
-      data.lastReset = now;
-    }
-
-    // Filter requests within the current window
-    data.requests = (data.requests || []).filter((time) => time > windowStart);
-
-    // Check rate limit
-    if (data.requests.length >= RATE_LIMIT_RPM) {
-      throw new Error(
-          `Rate limit exceeded. Maximum ${RATE_LIMIT_RPM} requests per minute.`,
-      );
-    }
-
-    // Check daily token limit
-    if (data.dailyTokens >= DAILY_OUT_TOKENS_CAP) {
-      throw new Error(
-          `Daily token limit reached. Limit: ${DAILY_OUT_TOKENS_CAP} tokens.`,
-      );
-    }
-
-    // Add current request
-    data.requests.push(now);
-    transaction.set(rateLimitDoc, data);
-
-    return data.dailyTokens;
-  });
-}
-
-/**
- * Update token usage for user
- * @param {string} userId - The user ID
- * @param {number} tokenIn - Input tokens used
- * @param {number} tokenOut - Output tokens used
- * @return {Promise<void>}
- */
-async function updateTokenUsage(userId, tokenIn, tokenOut) {
-  const rateLimitDoc = admin.firestore().collection("rateLimits").doc(userId);
-
-  await admin.firestore().runTransaction(async (transaction) => {
-    const doc = await transaction.get(rateLimitDoc);
-    const data = doc.exists ? doc.data() : {dailyTokens: 0};
-
-    data.dailyTokens = (data.dailyTokens || 0) + tokenOut;
-    transaction.set(rateLimitDoc, data, {merge: true});
-  });
-}
-
-/**
- * Extract citations from assistant response
- * @param {Object} message - The assistant message object
- * @return {Array} Array of citation objects
- */
-function extractCitations(message) {
-  const citations = [];
-
-  // Look for file citations in the message annotations
-  if (message.content[0] && message.content[0].text && message.content[0].text.annotations) {
-    message.content[0].text.annotations.forEach((annotation) => {
-      if (annotation.type === "file_citation") {
-        citations.push({
-          type: "file",
-          fileId: annotation.file_citation.file_id,
-          text: annotation.text,
-        });
+async function getOrCreateThread(userId) {
+  try {
+    let existingThreadId = null;
+    
+    // Try to get existing thread from Firestore (optional)
+    try {
+      const userDoc = await admin.firestore().collection("users").doc(userId).get();
+      if (userDoc.exists && userDoc.data().threadId) {
+        existingThreadId = userDoc.data().threadId;
+        
+        // Verify thread still exists in OpenAI
+        try {
+          await openai.beta.threads.retrieve(existingThreadId);
+          logger.info("Using existing thread", {userId, threadId: existingThreadId});
+          return existingThreadId;
+        } catch (error) {
+          logger.warn("Existing thread not found in OpenAI, creating new one", {userId, oldThreadId: existingThreadId});
+          existingThreadId = null;
+        }
       }
-    });
+    } catch (firestoreError) {
+      logger.warn("Firestore unavailable for thread lookup, creating new thread", {
+        userId,
+        error: firestoreError.message
+      });
+    }
+    
+    // Create new thread
+    const thread = await openai.beta.threads.create();
+    logger.info("Created new OpenAI thread", {userId, threadId: thread.id});
+    
+    // Try to store thread ID in Firestore (optional)
+    try {
+      await admin.firestore().collection("users").doc(userId).set({
+        threadId: thread.id,
+        createdAt: new Date(),
+        lastActiveAt: new Date()
+      }, { merge: true });
+      logger.info("Thread ID stored in Firestore", {userId, threadId: thread.id});
+    } catch (firestoreError) {
+      logger.warn("Could not store thread in Firestore, continuing", {
+        userId,
+        threadId: thread.id,
+        error: firestoreError.message
+      });
+    }
+    
+    return thread.id;
+  } catch (error) {
+    logger.error("Critical error in thread management", {userId, error: error.message});
+    throw error;
   }
-
-  return citations;
 }
 
 /**
- * Detect language of user message for multilingual CourseGPT response
- * @param {string} message - User message to analyze
- * @return {string} Detected language code (e.g., 'en', 'de', 'es', 'fr')
+ * Chat with CourseGPT Assistant - Streamlined Version
  */
-function detectLanguage(message) {
-  // Temporarily default to English to resolve backend issues
-  // TODO: Implement more sophisticated language detection later
-  return 'en';
-}
-
-/**
- * Chat with CourseGPT Assistant - Enhanced with multilingual support
- * Responds in the user's detected language for authentic ACIM guidance
- */
-exports.chatWithAssistant = onCall(async (request) => {
+exports.chatWithAssistant = onCall({
+  memory: '512MB',
+  timeoutSeconds: 60,
+  maxInstances: 10
+}, async (request) => {
   const startTime = Date.now();
-  let tokenIn = 0;
-  let tokenOut = 0;
-
+  
   try {
     const {message, tone = "gentle"} = request.data;
     const userId = request.auth && request.auth.uid;
@@ -180,22 +119,15 @@ exports.chatWithAssistant = onCall(async (request) => {
       throw new Error("Message too long. Maximum 4000 characters.");
     }
 
-    // Detect user's language for multilingual response
-    const detectedLanguage = detectLanguage(message);
-
     logger.info("Chat request received", {
       userId,
       messageLength: message.length,
       tone,
-      detectedLanguage,
       timestamp: startTime,
     });
 
-    // Check rate limits and daily token usage
-    const currentDailyTokens = await checkRateLimit(userId);
-
     // Get or create thread for user
-    let userThreadId = await getOrCreateThread(userId);
+    const userThreadId = await getOrCreateThread(userId);
     
     if (!userThreadId) {
       throw new Error("Failed to create or retrieve thread ID");
@@ -203,24 +135,25 @@ exports.chatWithAssistant = onCall(async (request) => {
 
     logger.info("Thread ID confirmed", {userId, threadId: userThreadId});
 
-    // Create message document in Firestore first (for streaming)
+    // Create message document in Firestore (for real-time updates)
     const messageDoc = {
       userId,
       threadId: userThreadId,
       userMessage: message,
-      assistantResponse: "", // Will be updated as we stream
+      assistantResponse: "",
       tone,
-      detectedLanguage,
       status: "processing",
       timestamp: new Date(),
-      tokenIn: 0,
-      tokenOut: 0,
-      citations: [],
       startTime: startTime,
     };
 
-    const messageRef = await admin.firestore().collection("messages").add(messageDoc);
-    logger.info("Message document created", {messageId: messageRef.id});
+    let messageRef;
+    try {
+      messageRef = await admin.firestore().collection("messages").add(messageDoc);
+      logger.info("Message document created", {messageId: messageRef.id});
+    } catch (firestoreError) {
+      logger.warn("Firestore write failed, continuing without storage", {error: firestoreError.message});
+    }
 
     // Add user message to OpenAI thread
     await openai.beta.threads.messages.create(userThreadId, {
@@ -235,44 +168,19 @@ exports.chatWithAssistant = onCall(async (request) => {
 
     logger.info("Assistant run started", {runId: run.id, threadId: userThreadId});
 
-    // Poll for completion with detailed status tracking
+    // Poll for completion
     let runStatus = run;
     let pollCount = 0;
-    const maxPolls = 120; // 2 minutes timeout
+    const maxPolls = 60; // 1 minute timeout for streamlined version
 
     while (["queued", "in_progress"].includes(runStatus.status) && pollCount < maxPolls) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Store parameters in local variables to prevent scoping issues
-      const currentThreadId = userThreadId;
-      const currentRunId = run.id;
-      
-      // Ensure parameters are still valid before making API call
-      if (!currentThreadId) {
-        throw new Error("Thread ID became undefined during polling");
-      }
-      if (!currentRunId) {
-        throw new Error("Run ID became undefined during polling");
-      }
-      
-      logger.info("Polling run status", {threadId: currentThreadId, runId: currentRunId, pollCount});
-      
-      // Debug log to verify parameters before API call
-      logger.info("API call parameters", {
-        param1_threadId: currentThreadId,
-        param2_runId: currentRunId,
-        threadIdType: typeof currentThreadId,
-        runIdType: typeof currentRunId
-      });
-      
-      // Fix: Use correct OpenAI v4 SDK syntax with object parameters
-      runStatus = await openai.beta.threads.runs.retrieve(currentThreadId, currentRunId);
+      runStatus = await openai.beta.threads.runs.retrieve(userThreadId, run.id);
       pollCount++;
 
       if (pollCount % 10 === 0) {
         logger.info("Run status update", {
           runId: run.id,
-          threadId: userThreadId,
           status: runStatus.status,
           pollCount,
         });
@@ -287,124 +195,65 @@ exports.chatWithAssistant = onCall(async (request) => {
       );
 
       if (assistantMessage) {
-        const response = (assistantMessage.content[0] && assistantMessage.content[0].text && assistantMessage.content[0].text.value) || "No response generated";
-        const citations = extractCitations(assistantMessage);
+        const response = assistantMessage.content[0]?.text?.value || "No response generated";
 
-        // Estimate token usage (rough approximation: 1 token ≈ 4 characters)
-        tokenIn = Math.ceil(message.length / 4);
-        tokenOut = Math.ceil(response.length / 4);
-
-        // Update token usage
-        await updateTokenUsage(userId, tokenIn, tokenOut);
-
-        // Update message document with final response
-        await messageRef.update({
-          assistantResponse: response,
-          text: response, // compatibility field for frontend listeners expecting `text`
-          status: "completed",
-          tokenIn: tokenIn,
-          tokenOut: tokenOut,
-          citations: citations,
-          completedAt: new Date(),
-          latency: Date.now() - startTime,
-          runId: run.id,
-        });
-
-        // Calculate remaining daily tokens
-        const limitRemaining = Math.max(0, DAILY_OUT_TOKENS_CAP - (currentDailyTokens + tokenOut));
+        // Update message document if we created one
+        if (messageRef) {
+          try {
+            await messageRef.update({
+              assistantResponse: response,
+              text: response, // compatibility field
+              status: "completed",
+              completedAt: new Date(),
+              latency: Date.now() - startTime,
+              runId: run.id,
+            });
+          } catch (updateError) {
+            logger.warn("Failed to update message document", {error: updateError.message});
+          }
+        }
 
         logger.info("Chat completed successfully", {
           userId,
-          messageId: messageRef.id,
-          tokenIn,
-          tokenOut,
-          limitRemaining,
+          messageId: messageRef?.id,
+          responseLength: response.length,
           latency: Date.now() - startTime,
-          citationsCount: citations.length,
         });
 
-        // Return response with actual CourseGPT content for immediate display
+        // Return response for immediate display
         return {
-          messageId: messageRef.id,
+          messageId: messageRef?.id,
           response: response,
-          tokenIn,
-          tokenOut,
-          limitRemaining,
-          citations: citations,
+          latency: Date.now() - startTime,
+          isPlaceholder: false
         };
+      } else {
+        throw new Error("No assistant response found");
       }
+    } else if (runStatus.status === "failed") {
+      logger.error("Assistant run failed", {
+        runId: run.id,
+        status: runStatus.status,
+        error: runStatus.last_error
+      });
+      throw new Error(`Assistant run failed: ${runStatus.last_error?.message || 'Unknown error'}`);
+    } else {
+      logger.error("Assistant run timed out", {runId: run.id, status: runStatus.status, pollCount});
+      throw new Error("Assistant response timed out");
     }
 
-    // Handle failed runs
-    await messageRef.update({
-      status: "failed",
-      error: `Assistant run failed with status: ${runStatus.status}`,
-      failedAt: new Date(),
-    });
-
-    logger.error("Assistant run failed", {
-      runId: run.id,
-      status: runStatus.status,
-      lastError: runStatus.last_error,
-    });
-
-    throw new Error(`Assistant run failed with status: ${runStatus.status}`);
   } catch (error) {
     logger.error("Chat function error", {
-      userId: request.auth && request.auth.uid,
       error: error.message,
       stack: error.stack,
-      latency: Date.now() - startTime,
+      userId: request.auth?.uid
     });
     throw error;
   }
 });
 
 /**
- * Get existing thread for user or create a new one
- * @param {string} userId - The user ID
- * @return {Promise<string>} Thread ID
- */
-async function getOrCreateThread(userId) {
-  try {
-    if (!userId) {
-      throw new Error("User ID is required for thread management");
-    }
-
-    // Check if user has existing thread
-    const userDoc = await admin.firestore().collection("users").doc(userId).get();
-
-    if (userDoc.exists && userDoc.data().threadId) {
-      const existingThreadId = userDoc.data().threadId;
-      logger.info("Using existing thread", {userId, threadId: existingThreadId});
-      return existingThreadId;
-    }
-
-    // Create new thread
-    const thread = await openai.beta.threads.create();
-    
-    if (!thread || !thread.id) {
-      throw new Error("Failed to create OpenAI thread - no thread ID returned");
-    }
-
-    // Store thread ID in user document
-    const firestore = admin.firestore();
-    await firestore.collection("users").doc(userId).set({
-      threadId: thread.id,
-      createdAt: new Date(),
-    }, {merge: true});
-
-    logger.info("New thread created for user", {userId, threadId: thread.id});
-    return thread.id;
-  } catch (error) {
-    logger.error("Error managing thread", {userId, error: error.message, stack: error.stack});
-    throw new Error(`Thread management failed: ${error.message}`);
-  }
-}
-
-/**
- * Clear thread for user (delete and recreate)
- * Callable HTTPS Function as specified in specs.md
+ * Clear thread function
  */
 exports.clearThread = onCall(async (request) => {
   try {
@@ -416,48 +265,64 @@ exports.clearThread = onCall(async (request) => {
 
     logger.info("Clear thread request", {userId});
 
-    // Get user's current thread
-    const userDoc = await admin.firestore().collection("users").doc(userId).get();
-
-    if (userDoc.exists && userDoc.data().threadId) {
-      const oldThreadId = userDoc.data().threadId;
-
-      try {
-        // Delete old thread from OpenAI (if possible)
-        // Note: OpenAI doesn't have a delete thread endpoint yet, but we prepare for it
-        logger.info("Old thread cleared from records", {userId, oldThreadId});
-      } catch (error) {
-        logger.warn("Could not delete old thread from OpenAI", {error: error.message});
-      }
-    }
-
     // Create new thread
     const newThread = await openai.beta.threads.create();
+    logger.info("New thread created for clear", {userId, threadId: newThread.id});
+    
+    // Try to update user document with new thread ID
+    try {
+      await admin.firestore().collection("users").doc(userId).set({
+        threadId: newThread.id,
+        lastClearedAt: new Date(),
+        lastActiveAt: new Date()
+      }, { merge: true });
+      logger.info("Thread ID updated in Firestore", {userId, threadId: newThread.id});
+    } catch (firestoreError) {
+      logger.warn("Could not update user thread in Firestore", {
+        userId,
+        threadId: newThread.id,
+        error: firestoreError.message
+      });
+    }
 
-    // Update user document
-    await admin.firestore().collection("users").doc(userId).set({
-      threadId: newThread.id,
-      clearedAt: new Date(),
-    }, {merge: true});
+    // Try to clear user's messages (optional)
+    try {
+      const messagesQuery = admin.firestore().collection("messages").where("userId", "==", userId);
+      const messagesToDelete = await messagesQuery.get();
 
-    // Clear user's message history in Firestore
-    const messagesQuery = admin.firestore().collection("messages").where("userId", "==", userId);
-    const messagesToDelete = await messagesQuery.get();
-
-    const batch = admin.firestore().batch();
-    messagesToDelete.docs.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
-    await batch.commit();
+      if (!messagesToDelete.empty) {
+        const batch = admin.firestore().batch();
+        messagesToDelete.docs.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+        await batch.commit();
+        logger.info("Messages cleared from Firestore", {userId, count: messagesToDelete.size});
+      }
+    } catch (cleanupError) {
+      logger.warn("Message cleanup failed, continuing", {error: cleanupError.message});
+    }
 
     logger.info("Thread cleared successfully", {userId, newThreadId: newThread.id});
 
     return {
       threadId: newThread.id,
-      message: "Thread cleared and reset successfully",
+      message: "Thread cleared successfully"
     };
+
   } catch (error) {
-    logger.error("Clear thread error", {error: error.message, stack: error.stack});
+    logger.error("Clear thread error", {error: error.message});
     throw error;
   }
+});
+
+/**
+ * Health check function
+ */
+exports.healthCheck = onCall(async (request) => {
+  return {
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    version: "1.0.0-streamlined",
+    message: "ACIM Guide Functions are running with divine grace 🕊️"
+  };
 });

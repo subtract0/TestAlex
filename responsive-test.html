@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACIM Guide - Responsive Design Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .viewport-test {
+            margin-bottom: 40px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .viewport-header {
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+        
+        .viewport-frame {
+            position: relative;
+            background: white;
+            overflow: hidden;
+        }
+        
+        iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .device-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 10;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .features-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .features-list h3 {
+            color: #2196F3;
+            margin-top: 0;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .feature-check {
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🕊️ ACIM Guide - Responsive Design Showcase</h1>
+        <p>This page demonstrates the truly responsive design implementation across all device sizes.</p>
+        
+        <div class="test-grid">
+            <!-- Desktop 1366x768 -->
+            <div class="viewport-test">
+                <div class="viewport-header">💻 Desktop (1366×768)</div>
+                <div class="viewport-frame" style="width: 100%; height: 400px;">
+                    <div class="device-info">1366×768</div>
+                    <iframe src="index.html" style="transform: scale(0.4); transform-origin: 0 0; width: 250%; height: 250%;"></iframe>
+                </div>
+            </div>
+            
+            <!-- Tablet Portrait -->
+            <div class="viewport-test">
+                <div class="viewport-header">📱 Tablet Portrait (768×1024)</div>
+                <div class="viewport-frame" style="width: 100%; height: 400px;">
+                    <div class="device-info">768×1024</div>
+                    <iframe src="index.html" style="transform: scale(0.6); transform-origin: 0 0; width: 167%; height: 167%;"></iframe>
+                </div>
+            </div>
+            
+            <!-- Mobile Portrait -->
+            <div class="viewport-test">
+                <div class="viewport-header">📱 Mobile Portrait (375×667)</div>
+                <div class="viewport-frame" style="width: 100%; height: 400px;">
+                    <div class="device-info">375×667</div>
+                    <iframe src="index.html" style="transform: scale(0.8); transform-origin: 0 0; width: 125%; height: 125%;"></iframe>
+                </div>
+            </div>
+            
+            <!-- Small Mobile -->
+            <div class="viewport-test">
+                <div class="viewport-header">📱 Small Mobile (320×568)</div>
+                <div class="viewport-frame" style="width: 100%; height: 400px;">
+                    <div class="device-info">320×568</div>
+                    <iframe src="index.html" style="transform: scale(0.9); transform-origin: 0 0; width: 111%; height: 111%;"></iframe>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features-list">
+            <h3>🚀 Responsive Features Implemented</h3>
+            
+            <div class="feature-item">
+                <span class="feature-check">✅</span>
+                <span><strong>Mobile-First Design:</strong> Base styles optimized for mobile, progressively enhanced for larger screens</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">✅</span>
+                <span><strong>Flexible Grid Layout:</strong> Quick actions adapt from 1 column (mobile) to 4 columns (desktop)</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">✅</span>
+                <span><strong>Adaptive Typography:</strong> Fluid font scaling from 14px to 28px across all viewports</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">✅</span>
+                <span><strong>Touch-Optimized:</strong> 44px minimum touch targets for accessibility compliance</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">✅</span>
+                <span><strong>Viewport-Aware Status:</strong> Status indicator repositioned for optimal visibility on each device</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">✅</span>
+                <span><strong>Landscape Mode Support:</strong> Special optimizations for landscape orientation on mobile</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">✅</span>
+                <span><strong>iOS Safari Fixes:</strong> Proper 100vh handling and touch scrolling optimizations</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">✅</span>
+                <span><strong>High DPI Support:</strong> Crisp rendering on retina displays</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">✅</span>
+                <span><strong>Accessibility Ready:</strong> Support for reduced motion and high contrast preferences</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">✅</span>
+                <span><strong>Performance Optimized:</strong> Hardware acceleration and efficient CSS animations</span>
+            </div>
+        </div>
+        
+        <div class="features-list" style="background: #e8f4f8;">
+            <h3>📱 Breakpoint Strategy</h3>
+            
+            <div class="feature-item">
+                <span class="feature-check">📱</span>
+                <span><strong>320px - 375px:</strong> Small mobile phones (optimized spacing and stacked layout)</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">📱</span>
+                <span><strong>376px - 480px:</strong> Large mobile phones (2-column quick actions)</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">📱</span>
+                <span><strong>481px - 768px:</strong> Small tablets (enhanced padding and spacing)</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">📱</span>
+                <span><strong>769px - 1024px:</strong> Tablets portrait (desktop-like layout with mobile optimizations)</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">💻</span>
+                <span><strong>1025px - 1366px:</strong> Small laptops (compact design for standard laptop screens)</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-check">💻</span>
+                <span><strong>1367px+:</strong> Large screens (full desktop experience with maximum content width)</span>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px; padding: 20px; background: #f0f8ff; border-radius: 8px;">
+            <h3 style="color: #2196F3; margin: 0 0 10px 0;">🎯 Perfect for Every Device</h3>
+            <p style="margin: 0; color: #666;">Your ACIM Guide now provides an optimal experience on smartphones, tablets, laptops, and desktops.</p>
+        </div>
+    </div>
+</body>
+</html>

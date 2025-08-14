@@ -1,0 +1,74 @@
+{
+  "name": "acimguide-testing-suite",
+  "version": "1.0.0",
+  "description": "Comprehensive testing infrastructure for ACIMguide platform",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:mutant": "mutmut run",
+    "test:mutant:results": "mutmut results",
+    "install:playwright": "playwright install",
+    "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
+    "lint:fix": "eslint . --ext .js,.ts,.jsx,.tsx --fix"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@playwright/test": "^1.41.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "jest-coverage-badge": "^1.0.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "ts-jest": "^29.4.1",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "firebase": "^12.1.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "preset": "ts-jest",
+    "testMatch": [
+      "**/__tests__/**/*.(js|ts)",
+      "**/tests/**/*.test.(js|ts)",
+      "**/*.test.(js|ts)"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/e2e/",
+      "/playwright-report/",
+      "/test-results/"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 90,
+        "functions": 90,
+        "lines": 90,
+        "statements": 90
+      }
+    },
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html",
+      "json-summary"
+    ],
+    "collectCoverageFrom": [
+      "**/*.{js,ts}",
+      "!**/node_modules/**",
+      "!**/e2e/**",
+      "!**/coverage/**",
+      "!**/dist/**",
+      "!**/*.config.js",
+      "!**/*.test.js",
+      "!**/*.spec.js"
+    ]
+  }
+}

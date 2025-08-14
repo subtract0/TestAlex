@@ -407,7 +407,7 @@ Deliver concrete, implementable solutions.
         elif agent_capability.role == AgentRole.ACIM_SCHOLAR:
             context_parts.append("""
 **ACIM Context**
-- Source material: A Course in Miracles (Foundation for Inner Peace)
+- Source material: A Course in Miracles (public domain sources)
 - Core principles: Forgiveness, love, inner peace, spiritual awakening
 - Critical requirement: 100% accuracy in all ACIM references
 - User trust depends on doctrinal fidelity

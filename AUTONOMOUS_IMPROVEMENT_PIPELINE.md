@@ -51,7 +51,7 @@ Autonomous Improvement Pipeline Architecture
 **Responsibilities**:
 - Validate all content changes for ACIM fidelity
 - Review AI responses for doctrinal accuracy
-- Ensure exact text reproduction from Foundation for Inner Peace editions
+- Ensure exact text reproduction from authentic public domain ACIM source data
 - Prevent worldly advice contamination
 - Maintain citation accuracy (T-1.I.1:1-5 format)
 

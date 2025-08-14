@@ -13,6 +13,7 @@
       "premium",
       "high-value"
     ],
+    "capability_tags": [],
     "status": "pending",
     "created_at": "2025-08-12T09:51:03.871574",
     "assigned_at": null,
@@ -40,6 +41,7 @@
       "iap",
       "revenue"
     ],
+    "capability_tags": [],
     "status": "pending",
     "created_at": "2025-08-12T09:51:03.872491",
     "assigned_at": null,
@@ -66,6 +68,7 @@
       "revenue",
       "high-value"
     ],
+    "capability_tags": [],
     "status": "pending",
     "created_at": "2025-08-12T09:51:03.873493",
     "assigned_at": null,
@@ -92,6 +95,7 @@
       "firebase",
       "openai"
     ],
+    "capability_tags": [],
     "status": "pending",
     "created_at": "2025-08-12T09:51:03.874269",
     "assigned_at": null,
@@ -118,6 +122,7 @@
       "retention",
       "ai"
     ],
+    "capability_tags": [],
     "status": "pending",
     "created_at": "2025-08-12T09:51:03.875090",
     "assigned_at": null,
@@ -142,6 +147,7 @@
       "opportunity",
       "revenue_growth"
     ],
+    "capability_tags": [],
     "status": "pending",
     "created_at": "2025-08-12T09:51:03.876659",
     "assigned_at": null,
@@ -166,6 +172,7 @@
       "opportunity",
       "revenue_growth"
     ],
+    "capability_tags": [],
     "status": "pending",
     "created_at": "2025-08-12T09:51:03.877648",
     "assigned_at": null,
@@ -190,6 +197,7 @@
       "opportunity",
       "revenue_growth"
     ],
+    "capability_tags": [],
     "status": "pending",
     "created_at": "2025-08-12T09:51:03.878657",
     "assigned_at": null,
@@ -214,6 +222,7 @@
       "opportunity",
       "revenue_growth"
     ],
+    "capability_tags": [],
     "status": "pending",
     "created_at": "2025-08-12T09:51:03.879904",
     "assigned_at": null,
@@ -238,6 +247,7 @@
       "opportunity",
       "revenue_growth"
     ],
+    "capability_tags": [],
     "status": "pending",
     "created_at": "2025-08-12T09:51:03.883452",
     "assigned_at": null,
@@ -262,6 +272,7 @@
       "opportunity",
       "revenue_growth"
     ],
+    "capability_tags": [],
     "status": "pending",
     "created_at": "2025-08-12T09:51:03.884665",
     "assigned_at": null,
@@ -286,6 +297,7 @@
       "opportunity",
       "revenue_growth"
     ],
+    "capability_tags": [],
     "status": "pending",
     "created_at": "2025-08-12T09:51:03.886175",
     "assigned_at": null,
@@ -310,6 +322,7 @@
       "opportunity",
       "market_expansion"
     ],
+    "capability_tags": [],
     "status": "pending",
     "created_at": "2025-08-12T09:51:03.887767",
     "assigned_at": null,
@@ -321,5 +334,181 @@
       "opportunity_value": 75000,
       "opportunity_roi": 275
     }
+  },
+  "task_db6234ca": {
+    "id": "task_db6234ca",
+    "title": "Revenue Experiment: Copy Optimization",
+    "description": "\n            Conversion Optimization Experiment\n            \n            **Hypothesis:** Action-oriented CTAs will increase click-through rates\n            **Target Stage:** paid\n            **Expected Lift:** +10.5%\n            **Confidence:** 85.0%\n            \n            Execute A/B test to optimize paid conversion rate.\n            Target: +20% improvement in 2-week cycle.\n            \n            Success Metrics:\n            - Increase conversion rate by 10.5%\n            - Statistical significance >95%\n            - No negative impact on user experience\n            - Implement winning variant permanently\n            ",
+    "priority": "medium",
+    "category": "revenue",
+    "assignee": "ui_ux_designer",
+    "dependencies": [],
+    "tags": [
+      "revenue",
+      "conversion",
+      "experiment",
+      "copy"
+    ],
+    "capability_tags": [],
+    "status": "pending",
+    "created_at": "2025-08-12T22:29:48.042445",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 6,
+    "actual_hours": null,
+    "metadata": {
+      "experiment_id": "1c7fefbd-97bc-4269-b04e-9570603f3014",
+      "experiment_type": "copy",
+      "target_stage": "paid",
+      "expected_lift": 0.105,
+      "priority_score": 669.444662517479,
+      "revenue_potential": 181,
+      "value_category": "conversion_optimization"
+    }
+  },
+  "task_88b971c0": {
+    "id": "task_88b971c0",
+    "title": "Revenue Experiment: Pricing Optimization",
+    "description": "\n            Conversion Optimization Experiment\n            \n            **Hypothesis:** Longer trial period will increase conversion to paid\n            **Target Stage:** paid\n            **Expected Lift:** +17.5%\n            **Confidence:** 70.0%\n            \n            Execute A/B test to optimize paid conversion rate.\n            Target: +20% improvement in 2-week cycle.\n            \n            Success Metrics:\n            - Increase conversion rate by 17.5%\n            - Statistical significance >95%\n            - No negative impact on user experience\n            - Implement winning variant permanently\n            ",
+    "priority": "medium",
+    "category": "revenue",
+    "assignee": "product_manager",
+    "dependencies": [],
+    "tags": [
+      "revenue",
+      "conversion",
+      "experiment",
+      "pricing"
+    ],
+    "capability_tags": [],
+    "status": "pending",
+    "created_at": "2025-08-12T22:29:48.045168",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 8,
+    "actual_hours": null,
+    "metadata": {
+      "experiment_id": "df67b5f9-c6d1-4964-bff4-490ae8d20c4e",
+      "experiment_type": "pricing",
+      "target_stage": "paid",
+      "expected_lift": 0.175,
+      "priority_score": 547.3404786602797,
+      "revenue_potential": 301,
+      "value_category": "conversion_optimization"
+    }
+  },
+  "task_827be67f": {
+    "id": "task_827be67f",
+    "title": "Revenue Experiment: Copy Optimization",
+    "description": "\n            Conversion Optimization Experiment\n            \n            **Hypothesis:** Benefit-focused headlines will outperform feature-focused ones\n            **Target Stage:** paid\n            **Expected Lift:** +10.5%\n            **Confidence:** 85.0%\n            \n            Execute A/B test to optimize paid conversion rate.\n            Target: +20% improvement in 2-week cycle.\n            \n            Success Metrics:\n            - Increase conversion rate by 10.5%\n            - Statistical significance >95%\n            - No negative impact on user experience\n            - Implement winning variant permanently\n            ",
+    "priority": "medium",
+    "category": "revenue",
+    "assignee": "ui_ux_designer",
+    "dependencies": [],
+    "tags": [
+      "revenue",
+      "conversion",
+      "experiment",
+      "copy"
+    ],
+    "capability_tags": [],
+    "status": "pending",
+    "created_at": "2025-08-12T22:29:48.045801",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 12,
+    "actual_hours": null,
+    "metadata": {
+      "experiment_id": "814a5d8b-95ba-420e-bc16-1a3c221c5196",
+      "experiment_type": "copy",
+      "target_stage": "paid",
+      "expected_lift": 0.105,
+      "priority_score": 412.0915281509835,
+      "revenue_potential": 181,
+      "value_category": "conversion_optimization"
+    }
+  },
+  "task_44a95b72": {
+    "id": "task_44a95b72",
+    "title": "Revenue Experiment: Pricing Optimization",
+    "description": "\n            Conversion Optimization Experiment\n            \n            **Hypothesis:** Clearer value proposition and social proof will increase pricing page conversion\n            **Target Stage:** paid\n            **Expected Lift:** +17.5%\n            **Confidence:** 70.0%\n            \n            Execute A/B test to optimize paid conversion rate.\n            Target: +20% improvement in 2-week cycle.\n            \n            Success Metrics:\n            - Increase conversion rate by 17.5%\n            - Statistical significance >95%\n            - No negative impact on user experience\n            - Implement winning variant permanently\n            ",
+    "priority": "medium",
+    "category": "revenue",
+    "assignee": "product_manager",
+    "dependencies": [],
+    "tags": [
+      "revenue",
+      "conversion",
+      "experiment",
+      "pricing"
+    ],
+    "capability_tags": [],
+    "status": "pending",
+    "created_at": "2025-08-12T22:29:48.046416",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 16,
+    "actual_hours": null,
+    "metadata": {
+      "experiment_id": "3d465090-483e-4932-a6ef-9ace7d064f42",
+      "experiment_type": "pricing",
+      "target_stage": "paid",
+      "expected_lift": 0.175,
+      "priority_score": 336.92758625006786,
+      "revenue_potential": 301,
+      "value_category": "conversion_optimization"
+    }
+  },
+  "task_de792f9e": {
+    "id": "task_de792f9e",
+    "title": "Revenue Experiment: Onboarding Optimization",
+    "description": "\n            Conversion Optimization Experiment\n            \n            **Hypothesis:** Shorter onboarding will reduce abandonment\n            **Target Stage:** trial\n            **Expected Lift:** +33.0%\n            **Confidence:** 75.0%\n            \n            Execute A/B test to optimize trial conversion rate.\n            Target: +20% improvement in 2-week cycle.\n            \n            Success Metrics:\n            - Increase conversion rate by 33.0%\n            - Statistical significance >95%\n            - No negative impact on user experience\n            - Implement winning variant permanently\n            ",
+    "priority": "medium",
+    "category": "revenue",
+    "assignee": "ui_ux_designer",
+    "dependencies": [],
+    "tags": [
+      "revenue",
+      "conversion",
+      "experiment",
+      "onboarding"
+    ],
+    "capability_tags": [],
+    "status": "pending",
+    "created_at": "2025-08-12T22:29:48.047086",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": 24,
+    "actual_hours": null,
+    "metadata": {
+      "experiment_id": "0c1d0222-93bc-41fa-ab5c-97d3d9318b81",
+      "experiment_type": "onboarding",
+      "target_stage": "trial",
+      "expected_lift": 0.33,
+      "priority_score": 175.1326605423314,
+      "revenue_potential": 569,
+      "value_category": "conversion_optimization"
+    }
+  },
+  "task_1bfc4a65": {
+    "id": "task_1bfc4a65",
+    "title": "Critical ACIM Issue",
+    "description": "Critical content validation issue",
+    "priority": "critical",
+    "category": "content",
+    "assignee": null,
+    "dependencies": [],
+    "tags": [
+      "acim",
+      "critical"
+    ],
+    "capability_tags": [],
+    "status": "pending",
+    "created_at": "2025-08-14T15:38:32.597278",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": null,
+    "actual_hours": null,
+    "metadata": {}
   }
 }

@@ -43,7 +43,7 @@ ACIMguide System Architecture
 
 ### Absolute Requirements:
 
-1. **Exact Text Fidelity**: All Course quotations MUST be reproduced exactly as published in the original Foundation for Inner Peace editions, with no modifications, paraphrasing, or interpretation.
+1. **Exact Text Fidelity**: All Course quotations MUST be reproduced exactly as published in authentic public domain ACIM sources, with no modifications, paraphrasing, or interpretation.
 
 2. **No Worldly Advice**: Never provide practical life advice, psychological counseling, or problem-solving suggestions. The Course states: *"The ego will demand many answers that this course does not give. It does not recognize as questions the mere form of a question to which an answer is impossible."* (T-21.VII.12:8-9)
 
