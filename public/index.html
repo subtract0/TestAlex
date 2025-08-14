@@ -2,9 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACIMguide - AI Companion for A Course in Miracles</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ACIM Guide - Your AI Companion for A Course in Miracles</title>
+    <meta name="description" content="Experience authentic ACIM guidance through our AI companion. Get answers about forgiveness, peace, and spiritual awakening from A Course in Miracles.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="responsive.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* ACIM Guide Design System */
+        :root {
+            /* Colors - Divine Light Palette */
+            --primary-light: #E3F2FD;
+            --primary: #2196F3;
+            --primary-dark: #1976D2;
+            
+            --secondary-light: #F3E5F5;
+            --secondary: #9C27B0;
+            --secondary-dark: #7B1FA2;
+            
+            --accent-light: #FFF8E1;
+            --accent: #FFB300;
+            --accent-dark: #FF8F00;
+            
+            --white: #FFFFFF;
+            --light-gray: #F8F9FA;
+            --medium-gray: #6C757D;
+            --dark-gray: #343A40;
+            
+            --success: #28A745;
+            --warning: #FFC107;
+            --error: #DC3545;
+            --info: #17A2B8;
+            
+            /* Typography */
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-secondary: 'Playfair Display', Georgia, serif;
+            
+            /* Spacing */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-12: 3rem;
+            --space-16: 4rem;
+            
+            /* Transitions */
+            --duration-fast: 150ms;
+            --duration-normal: 300ms;
+            --duration-slow: 500ms;
+            --ease-out: cubic-bezier(0, 0, 0.2, 1);
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -12,357 +65,603 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: var(--font-primary);
+            background: #f8fafc;
             min-height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: stretch;
             justify-content: center;
-            padding: 20px;
+            padding: var(--space-2);
+            line-height: 1.6;
+            color: var(--dark-gray);
+            margin: 0;
         }
         
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            background: var(--white);
+            border-radius: var(--space-2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
+            height: calc(100vh - 16px);
+            max-height: calc(100vh - 16px);
             overflow: hidden;
+            transition: box-shadow var(--duration-normal) var(--ease-out);
+            display: flex;
+            flex-direction: column;
         }
         
+        .container:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08), 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Header - Optimized for Viewport */
         .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            padding: 30px;
+            background: #ffffff;
+            color: #1e3a8a;
+            padding: 24px 32px 20px 32px;
             text-align: center;
+            position: relative;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            flex-shrink: 0;
+        }
+        
+        .logo {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px auto;
+            display: block;
         }
         
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 300;
+            font-family: var(--font-primary);
+            font-size: 1.8rem;
+            margin: 0 0 6px 0;
+            font-weight: 700;
+            color: #1e3a8a;
+            letter-spacing: -0.02em;
         }
         
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
+        .header .subtitle {
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-weight: 400;
+            margin: 0;
         }
         
+        .status {
+            text-align: center;
+            padding: 8px var(--space-4);
+            font-size: 0.8rem;
+            font-weight: 400;
+            transition: all var(--duration-normal) var(--ease-out);
+            position: absolute;
+            top: 8px;
+            right: 16px;
+            border-radius: 12px;
+            min-width: 120px;
+            z-index: 10;
+            backdrop-filter: blur(8px);
+            flex-shrink: 0;
+        }
+        
+        .status.connecting {
+            background: rgba(255, 243, 205, 0.9);
+            color: #856404;
+            border: 1px solid rgba(133, 100, 4, 0.2);
+        }
+        
+        .status.connected {
+            background: rgba(209, 236, 241, 0.9);
+            color: #0C5460;
+            border: 1px solid rgba(12, 84, 96, 0.2);
+        }
+        
+        .status.error {
+            background: rgba(248, 215, 218, 0.9);
+            color: #721C24;
+            border: 1px solid rgba(114, 28, 36, 0.2);
+        }
+        
+        /* Chat Container - Viewport Optimized */
         .chat-container {
-            height: 500px;
+            flex: 1;
             overflow-y: auto;
-            padding: 20px;
-            background: #f8f9fa;
+            padding: 0;
+            background: #ffffff;
+            scroll-behavior: smooth;
+            border: none;
+            min-height: 0; /* Important for flex container */
         }
         
+        /* Invisible Scrollbar - Clean Apple Style */
+        .chat-container::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+        
+        /* Message Layout - Minimalist Spacing */
         .message {
-            margin-bottom: 20px;
-            display: flex;
-            align-items: flex-start;
+            padding: 0;
+            margin: 0;
+            animation: messageSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* User Messages - Small Bubble, Right Aligned */
         .message.user {
+            padding: 20px 32px 12px 120px;
+            display: flex;
             justify-content: flex-end;
         }
         
-        .message-content {
-            max-width: 70%;
-            padding: 15px 20px;
-            border-radius: 20px;
-            font-size: 1em;
+        .message.user .message-content {
+            background: #1e3a8a;
+            color: white;
+            padding: 16px 20px;
+            border-radius: 24px;
+            border-bottom-right-radius: 8px;
+            max-width: 320px;
+            font-size: 16px;
             line-height: 1.5;
+            box-shadow: 0 2px 16px rgba(30, 58, 138, 0.15);
+            font-weight: 400;
         }
         
-        .message.user .message-content {
-            background: #007bff;
-            color: white;
-            border-bottom-right-radius: 5px;
+        /* AI Messages - Full Width Wall of Peace */
+        .message.assistant {
+            padding: 32px;
+            background: #ffffff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
         }
         
         .message.assistant .message-content {
-            background: white;
-            color: #333;
-            border: 1px solid #e9ecef;
-            border-bottom-left-radius: 5px;
-        }
-        
-        .message.assistant .message-content strong {
-            color: #007bff;
-            font-weight: 600;
-        }
-        
-        .message.assistant .message-content em {
-            font-style: italic;
-            color: #6c757d;
-        }
-        
-        .message.assistant .message-content blockquote {
-            border-left: 3px solid #007bff;
-            padding-left: 15px;
-            margin: 10px 0;
-            font-style: italic;
-            color: #495057;
-            background: #f8f9fa;
-            padding: 10px 15px;
-            border-radius: 5px;
-        }
-        
-        .message.assistant .message-content .course-quote {
-            background: #f8fff9;
-            color: #155724;
-            font-weight: 500;
-            padding: 2px 6px;
-            border-radius: 3px;
-            border-left: 3px solid #28a745;
-            display: inline-block;
-            margin: 0 2px;
-        }
-        
-        .message.assistant .message-content .section-break {
+            max-width: none;
+            width: 100%;
+            padding: 0;
+            background: transparent;
             border: none;
-            height: 2px;
-            background: linear-gradient(to right, transparent, #007bff, transparent);
-            margin: 20px 0;
+            box-shadow: none;
+            border-radius: 0;
+            font-size: 17px;
+            line-height: 1.7;
+            color: #1f2937;
+            font-weight: 400;
         }
         
-        .message.assistant .message-content h1 {
-            color: #007bff;
-            font-size: 1.4em;
-            margin: 20px 0 15px 0;
-            font-weight: 600;
-        }
-        
-        .message.assistant .message-content h2 {
-            color: #007bff;
-            font-size: 1.3em;
-            margin: 18px 0 12px 0;
-            font-weight: 600;
-        }
-        
-        .message.assistant .message-content h3 {
-            color: #007bff;
-            font-size: 1.2em;
-            margin: 15px 0 10px 0;
-            font-weight: 600;
-        }
-        
-        .message.assistant .message-content .acim-quote {
-            background: #f0f8ff;
-            border-left: 4px solid #007bff;
-            padding: 15px 20px;
-            margin: 15px 0;
-            border-radius: 8px;
-            font-style: italic;
-            color: #2c3e50;
-            position: relative;
-        }
-        
-        .message.assistant .message-content .acim-quote cite {
-            display: block;
-            margin-top: 8px;
-            font-size: 0.9em;
-            color: #6c757d;
-            font-weight: 500;
-        }
-        
-        .message.assistant .message-content ul {
-            margin: 15px 0;
-            padding-left: 0;
-        }
-        
-        .message.assistant .message-content li {
-            margin: 8px 0;
-            padding-left: 20px;
-            position: relative;
-            list-style: none;
-        }
-        
-        .message.assistant .message-content li:before {
-            content: '•';
-            color: #007bff;
-            font-weight: bold;
-            position: absolute;
-            left: 0;
-        }
-        
+        /* Typography - Clean & Readable */
         .message.assistant .message-content p {
-            margin: 12px 0;
-            line-height: 1.6;
-        }
-        
-        .message.assistant .message-content p:first-child {
-            margin-top: 0;
+            margin: 0 0 24px 0;
         }
         
         .message.assistant .message-content p:last-child {
             margin-bottom: 0;
         }
         
-        .input-container {
-            padding: 20px;
-            background: white;
-            border-top: 1px solid #e9ecef;
-            display: flex;
-            gap: 10px;
-        }
-        
-        .input-container input {
-            flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #e9ecef;
-            border-radius: 25px;
-            font-size: 1em;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        
-        .input-container input:focus {
-            border-color: #007bff;
-        }
-        
-        .input-container button {
-            padding: 15px 30px;
-            background: #007bff;
-            color: white;
+        /* ACIM Quotes - Vintage Typewriter Style */
+        .message.assistant .message-content .acim-quote {
+            background: #f8fafc;
             border: none;
-            border-radius: 25px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background 0.3s;
+            border-left: 3px solid #1e3a8a;
+            padding: 24px 28px;
+            margin: 32px 0;
+            border-radius: 0;
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            font-size: 18px;
+            line-height: 1.6;
+            color: #374151;
+            position: relative;
         }
         
-        .input-container button:hover {
-            background: #0056b3;
+        .message.assistant .message-content .acim-quote::before {
+            content: none;
         }
         
-        .input-container button:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
+        .message.assistant .message-content .acim-quote cite {
+            display: block;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #6b7280;
+            font-style: normal;
+            font-weight: 500;
+            font-family: var(--font-primary);
+        }
+        
+        /* Section Breaks - Minimal */
+        .message.assistant .message-content hr.section-break {
+            border: none;
+            height: 1px;
+            background: rgba(30, 58, 138, 0.1);
+            margin: 40px 0;
+            width: 60px;
+        }
+        
+        /* No Headers - Keep it conversational */
+        .message.assistant .message-content h1,
+        .message.assistant .message-content h2,
+        .message.assistant .message-content h3 {
+            display: none;
+        }
+        
+        /* Emphasis - Subtle */
+        .message.assistant .message-content strong {
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+        
+        .message.assistant .message-content em {
+            font-style: italic;
+            color: #4b5563;
+        }
+        
+        /* Lists - Clean */
+        .message.assistant .message-content ul {
+            margin: 24px 0;
+            padding-left: 0;
+            list-style: none;
+        }
+        
+        .message.assistant .message-content li {
+            margin: 12px 0;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .message.assistant .message-content li::before {
+            content: '•';
+            color: #1e3a8a;
+            position: absolute;
+            left: 0;
+            top: 0;
         }
         
         .quick-actions {
-            padding: 20px;
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
+            padding: var(--space-4);
+            background: var(--white);
+            border-top: 1px solid var(--light-gray);
+            flex-shrink: 0;
         }
         
         .quick-actions h3 {
-            margin-bottom: 15px;
-            color: #495057;
-            font-size: 1.1em;
+            margin-bottom: var(--space-4);
+            color: var(--dark-gray);
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: var(--font-secondary);
         }
         
         .quick-action-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-3);
         }
         
         .quick-action {
-            padding: 10px 15px;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 15px;
+            padding: var(--space-4) var(--space-6);
+            background: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
+            border: 2px solid transparent;
+            border-radius: var(--space-4);
             cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.3s;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all var(--duration-normal) var(--ease-out);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .quick-action::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left var(--duration-slow) var(--ease-out);
         }
         
         .quick-action:hover {
-            background: #e9ecef;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--light-gray) 100%);
+            border-color: var(--primary);
             transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(33, 150, 243, 0.2);
+        }
+        
+        .quick-action:hover::before {
+            left: 100%;
+        }
+        
+        .input-container {
+            padding: var(--space-4);
+            background: var(--white);
+            border-top: 1px solid var(--light-gray);
+            display: flex;
+            gap: var(--space-3);
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: var(--space-4) var(--space-6);
+            border: 2px solid var(--light-gray);
+            border-radius: 2rem;
+            font-size: 1rem;
+            outline: none;
+            transition: all var(--duration-normal) var(--ease-out);
+            font-family: var(--font-primary);
+            background: var(--white);
+        }
+        
+        .message-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+        
+        .message-input:disabled {
+            background: var(--light-gray);
+            color: var(--medium-gray);
+            cursor: not-allowed;
+        }
+        
+        .send-button {
+            padding: var(--space-4) var(--space-8);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-out);
+            position: relative;
+            overflow: hidden;
+            font-family: var(--font-primary);
+            min-width: 100px;
+        }
+        
+        .send-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left var(--duration-normal) var(--ease-out);
+        }
+        
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+        }
+        
+        .send-button:hover:not(:disabled)::before {
+            left: 100%;
+        }
+        
+        .send-button:disabled {
+            background: var(--medium-gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
-            color: #6c757d;
-        }
-        
-        .processing-message {
-            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
-            border-left: 4px solid #007bff;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; }
-            100% { opacity: 0.8; }
-        }
-        
-        .citation {
-            background: #f8f9fa;
-            border-left: 3px solid #28a745;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
+            padding: var(--space-6);
+            color: var(--medium-gray);
             font-style: italic;
         }
         
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
+        .loading.show {
+            display: block;
         }
         
-        .status {
-            text-align: center;
-            padding: 10px;
-            background: #d1ecf1;
-            color: #0c5460;
-            font-size: 0.9em;
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--light-gray);
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: var(--space-2);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: linear-gradient(135deg, #F8D7DA 0%, #FADBD8 100%);
+            color: var(--error);
+            padding: var(--space-4);
+            border-radius: var(--space-2);
+            margin: var(--space-3) 0;
+            border-left: 4px solid var(--error);
+            font-weight: 500;
+        }
+        
+        /* Responsive design - Mobile first approach */
+        @media (max-width: 768px) {
+            body {
+                padding: var(--space-1);
+            }
+            
+            .container {
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: var(--space-4) var(--space-4) var(--space-3) var(--space-4);
+            }
+            
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .status {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin: 8px 0 0 0;
+                font-size: 0.75rem;
+            }
+            
+            .chat-container {
+                height: 400px;
+                padding: var(--space-4);
+            }
+            
+            .message-content {
+                max-width: 85%;
+                padding: var(--space-3) var(--space-4);
+                font-size: 0.95rem;
+            }
+            
+            .quick-action-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-container {
+                padding: var(--space-4);
+                flex-direction: column;
+                gap: var(--space-3);
+            }
+            
+            .message-input {
+                width: 100%;
+            }
+            
+            .send-button {
+                width: 100%;
+            }
+        }
+        
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+        
+        /* High contrast mode */
+        @media (prefers-contrast: high) {
+            .container {
+                border: 2px solid var(--dark-gray);
+            }
+            
+            .message.user .message-content {
+                background: var(--dark-gray);
+                border: 2px solid var(--white);
+            }
+            
+            .message.assistant .message-content {
+                border: 2px solid var(--dark-gray);
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>ACIMguide</h1>
-            <p>Your AI Companion for A Course in Miracles</p>
+            <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <!-- Outer Circle -->
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#1e3a8a" stroke-width="6"/>
+                <!-- Four-pointed Star (Diamond Cross) -->
+                <path d="M50 15 L60 40 L85 50 L60 60 L50 85 L40 60 L15 50 L40 40 Z" fill="#1e3a8a"/>
+                <!-- Small decorative star -->
+                <path d="M75 25 L77 30 L82 30 L78 33 L80 38 L75 35 L70 38 L72 33 L68 30 L73 30 Z" fill="#1e3a8a"/>
+                <!-- Arc at top -->
+                <path d="M30 15 Q50 5 70 15" fill="none" stroke="#1e3a8a" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+            <h1>ACIM Guide</h1>
+            <p class="subtitle">AI-powered study companion for A Course in Miracles</p>
+            
+            <!-- User Authentication will be added here in next iteration -->
+            <div id="userMenu" style="display: none;">
+                <!-- Future: Login/Profile menu -->
+            </div>
         </div>
         
-        <div class="status" id="status">
-            🔄 Initializing ACIMguide...
+        <div class="status connecting" id="status">
+            Connecting...
         </div>
         
         <div class="chat-container" id="chatContainer">
             <div class="message assistant">
                 <div class="message-content">
-                    Welcome! I'm here to help you with your study and practice of A Course in Miracles. 
-                    Ask me anything about the Course, or use one of the quick actions below to get started.
+                    <strong>Welcome to ACIM Guide.</strong>
+                    <br><br>
+                    I can help you study and understand A Course in Miracles. 
+                    Ask me questions about the Course, or choose one of the topics below to get started.
+                    <br><br>
+                    <div class="acim-quote">
+                        "Nothing real can be threatened. Nothing unreal exists. Herein lies the peace of God."
+                        <cite>- A Course in Miracles, Introduction</cite>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <div class="quick-actions">
-            <h3>Quick Actions</h3>
+        <div class="quick-actions" id="quickActions">
+            <h3>Get Started</h3>
             <div class="quick-action-buttons">
                 <div class="quick-action" onclick="sendQuickAction('What is the main teaching of A Course in Miracles?')">
-                    📚 Main Teaching
+                    Core Teaching
                 </div>
-                <div class="quick-action" onclick="sendQuickAction('Guide me through 5 steps to practice forgiveness.')">
-                    🕊️ Forgiveness Practice
+                <div class="quick-action" onclick="sendQuickAction('Guide me through 5 steps to practice forgiveness according to ACIM.')">
+                    Forgiveness Practice
                 </div>
-                <div class="quick-action" onclick="sendQuickAction('What does ACIM say about inner peace?')">
-                    ☮️ Inner Peace
+                <div class="quick-action" onclick="sendQuickAction('What does ACIM say about finding inner peace?')">
+                    Inner Peace
                 </div>
-                <div class="quick-action" onclick="sendQuickAction('Explain lesson 1 of the workbook.')">
-                    📖 Workbook Lesson
+                <div class="quick-action" onclick="sendQuickAction('Explain lesson 1 of the ACIM workbook.')">
+                    Daily Lesson
                 </div>
             </div>
         </div>
         
         <div class="input-container">
-            <input type="text" id="messageInput" placeholder="Ask about A Course in Miracles..." onkeypress="handleKeyPress(event)" disabled>
-            <button onclick="sendMessage()" id="sendButton" disabled>Send</button>
+            <input 
+                type="text" 
+                id="messageInput" 
+                class="message-input"
+placeholder="Ask about A Course in Miracles..."
+                onkeypress="handleKeyPress(event)" 
+                disabled
+            >
+            <button onclick="sendMessage()" id="sendButton" class="send-button" disabled>
+                Send
+            </button>
         </div>
         
         <div class="loading" id="loading">
-            <p>🤔 Thinking...</p>
+            Processing your question...
         </div>
     </div>
 
@@ -373,15 +672,14 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <script>
-        // Firebase configuration
+        // Firebase configuration for production
         const firebaseConfig = {
-            apiKey: "AIzaSyCCflF_DqyV4heJirV_9WxMBq71PYS-8Ik",
-            authDomain: "acim-guide-test.firebaseapp.com",
-            projectId: "acim-guide-test",
-            storageBucket: "acim-guide-test.firebasestorage.app",
-            messagingSenderId: "257923742377",
-            appId: "1:257923742377:web:bc8f354e465012ae1f07b8",
-            measurementId: "G-NG943R62Z8"
+            apiKey: "AIzaSyCyGw7AioVfQ3sfxlW1kWnlsNnrQAmymwU",
+            authDomain: "acim-guide-production.firebaseapp.com",
+            projectId: "acim-guide-production",
+            storageBucket: "acim-guide-production.firebasestorage.app",
+            messagingSenderId: "1002911619347",
+            appId: "1:1002911619347:web:d497f100e932d40639a2e6"
         };
 
         // Initialize Firebase
@@ -389,18 +687,14 @@
         const functions = firebase.functions();
         const firestore = firebase.firestore();
 
-        // For development, you might want to use the emulator
-        functions.useEmulator("localhost", 5001);
-
         let isAuthenticated = false;
         let currentUserId = null;
 
         // Robust Firebase authentication - NO DEMO MODE
         function initializeAuth() {
             // Show authentication in progress
-            document.getElementById('status').innerHTML = '🔄 Connecting to Firebase...';
-            document.getElementById('status').style.background = '#fff3cd';
-            document.getElementById('status').style.color = '#856404';
+            document.getElementById('status').innerHTML = 'Connecting...';
+            document.getElementById('status').className = 'status connecting';
             
             // Keep interface disabled until authenticated
             document.getElementById('messageInput').disabled = true;
@@ -413,10 +707,25 @@
                     currentUserId = userCredential.user.uid;
                     console.log('✅ Firebase authenticated successfully with user ID:', currentUserId);
                     
-                    // Update status to success
-                    document.getElementById('status').innerHTML = '✅ Connected! Your spiritual companion is ready.';
-                    document.getElementById('status').style.background = '#d1ecf1';
-                    document.getElementById('status').style.color = '#0c5460';
+                    // Update status to success and then hide it after 3 seconds
+                    document.getElementById('status').innerHTML = 'Ready';
+                    document.getElementById('status').className = 'status connected';
+                    
+                    // Auto-hide status after 3 seconds for cleaner design
+                    setTimeout(() => {
+                        const status = document.getElementById('status');
+                        if (status && status.innerHTML.includes('Ready')) {
+                            status.style.opacity = '0.7';
+                            status.style.fontSize = '0.7rem';
+                            status.innerHTML = '●';
+                            // Eventually hide completely
+                            setTimeout(() => {
+                                if (status.innerHTML === '●') {
+                                    status.style.display = 'none';
+                                }
+                            }, 2000);
+                        }
+                    }, 3000);
                     
                     // Enable interface
                     document.getElementById('messageInput').disabled = false;
@@ -429,9 +738,8 @@
                     console.error('❌ Firebase authentication failed:', error);
                     
                     // Show authentication error - NO FALLBACK
-                    document.getElementById('status').innerHTML = '❌ Authentication failed. Please refresh the page.';
-                    document.getElementById('status').style.background = '#f8d7da';
-                    document.getElementById('status').style.color = '#721c24';
+                    document.getElementById('status').innerHTML = 'Connection failed. Please refresh.';
+                    document.getElementById('status').className = 'status error';
                     
                     // Keep interface disabled
                     isAuthenticated = false;
@@ -442,7 +750,7 @@
                 });
         }
         
-        // Initialize auth when page loads
+        // Initialize when page loads
         initializeAuth();
 
         // Real-time message listener with improved handling
@@ -529,8 +837,9 @@
             if (!isUser) {
                 let formattedContent = content;
                 
-                // First handle section breaks that are standalone
+                // Handle section breaks - both --- format and "section-break"> format
                 formattedContent = formattedContent.replace(/^---$/gm, '<hr class="section-break">');
+                formattedContent = formattedContent.replace(/"section-break">/g, '<hr class="section-break">');
                 
                 // Handle headers (### Header Text)
                 formattedContent = formattedContent.replace(/^###\s*(.+)$/gm, '<h3>$1</h3>');
@@ -601,78 +910,105 @@
         }
 
         function showLoading(show) {
-            document.getElementById('loading').style.display = show ? 'block' : 'none';
-            document.getElementById('sendButton').disabled = show;
+            const loading = document.getElementById('loading');
+            const sendButton = document.getElementById('sendButton');
+            
+            if (show) {
+                loading.classList.add('show');
+                sendButton.disabled = true;
+                sendButton.textContent = 'Sending...';
+            } else {
+                loading.classList.remove('show');
+                sendButton.disabled = false;
+                sendButton.textContent = 'Send';
+            }
         }
-
-        function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error';
-            errorDiv.textContent = message;
-            document.getElementById('chatContainer').appendChild(errorDiv);
-        }
-
-
 
         function sendQuickAction(message) {
             document.getElementById('messageInput').value = message;
             sendMessage();
+            
+            // Hide quick actions after first use for cleaner interface
+            const quickActions = document.getElementById('quickActions');
+            if (quickActions) {
+                quickActions.style.transition = 'opacity 0.3s ease, height 0.3s ease';
+                quickActions.style.opacity = '0';
+                quickActions.style.height = '0';
+                quickActions.style.overflow = 'hidden';
+                quickActions.style.padding = '0';
+                quickActions.style.borderTop = 'none';
+                
+                setTimeout(() => {
+                    quickActions.style.display = 'none';
+                }, 300);
+            }
         }
 
         function handleKeyPress(event) {
-            if (event.key === 'Enter') {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
                 sendMessage();
             }
         }
 
-        // Production message handling - Firebase backend only
+        // Enhanced message sending
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
             
             if (!message) return;
             
-            // Ensure user is authenticated
             if (!isAuthenticated || !currentUserId) {
-                addMessage('❌ Please wait for authentication to complete before sending messages.');
+                addMessage('Please wait for the connection to complete before sending messages.');
                 return;
             }
             
-            // Add user message to chat
+            // Add user message
             addMessage(message, true);
             input.value = '';
             showLoading(true);
             
             try {
-                // Call Firebase function for real CourseGPT response
+                // Wait for authentication state to ensure we have a token
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    throw new Error('No authenticated user found');
+                }
+                
+                // Get fresh ID token for authentication
+                const idToken = await user.getIdToken();
+                console.log('✅ Retrieved auth token for Firebase Functions');
+                
                 const chatWithAssistant = functions.httpsCallable('chatWithAssistant');
                 const result = await chatWithAssistant({
                     message: message,
                     tone: 'gentle'
                 });
                 
-                console.log('✅ Message sent to CourseGPT:', {
+                console.log('✅ Message sent with love:', {
                     messageId: result.data.messageId,
-                    responseLength: result.data.response ? result.data.response.length : 0,
                     hasResponse: !!result.data.response
                 });
                 
-                // Check if response is included directly in the result
                 if (result.data.response && result.data.response.trim()) {
-                    console.log('✅ CourseGPT response received directly, displaying full response...');
-                    console.log('Response preview:', result.data.response.substring(0, 200) + '...');
                     addMessage(result.data.response);
                 } else {
-                    console.log('⏳ No direct response, CourseGPT is still processing...');
-                    addMessage(`🤔 CourseGPT is reflecting on your question...<br><br><em>Drawing wisdom from A Course in Miracles...</em>`);
+                    addMessage('Processing your question about A Course in Miracles...');
                 }
                 
             } catch (error) {
-                console.error('❌ Error calling CourseGPT:', error);
+                console.error('❌ Challenge in connection:', error);
                 showLoading(false);
                 
-                // Show specific error to user
-                addMessage(`❌ Error connecting to CourseGPT: ${error.message}<br><br>Please try again or contact support if the issue persists.`);
+                // More specific error handling
+                let errorMessage = error.message;
+                if (error.code === 'unauthenticated') {
+                    errorMessage = 'Authentication issue. Please refresh the page to reconnect.';
+                } else if (error.code === 'internal') {
+                    errorMessage = 'Temporary server issue. Please try again in a moment.';
+                }
+                
+                addMessage(`Error: ${errorMessage}<br><br>Please try again or refresh the page if the issue continues.`);
             }
             
             showLoading(false);
