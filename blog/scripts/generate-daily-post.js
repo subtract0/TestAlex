@@ -204,7 +204,11 @@ async function main() {
     console.log('🔮 Generating daily ACIM blog post...');
     
     const post = await generateBlogPost();
-    const contentDir = path.join(process.cwd(), 'blog', 'content');
+    // Adjust path based on current working directory
+    const isInScriptsDir = process.cwd().endsWith('scripts');
+    const contentDir = isInScriptsDir 
+      ? path.join(process.cwd(), '..', 'content')
+      : path.join(process.cwd(), 'blog', 'content');
     
     await ensureDirectoryExists(contentDir);
     
@@ -227,7 +231,11 @@ async function main() {
 
 async function updateSitemap(postMetadata) {
   try {
-    const sitemapPath = path.join(process.cwd(), 'blog', 'sitemap.json');
+    // Adjust path based on current working directory
+    const isInScriptsDir = process.cwd().endsWith('scripts');
+    const sitemapPath = isInScriptsDir
+      ? path.join(process.cwd(), '..', 'sitemap.json')
+      : path.join(process.cwd(), 'blog', 'sitemap.json');
     let sitemap = [];
     
     try {

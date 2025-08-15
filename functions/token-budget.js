@@ -18,36 +18,109 @@ const BUDGET_CONFIG = {
   // Monthly budget in EUR
   monthlyBudgetEUR: 500,
   
-  // Promotional token allocations
-  promotionalTokens: {
-    primaryModel: {
-      allocation: 250000,     // 250k tokens for GPT-5-chat-latest
+  // Updated OpenAI Free Tier Allocations (2025)
+  freeTokenAllocations: {
+    premiumModels: {
+      dailyAllocation: 250000,  // 250k tokens/day for premium models
+      models: ['gpt-5-chat-latest', 'gpt-5', 'gpt-4.1', 'gpt-4o', 'o1', 'o3'],
       used: 0,
-      model: 'gpt-5-chat-latest',
+      resetDaily: true,
       priority: 'high-value-users'
     },
     budgetModels: {
-      allocation: 2500000,    // 2.5M tokens for budget models
+      dailyAllocation: 2500000, // 2.5M tokens/day for budget models
+      models: [
+        'gpt-5-mini', 'gpt-5-nano', 'gpt-4.1-mini', 'gpt-4.1-nano',
+        'gpt-4o-mini', 'o1-mini', 'o3-mini', 'o4-mini', 'codex-mini-latest'
+      ],
       used: 0,
-      models: ['gpt-5-mini', 'gpt-4o'],
+      resetDaily: true,
       priority: 'optimization-tasks'
     }
   },
   
   // OpenAI pricing (as of 2025 - adjust as needed)
   pricing: {
+    // Premium models (250k free tokens/day)
     'gpt-5-chat-latest': {
       inputTokens: 0.05 / 1000,   // €0.05 per 1K input tokens (estimated)
-      outputTokens: 0.10 / 1000   // €0.10 per 1K output tokens (estimated)
+      outputTokens: 0.10 / 1000,  // €0.10 per 1K output tokens (estimated)
+      freeTier: 'premiumModels'
     },
-    'gpt-5-mini': {
-      inputTokens: 0.015 / 1000,  // €0.015 per 1K input tokens (estimated)
-      outputTokens: 0.03 / 1000   // €0.03 per 1K output tokens (estimated)
+    'gpt-5': {
+      inputTokens: 0.06 / 1000,   // €0.06 per 1K input tokens (estimated)
+      outputTokens: 0.12 / 1000,  // €0.12 per 1K output tokens (estimated)
+      freeTier: 'premiumModels'
+    },
+    'gpt-4.1': {
+      inputTokens: 0.04 / 1000,   // €0.04 per 1K input tokens (estimated)
+      outputTokens: 0.08 / 1000,  // €0.08 per 1K output tokens (estimated)
+      freeTier: 'premiumModels'
     },
     'gpt-4o': {
       inputTokens: 0.025 / 1000,  // €0.025 per 1K input tokens
-      outputTokens: 0.05 / 1000   // €0.05 per 1K output tokens
+      outputTokens: 0.05 / 1000,  // €0.05 per 1K output tokens
+      freeTier: 'premiumModels'
     },
+    'o1': {
+      inputTokens: 0.15 / 1000,   // €0.15 per 1K input tokens (estimated)
+      outputTokens: 0.30 / 1000,  // €0.30 per 1K output tokens (estimated)
+      freeTier: 'premiumModels'
+    },
+    'o3': {
+      inputTokens: 0.20 / 1000,   // €0.20 per 1K input tokens (estimated)
+      outputTokens: 0.40 / 1000,  // €0.40 per 1K output tokens (estimated)
+      freeTier: 'premiumModels'
+    },
+    
+    // Budget models (2.5M free tokens/day)
+    'gpt-5-mini': {
+      inputTokens: 0.015 / 1000,  // €0.015 per 1K input tokens (estimated)
+      outputTokens: 0.03 / 1000,  // €0.03 per 1K output tokens (estimated)
+      freeTier: 'budgetModels'
+    },
+    'gpt-5-nano': {
+      inputTokens: 0.008 / 1000,  // €0.008 per 1K input tokens (estimated)
+      outputTokens: 0.016 / 1000, // €0.016 per 1K output tokens (estimated)
+      freeTier: 'budgetModels'
+    },
+    'gpt-4.1-mini': {
+      inputTokens: 0.012 / 1000,  // €0.012 per 1K input tokens (estimated)
+      outputTokens: 0.024 / 1000, // €0.024 per 1K output tokens (estimated)
+      freeTier: 'budgetModels'
+    },
+    'gpt-4.1-nano': {
+      inputTokens: 0.006 / 1000,  // €0.006 per 1K input tokens (estimated)
+      outputTokens: 0.012 / 1000, // €0.012 per 1K output tokens (estimated)
+      freeTier: 'budgetModels'
+    },
+    'gpt-4o-mini': {
+      inputTokens: 0.01 / 1000,   // €0.01 per 1K input tokens
+      outputTokens: 0.02 / 1000,  // €0.02 per 1K output tokens
+      freeTier: 'budgetModels'
+    },
+    'o1-mini': {
+      inputTokens: 0.05 / 1000,   // €0.05 per 1K input tokens (estimated)
+      outputTokens: 0.10 / 1000,  // €0.10 per 1K output tokens (estimated)
+      freeTier: 'budgetModels'
+    },
+    'o3-mini': {
+      inputTokens: 0.06 / 1000,   // €0.06 per 1K input tokens (estimated)
+      outputTokens: 0.12 / 1000,  // €0.12 per 1K output tokens (estimated)
+      freeTier: 'budgetModels'
+    },
+    'o4-mini': {
+      inputTokens: 0.04 / 1000,   // €0.04 per 1K input tokens (estimated)
+      outputTokens: 0.08 / 1000,  // €0.08 per 1K output tokens (estimated)
+      freeTier: 'budgetModels'
+    },
+    'codex-mini-latest': {
+      inputTokens: 0.005 / 1000,  // €0.005 per 1K input tokens (estimated)
+      outputTokens: 0.01 / 1000,  // €0.01 per 1K output tokens (estimated)
+      freeTier: 'budgetModels'
+    },
+    
+    // Legacy models
     gpt4: {
       inputTokens: 0.03 / 1000,   // €0.03 per 1K input tokens
       outputTokens: 0.06 / 1000   // €0.06 per 1K output tokens
