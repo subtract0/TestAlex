@@ -32,9 +32,9 @@ on:
 env:
   NODE_VERSION: '18'
   PYTHON_VERSION: '3.11'
-  GCP_PROJECT_ID: 'acimguide-app'
-  STAGING_URL: 'https://staging.acimguide.com'
-  PRODUCTION_URL: 'https://acimguide.com'
+  GCP_PROJECT_ID: 'acim-guide-test'
+  STAGING_URL: 'https://acim-guide-test.web.app'
+  PRODUCTION_URL: 'https://acim-guide-test.web.app'
 
 jobs:
   # =================
