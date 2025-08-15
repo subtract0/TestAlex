@@ -77,6 +77,19 @@ node_modules/
 
 # dotenv environment variables file
 .env
+.env.*
+
+# SECURITY: Deployment directory with processed files containing API keys
+deploy/
+*.deploy.*
+
+# SECURITY: Additional sensitive files
+*.pem
+*.key
+*.cert
+*.config.local.*
+api-keys.*
+firebase-config.*
 
 # dataconnect generated files
 .dataconnect
