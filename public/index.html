@@ -852,8 +852,18 @@ placeholder="Ask about A Course in Miracles..."
             if (!isUser) {
                 let formattedContent = content;
                 
-                // Handle section breaks - unified format for ---, "section-break", and ***
-                formattedContent = formattedContent.replace(/^(---|\*\*\*|"section-break">)$/gm, '<hr class="section-break">');
+                // Handle all section-break patterns comprehensively
+                formattedContent = formattedContent
+                  // Handle various section break formats
+                  .replace(/^(---|\*\*\*|\*\*\*\*\*)$/gm, '<hr class="section-break">')
+                  // Handle "section-break" patterns (with or without quotes, asterisks, brackets)
+                  .replace(/\*?["']?section-break["']?\*?[>]?/gi, '<hr class="section-break">')
+                  // Handle specific problematic patterns
+                  .replace(/"section-break"[>]?/gi, '<hr class="section-break">')
+                  .replace(/[*]"section-break"[*][>]?/gi, '<hr class="section-break">')
+                  .replace(/<section-break>/gi, '<hr class="section-break">')
+                  // Clean up any remaining section break text that slips through
+                  .replace(/section-break/gi, '');
                 
                 // Handle specific ACIM lesson headings
                 formattedContent = formattedContent.replace(/^(No Selection:|No Order of Importance:)\s*$/gm, '<h4 class="acim-practice-heading">$1</h4>');

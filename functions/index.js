@@ -197,9 +197,14 @@ exports.chatWithAssistant = onCall({
       if (assistantMessage) {
         let response = assistantMessage.content[0]?.text?.value || "No response generated";
         
-        // Clean up HTML tags that should not be displayed
+        // Clean up section breaks and HTML tags that should not be displayed
         response = response
-          .replace(/\*"section-break"\*>|"section-break">|<section-break>/gi, '\n\n---\n\n')
+          // Handle all section-break patterns comprehensively
+          .replace(/\*?["']?section-break["']?\*?[>]?/gi, '\n\n---\n\n')
+          // Handle specific patterns that might appear
+          .replace(/"section-break"[>]?/gi, '\n\n---\n\n')
+          .replace(/[*]"section-break"[*][>]?/gi, '\n\n---\n\n')
+          .replace(/<\/?section-break\/?>/gi, '\n\n---\n\n')
           .replace(/<\/?[^>]+(>|$)/g, '') // Remove any remaining HTML tags
           .replace(/\n{3,}/g, '\n\n') // Clean up excessive line breaks
           .trim();
