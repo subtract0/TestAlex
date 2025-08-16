@@ -9,11 +9,14 @@
 const fs = require('fs');
 const path = require('path');
 
+// Load environment variables from .env file
+require('dotenv').config();
+
 console.log('🔐 Starting secure deployment process...');
 
 // Check for required environment variables
 const requiredEnvVars = [
-    'FIREBASE_API_KEY',
+    'GOOGLE_CLOUD_API_KEY',
     'FIREBASE_PROJECT_ID'
 ];
 
@@ -24,8 +27,9 @@ if (missingEnvVars.length > 0) {
     missingEnvVars.forEach(varName => {
         console.error(`   - ${varName}`);
     });
-    console.error('\nPlease set these environment variables before deploying.');
-    console.error('You can get the API key from Firebase Console > Project Settings > General > Web Apps');
+    console.error('\nPlease set these environment variables in .env file before deploying.');
+    console.error('GOOGLE_CLOUD_API_KEY: The Firebase Web API key from Google Cloud Console');
+    console.error('FIREBASE_PROJECT_ID: Your Firebase project ID (default: acim-guide-production)');
     process.exit(1);
 }
 
@@ -34,7 +38,7 @@ const templatePath = path.join(__dirname, '..', 'public', 'index.html');
 let htmlContent = fs.readFileSync(templatePath, 'utf8');
 
 // Replace the placeholder with actual API key
-const actualApiKey = process.env.FIREBASE_API_KEY;
+const actualApiKey = process.env.GOOGLE_CLOUD_API_KEY;
 const actualProjectId = process.env.FIREBASE_PROJECT_ID || 'acim-guide-production';
 
 console.log('🔄 Replacing API key placeholder with secure configuration...');

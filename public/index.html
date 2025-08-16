@@ -299,6 +299,20 @@
             display: none;
         }
         
+        /* ACIM Practice Headings - Gentle emphasis for lesson structure */
+        .message.assistant .message-content h4.acim-practice-heading {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e3a8a;
+            margin: 24px 0 16px 0;
+            padding: 0;
+            border: none;
+            font-family: var(--font-primary);
+            text-transform: none;
+            letter-spacing: 0.5px;
+        }
+        
         /* Emphasis - Subtle */
         .message.assistant .message-content strong {
             color: #1e3a8a;
@@ -838,9 +852,11 @@ placeholder="Ask about A Course in Miracles..."
             if (!isUser) {
                 let formattedContent = content;
                 
-                // Handle section breaks - both --- format and "section-break"> format
-                formattedContent = formattedContent.replace(/^---$/gm, '<hr class="section-break">');
-                formattedContent = formattedContent.replace(/"section-break">/g, '<hr class="section-break">');
+                // Handle section breaks - unified format for ---, "section-break", and ***
+                formattedContent = formattedContent.replace(/^(---|\*\*\*|"section-break">)$/gm, '<hr class="section-break">');
+                
+                // Handle specific ACIM lesson headings
+                formattedContent = formattedContent.replace(/^(No Selection:|No Order of Importance:)\s*$/gm, '<h4 class="acim-practice-heading">$1</h4>');
                 
                 // Handle headers (### Header Text)
                 formattedContent = formattedContent.replace(/^###\s*(.+)$/gm, '<h3>$1</h3>');

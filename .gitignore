@@ -87,9 +87,18 @@ deploy/
 *.pem
 *.key
 *.cert
+*.p12
 *.config.local.*
 api-keys.*
 firebase-config.*
+*apikey*
+*API_KEY*
+*.credentials
+.secrets/
+secrets/
+config/local.json
+config/production.json
+config/development.json
 
 # dataconnect generated files
 .dataconnect

@@ -10,15 +10,25 @@ const { getAuth, signInAnonymously } = require('firebase/auth');
 const { getFunctions, httpsCallable } = require('firebase/functions');
 const { getFirestore, collection, addDoc, getDocs, query, where } = require('firebase/firestore');
 
-// Firebase configuration
+// Load environment variables
+require('dotenv').config();
+
+// Firebase configuration - uses environment variables for security
 const firebaseConfig = {
-  apiKey: "AIzaSyCyGw7AioVfQ3sfxlW1kWnlsNnrQAmymwU",
-  authDomain: "acim-guide-production.firebaseapp.com",
-  projectId: "acim-guide-production",
-  storageBucket: "acim-guide-production.firebasestorage.app",
-  messagingSenderId: "1002911619347",
-  appId: "1:1002911619347:web:d497f100e932d40639a2e6"
+  apiKey: process.env.GOOGLE_CLOUD_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN || "acim-guide-production.firebaseapp.com",
+  projectId: process.env.FIREBASE_PROJECT_ID || "acim-guide-production",
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "acim-guide-production.firebasestorage.app",
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "1002911619347",
+  appId: process.env.FIREBASE_APP_ID || "1:1002911619347:web:d497f100e932d40639a2e6"
 };
+
+// Validate required environment variables
+if (!process.env.GOOGLE_CLOUD_API_KEY) {
+  console.error('❌ GOOGLE_CLOUD_API_KEY environment variable is required');
+  console.error('Please set this in your .env file or environment');
+  process.exit(1);
+}
 
 console.log('🕊️ ACIM Guide - Post-Deploy Health Checks');
 console.log('==========================================');
