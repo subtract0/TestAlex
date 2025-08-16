@@ -882,6 +882,9 @@ placeholder="Ask about A Course in Miracles..."
                 // Handle Course quotes with special styling
                 formattedContent = formattedContent.replace(/"([^"]*?)"/g, '<span class="course-quote">"$1"</span>');
                 
+                // Handle markdown blockquotes (> text) - convert to proper blockquotes
+                formattedContent = formattedContent.replace(/^>\s*(.+)$/gm, '<blockquote class="acim-quote">$1</blockquote>');
+                
                 // Handle blockquotes that start with **"text"** pattern
                 formattedContent = formattedContent.replace(/\*\*"([^"]*?)"\*\*\s*\*\(([^)]+)\)\*/g, '<blockquote class="acim-quote">"$1" <cite>($2)</cite></blockquote>');
                 
@@ -1017,9 +1020,8 @@ placeholder="Ask about A Course in Miracles..."
                     hasResponse: !!result.data.response
                 });
                 
-                if (result.data.response && result.data.response.trim()) {
-                    addMessage(result.data.response);
-                } else {
+                // Don't add immediate response - let Firestore listener handle it to avoid duplicates
+                if (!result.data.response || !result.data.response.trim()) {
                     addMessage('Processing your question about A Course in Miracles...');
                 }
                 
