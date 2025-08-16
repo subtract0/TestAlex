@@ -24,6 +24,19 @@ class EnvironmentValidator {
             'FIREBASE_MESSAGING_SENDER_ID',
             'FIREBASE_APP_ID'
         ];
+        
+        // For functions/.env, Firebase variables have different names to avoid reserved prefixes
+        this.functionsRequiredVars = [
+            'OPENAI_API_KEY',
+            'ASSISTANT_ID',
+            'VECTOR_STORE_ID',
+            'GOOGLE_CLOUD_API_KEY',
+            'ACIM_PROJECT_ID',
+            'ACIM_AUTH_DOMAIN',
+            'ACIM_STORAGE_BUCKET',
+            'ACIM_MESSAGING_SENDER_ID',
+            'ACIM_APP_ID'
+        ];
     }
 
     log(type, message) {
@@ -63,8 +76,9 @@ class EnvironmentValidator {
             }
         });
 
-        // Check required variables
-        this.requiredVars.forEach(varName => {
+        // Check required variables - use different list for functions/.env
+        const varsToCheck = filePath.includes('functions/.env') ? this.functionsRequiredVars : this.requiredVars;
+        varsToCheck.forEach(varName => {
             if (!envVars[varName]) {
                 this.errors.push(`Missing required environment variable: ${varName} in ${filePath}`);
             } else if (envVars[varName].length < 10) {
