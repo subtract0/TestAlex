@@ -47,76 +47,9 @@ const BUDGET_CONFIG = {
       outputTokens: 0.10 / 1000,  // €0.10 per 1K output tokens (estimated)
       freeTier: 'premiumModels'
     },
-    'gpt-5': {
-      inputTokens: 0.06 / 1000,   // €0.06 per 1K input tokens (estimated)
-      outputTokens: 0.12 / 1000,  // €0.12 per 1K output tokens (estimated)
-      freeTier: 'premiumModels'
-    },
-    'gpt-4.1': {
-      inputTokens: 0.04 / 1000,   // €0.04 per 1K input tokens (estimated)
-      outputTokens: 0.08 / 1000,  // €0.08 per 1K output tokens (estimated)
-      freeTier: 'premiumModels'
-    },
-    'gpt-4o': {
-      inputTokens: 0.025 / 1000,  // €0.025 per 1K input tokens
-      outputTokens: 0.05 / 1000,  // €0.05 per 1K output tokens
-      freeTier: 'premiumModels'
-    },
-    'o1': {
-      inputTokens: 0.15 / 1000,   // €0.15 per 1K input tokens (estimated)
-      outputTokens: 0.30 / 1000,  // €0.30 per 1K output tokens (estimated)
-      freeTier: 'premiumModels'
-    },
-    'o3': {
-      inputTokens: 0.20 / 1000,   // €0.20 per 1K input tokens (estimated)
-      outputTokens: 0.40 / 1000,  // €0.40 per 1K output tokens (estimated)
-      freeTier: 'premiumModels'
-    },
-    
-    // Budget models (2.5M free tokens/day)
-    'gpt-5-mini': {
-      inputTokens: 0.015 / 1000,  // €0.015 per 1K input tokens (estimated)
-      outputTokens: 0.03 / 1000,  // €0.03 per 1K output tokens (estimated)
-      freeTier: 'budgetModels'
-    },
-    'gpt-5-nano': {
-      inputTokens: 0.008 / 1000,  // €0.008 per 1K input tokens (estimated)
-      outputTokens: 0.016 / 1000, // €0.016 per 1K output tokens (estimated)
-      freeTier: 'budgetModels'
-    },
-    'gpt-4.1-mini': {
-      inputTokens: 0.012 / 1000,  // €0.012 per 1K input tokens (estimated)
-      outputTokens: 0.024 / 1000, // €0.024 per 1K output tokens (estimated)
-      freeTier: 'budgetModels'
-    },
-    'gpt-4.1-nano': {
-      inputTokens: 0.006 / 1000,  // €0.006 per 1K input tokens (estimated)
-      outputTokens: 0.012 / 1000, // €0.012 per 1K output tokens (estimated)
-      freeTier: 'budgetModels'
-    },
     'gpt-4o-mini': {
       inputTokens: 0.01 / 1000,   // €0.01 per 1K input tokens
       outputTokens: 0.02 / 1000,  // €0.02 per 1K output tokens
-      freeTier: 'budgetModels'
-    },
-    'o1-mini': {
-      inputTokens: 0.05 / 1000,   // €0.05 per 1K input tokens (estimated)
-      outputTokens: 0.10 / 1000,  // €0.10 per 1K output tokens (estimated)
-      freeTier: 'budgetModels'
-    },
-    'o3-mini': {
-      inputTokens: 0.06 / 1000,   // €0.06 per 1K input tokens (estimated)
-      outputTokens: 0.12 / 1000,  // €0.12 per 1K output tokens (estimated)
-      freeTier: 'budgetModels'
-    },
-    'o4-mini': {
-      inputTokens: 0.04 / 1000,   // €0.04 per 1K input tokens (estimated)
-      outputTokens: 0.08 / 1000,  // €0.08 per 1K output tokens (estimated)
-      freeTier: 'budgetModels'
-    },
-    'codex-mini-latest': {
-      inputTokens: 0.005 / 1000,  // €0.005 per 1K input tokens (estimated)
-      outputTokens: 0.01 / 1000,  // €0.01 per 1K output tokens (estimated)
       freeTier: 'budgetModels'
     },
     
@@ -128,17 +61,6 @@ const BUDGET_CONFIG = {
     gpt4_turbo: {
       inputTokens: 0.01 / 1000,   // €0.01 per 1K input tokens  
       outputTokens: 0.03 / 1000   // €0.03 per 1K output tokens
-    }
-  },
-  
-  // Budget allocation strategy
-  allocation: {
-    dailyPercentage: 0.8 / 30,    // 80% of monthly budget over 30 days
-    emergencyReserve: 0.15,       // 15% emergency reserve
-    userTiers: {
-      free: 0.05,     // 5% for free users
-      premium: 0.75,  // 75% for premium users  
-      admin: 0.20     // 20% for admin/testing
     }
   },
   
@@ -161,8 +83,8 @@ const BUDGET_CONFIG = {
     // Switch to cheaper models when budget is constrained
     modelFallback: {
       normal: 'gpt-5-chat-latest',
-      budgetConstrained: 'gpt-5-mini',
-      emergency: 'gpt-4o'
+      budgetConstrained: 'gpt-4o-mini',
+      emergency: 'gpt-4o-mini'
     }
   }
 };
@@ -200,27 +122,22 @@ async function getCurrentBudgetUtilization() {
     const remainingBudgetEUR = BUDGET_CONFIG.monthlyBudgetEUR - totalCostEUR;
     
     // Calculate daily burn rate
-    const daysInMonth = monthEnd.getDate();
-    const currentDay = now.getDate();
-    const dailyBurnRate = totalCostEUR / currentDay;
-    const projectedMonthlySpend = dailyBurnRate * daysInMonth;
+    const daysSinceMonthStart = Math.max(1, Math.ceil((now - monthStart) / (1000 * 60 * 60 * 24)));
+    const dailyBurnRate = totalCostEUR / daysSinceMonthStart;
+    const projectedMonthlySpend = dailyBurnRate * 30; // Assume 30-day month
     
     return {
-      monthStart: monthStart.toISOString(),
-      monthEnd: monthEnd.toISOString(),
       totalCostEUR,
+      budgetUtilization,
+      remainingBudgetEUR,
       totalTokensIn,
       totalTokensOut,
       requestCount,
-      budgetUtilization,
-      remainingBudgetEUR,
       dailyBurnRate,
       projectedMonthlySpend,
-      daysInMonth,
-      currentDay,
-      timestamp: now.toISOString()
+      monthStart: monthStart.toISOString(),
+      monthEnd: monthEnd.toISOString()
     };
-    
   } catch (error) {
     logger.error('Failed to get budget utilization', { error: error.message });
     throw error;
@@ -228,19 +145,19 @@ async function getCurrentBudgetUtilization() {
 }
 
 /**
- * Calculate cost for OpenAI API usage
+ * Calculate token usage cost
  */
-function calculateOpenAICost(tokensIn, tokensOut, model = 'gpt-5-chat-latest') {
-  const pricing = BUDGET_CONFIG.pricing[model] || BUDGET_CONFIG.pricing.gpt4;
+function calculateCost(tokensIn, tokensOut, model = 'gpt-4o-mini') {
+  const pricing = BUDGET_CONFIG.pricing[model] || BUDGET_CONFIG.pricing['gpt-4o-mini'];
   
-  const inputCost = (tokensIn / 1000) * pricing.inputTokens;
-  const outputCost = (tokensOut / 1000) * pricing.outputTokens;
+  const inputCost = tokensIn * pricing.inputTokens;
+  const outputCost = tokensOut * pricing.outputTokens;
   const totalCost = inputCost + outputCost;
   
   return {
-    inputCostEUR: inputCost,
-    outputCostEUR: outputCost,
-    totalCostEUR: totalCost,
+    inputCost,
+    outputCost,
+    totalCost,
     model,
     tokensIn,
     tokensOut
@@ -248,68 +165,38 @@ function calculateOpenAICost(tokensIn, tokensOut, model = 'gpt-5-chat-latest') {
 }
 
 /**
- * Record token usage and cost
+ * Record token usage in Firestore
  */
-async function recordTokenUsage(userId, tokensIn, tokensOut, model = 'gpt-5-chat-latest', userTier = 'free') {
+async function recordTokenUsage(userId, tokensIn, tokensOut, model = 'gpt-4o-mini', userTier = 'free') {
   try {
-    const cost = calculateOpenAICost(tokensIn, tokensOut, model);
+    const cost = calculateCost(tokensIn, tokensOut, model);
+    const timestamp = new Date();
     
-    const usageRecord = {
+    // Store in Firestore
+    await admin.firestore().collection('token_usage').add({
       userId,
       tokensIn,
       tokensOut,
       model,
       userTier,
-      ...cost,
-      timestamp: new Date(),
-      month: new Date().getMonth() + 1,
-      year: new Date().getFullYear()
-    };
-    
-    // Store in token usage collection
-    await admin.firestore().collection('token_usage').add(usageRecord);
-    
-    // Update user's monthly usage summary
-    const userMonthlyRef = admin.firestore()
-      .collection('user_monthly_usage')
-      .doc(`${userId}_${usageRecord.year}_${usageRecord.month}`);
-    
-    await admin.firestore().runTransaction(async (transaction) => {
-      const doc = await transaction.get(userMonthlyRef);
-      const existing = doc.exists ? doc.data() : {
-        userId,
-        year: usageRecord.year,
-        month: usageRecord.month,
-        totalCostEUR: 0,
-        totalTokensIn: 0,
-        totalTokensOut: 0,
-        requestCount: 0
-      };
-      
-      existing.totalCostEUR += cost.totalCostEUR;
-      existing.totalTokensIn += tokensIn;
-      existing.totalTokensOut += tokensOut;
-      existing.requestCount += 1;
-      existing.lastUpdate = new Date();
-      
-      transaction.set(userMonthlyRef, existing);
+      costEUR: cost.totalCost,
+      inputCostEUR: cost.inputCost,
+      outputCostEUR: cost.outputCost,
+      timestamp,
+      month: `${timestamp.getFullYear()}-${String(timestamp.getMonth() + 1).padStart(2, '0')}`
     });
     
     logger.info('Token usage recorded', {
       userId,
       tokensIn,
       tokensOut,
-      costEUR: cost.totalCostEUR,
-      model
+      model,
+      costEUR: cost.totalCost
     });
     
-    return cost;
-    
+    return cost.totalCost;
   } catch (error) {
-    logger.error('Failed to record token usage', {
-      userId,
-      error: error.message
-    });
+    logger.error('Failed to record token usage', { error: error.message, userId });
     throw error;
   }
 }
@@ -410,4 +297,152 @@ exports.checkBudgetAllowance = functions.https.onCall(async (data, context) => {
     
     // Determine if request should be allowed
     let allowed = parameters.enabled;
-    let reason = '';\n    \n    if (!allowed) {\n      reason = 'Monthly budget exhausted. Service temporarily unavailable.';\n    } else if (parameters.serviceLevel === 'emergency' && userTier === 'free') {\n      allowed = false;\n      reason = 'Budget constraints: Free tier temporarily limited. Please upgrade or try again later.';\n    }\n    \n    // Log budget check\n    logger.info('Budget allowance check', {\n      userId,\n      userTier,\n      allowed,\n      serviceLevel: parameters.serviceLevel,\n      budgetUtilization: budgetStatus.budgetUtilization,\n      remainingBudgetEUR: budgetStatus.remainingBudgetEUR\n    });\n    \n    return {\n      allowed,\n      reason,\n      serviceLevel: parameters.serviceLevel,\n      maxTokens: parameters.maxTokens,\n      recommendedModel: parameters.model,\n      budgetStatus: {\n        utilization: budgetStatus.budgetUtilization,\n        remainingEUR: budgetStatus.remainingBudgetEUR,\n        projectedSpend: budgetStatus.projectedMonthlySpend\n      },\n      userMonthlyUsage,\n      timestamp: new Date().toISOString()\n    };\n    \n  } catch (error) {\n    logger.error('Budget allowance check failed', {\n      error: error.message,\n      userId: context.auth?.uid\n    });\n    \n    throw new functions.https.HttpsError(\n      'internal',\n      'Failed to check budget allowance'\n    );\n  }\n});\n\n/**\n * Record OpenAI API usage after request completion\n */\nexports.recordApiUsage = functions.https.onCall(async (data, context) => {\n  try {\n    if (!context.auth) {\n      throw new functions.https.HttpsError(\n        'unauthenticated',\n        'Authentication required'\n      );\n    }\n    \n    const {\n      tokensIn,\n      tokensOut,\n      model = 'gpt-4',\n      userTier = 'free',\n      requestDuration,\n      success = true\n    } = data;\n    \n    if (!tokensIn || !tokensOut) {\n      throw new functions.https.HttpsError(\n        'invalid-argument',\n        'tokensIn and tokensOut are required'\n      );\n    }\n    \n    const userId = context.auth.uid;\n    \n    // Record the usage\n    const cost = await recordTokenUsage(userId, tokensIn, tokensOut, model, userTier);\n    \n    // Get updated budget status\n    const budgetStatus = await getCurrentBudgetUtilization();\n    \n    // Send alerts if budget thresholds are crossed\n    await checkBudgetAlerts(budgetStatus);\n    \n    return {\n      recorded: true,\n      cost,\n      budgetStatus: {\n        utilization: budgetStatus.budgetUtilization,\n        remainingEUR: budgetStatus.remainingBudgetEUR,\n        serviceLevel: determineServiceLevel(budgetStatus.budgetUtilization)\n      },\n      timestamp: new Date().toISOString()\n    };\n    \n  } catch (error) {\n    logger.error('API usage recording failed', {\n      error: error.message,\n      userId: context.auth?.uid\n    });\n    \n    throw new functions.https.HttpsError(\n      'internal',\n      'Failed to record API usage'\n    );\n  }\n});\n\n/**\n * Get budget status and recommendations\n */\nexports.getBudgetStatus = functions.https.onCall(async (data, context) => {\n  try {\n    // Allow unauthenticated access to general budget status for transparency\n    const budgetStatus = await getCurrentBudgetUtilization();\n    const serviceLevel = determineServiceLevel(budgetStatus.budgetUtilization);\n    \n    // Get user-specific data if authenticated\n    let userMonthlyUsage = null;\n    if (context.auth) {\n      const userId = context.auth.uid;\n      const now = new Date();\n      const userMonthlyRef = admin.firestore()\n        .collection('user_monthly_usage')\n        .doc(`${userId}_${now.getFullYear()}_${now.getMonth() + 1}`);\n      \n      const userMonthlyDoc = await userMonthlyRef.get();\n      userMonthlyUsage = userMonthlyDoc.exists ? userMonthlyDoc.data() : null;\n    }\n    \n    // Calculate recommendations\n    const recommendations = generateBudgetRecommendations(budgetStatus, serviceLevel);\n    \n    return {\n      budgetStatus,\n      serviceLevel,\n      userMonthlyUsage,\n      recommendations,\n      config: {\n        monthlyBudgetEUR: BUDGET_CONFIG.monthlyBudgetEUR,\n        throttlingThresholds: BUDGET_CONFIG.throttling\n      },\n      timestamp: new Date().toISOString()\n    };\n    \n  } catch (error) {\n    logger.error('Get budget status failed', { error: error.message });\n    \n    throw new functions.https.HttpsError(\n      'internal',\n      'Failed to get budget status'\n    );\n  }\n});\n\n/**\n * Generate budget recommendations\n */\nfunction generateBudgetRecommendations(budgetStatus, serviceLevel) {\n  const recommendations = [];\n  \n  if (budgetStatus.projectedMonthlySpend > BUDGET_CONFIG.monthlyBudgetEUR) {\n    recommendations.push({\n      type: 'budget_overrun',\n      severity: 'high',\n      message: `Projected monthly spend (€${budgetStatus.projectedMonthlySpend.toFixed(2)}) exceeds budget (€${BUDGET_CONFIG.monthlyBudgetEUR})`,\n      action: 'Consider implementing stricter usage limits or increasing budget'\n    });\n  }\n  \n  if (serviceLevel === 'warning') {\n    recommendations.push({\n      type: 'approaching_limit',\n      severity: 'medium',\n      message: '70% of monthly budget consumed',\n      action: 'Monitor usage closely and consider optimizing responses'\n    });\n  }\n  \n  if (serviceLevel === 'slowdown') {\n    recommendations.push({\n      type: 'service_degradation',\n      severity: 'high',\n      message: 'Service quality reduced due to budget constraints',\n      action: 'Users may experience shorter responses and longer processing times'\n    });\n  }\n  \n  if (serviceLevel === 'emergency') {\n    recommendations.push({\n      type: 'emergency_mode',\n      severity: 'critical',\n      message: 'Emergency mode active - free tier disabled',\n      action: 'Only premium users can access the service'\n    });\n  }\n  \n  if (budgetStatus.dailyBurnRate > (BUDGET_CONFIG.monthlyBudgetEUR / 30)) {\n    recommendations.push({\n      type: 'high_burn_rate',\n      severity: 'medium',\n      message: `Daily burn rate (€${budgetStatus.dailyBurnRate.toFixed(2)}) exceeds target`,\n      action: 'Consider implementing usage quotas per user'\n    });\n  }\n  \n  return recommendations;\n}\n\n/**\n * Check and send budget alerts\n */\nasync function checkBudgetAlerts(budgetStatus) {\n  try {\n    const alerts = [];\n    \n    // Check various alert thresholds\n    if (budgetStatus.budgetUtilization >= BUDGET_CONFIG.throttling.shutoffThreshold) {\n      alerts.push({\n        type: 'budget_exhausted',\n        severity: 'critical',\n        message: 'Monthly budget exhausted - service disabled',\n        budgetUtilization: budgetStatus.budgetUtilization\n      });\n    } else if (budgetStatus.budgetUtilization >= BUDGET_CONFIG.throttling.emergencyThreshold) {\n      alerts.push({\n        type: 'emergency_threshold',\n        severity: 'critical',\n        message: 'Emergency budget threshold reached - emergency mode activated',\n        budgetUtilization: budgetStatus.budgetUtilization\n      });\n    } else if (budgetStatus.budgetUtilization >= BUDGET_CONFIG.throttling.slowdownThreshold) {\n      alerts.push({\n        type: 'slowdown_threshold',\n        severity: 'high',\n        message: 'Slowdown threshold reached - service quality reduced',\n        budgetUtilization: budgetStatus.budgetUtilization\n      });\n    } else if (budgetStatus.budgetUtilization >= BUDGET_CONFIG.throttling.warningThreshold) {\n      alerts.push({\n        type: 'warning_threshold',\n        severity: 'medium',\n        message: 'Warning threshold reached - monitoring usage closely',\n        budgetUtilization: budgetStatus.budgetUtilization\n      });\n    }\n    \n    if (alerts.length > 0) {\n      // Store alerts\n      await admin.firestore().collection('budget_alerts').add({\n        alerts,\n        budgetStatus,\n        timestamp: new Date()\n      });\n      \n      logger.warn('Budget alerts generated', {\n        alertCount: alerts.length,\n        budgetUtilization: budgetStatus.budgetUtilization,\n        alerts\n      });\n    }\n    \n  } catch (error) {\n    logger.error('Failed to check budget alerts', { error: error.message });\n    // Don't throw - this is not critical\n  }\n}\n\n/**\n * Daily budget reset and cleanup function\n * Runs daily to clean up old records and reset counters\n */\nexports.dailyBudgetMaintenance = functions.pubsub\n  .schedule('0 0 * * *') // Run daily at midnight UTC\n  .onRun(async (context) => {\n    try {\n      logger.info('Daily budget maintenance started');\n      \n      // Get budget status\n      const budgetStatus = await getCurrentBudgetUtilization();\n      \n      // Clean up old token usage records (keep last 90 days)\n      const ninetyDaysAgo = new Date();\n      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);\n      \n      const oldRecordsQuery = admin.firestore()\n        .collection('token_usage')\n        .where('timestamp', '<', ninetyDaysAgo)\n        .limit(500);\n      \n      const oldRecords = await oldRecordsQuery.get();\n      \n      if (!oldRecords.empty) {\n        const batch = admin.firestore().batch();\n        oldRecords.docs.forEach(doc => {\n          batch.delete(doc.ref);\n        });\n        await batch.commit();\n        \n        logger.info('Cleaned up old token usage records', {\n          deletedCount: oldRecords.size\n        });\n      }\n      \n      // Generate daily budget report\n      const dailyReport = {\n        date: new Date().toISOString().split('T')[0],\n        budgetStatus,\n        serviceLevel: determineServiceLevel(budgetStatus.budgetUtilization),\n        recommendations: generateBudgetRecommendations(\n          budgetStatus, \n          determineServiceLevel(budgetStatus.budgetUtilization)\n        ),\n        timestamp: new Date()\n      };\n      \n      await admin.firestore()\n        .collection('daily_budget_reports')\n        .doc(dailyReport.date)\n        .set(dailyReport);\n      \n      logger.info('Daily budget maintenance completed', dailyReport);\n      \n      return dailyReport;\n      \n    } catch (error) {\n      logger.error('Daily budget maintenance failed', {\n        error: error.message,\n        stack: error.stack\n      });\n      throw error;\n    }\n  });\n"}
+    let reason = '';
+    
+    if (!allowed) {
+      reason = 'Monthly budget exhausted. Service temporarily unavailable.';
+    } else if (parameters.serviceLevel === 'emergency' && userTier === 'free') {
+      allowed = false;
+      reason = 'Budget constraints: Free tier temporarily limited. Please upgrade or try again later.';
+    }
+    
+    // Log budget check
+    logger.info('Budget allowance check', {
+      userId,
+      userTier,
+      allowed,
+      serviceLevel: parameters.serviceLevel,
+      budgetUtilization: budgetStatus.budgetUtilization,
+      remainingBudgetEUR: budgetStatus.remainingBudgetEUR
+    });
+    
+    return {
+      allowed,
+      reason,
+      serviceLevel: parameters.serviceLevel,
+      maxTokens: parameters.maxTokens,
+      recommendedModel: parameters.model,
+      budgetStatus: {
+        utilization: budgetStatus.budgetUtilization,
+        remainingEUR: budgetStatus.remainingBudgetEUR,
+        projectedSpend: budgetStatus.projectedMonthlySpend
+      },
+      userMonthlyUsage,
+      timestamp: new Date().toISOString()
+    };
+    
+  } catch (error) {
+    logger.error('Budget allowance check failed', {
+      error: error.message,
+      userId: context.auth?.uid
+    });
+    
+    throw new functions.https.HttpsError(
+      'internal',
+      'Failed to check budget allowance'
+    );
+  }
+});
+
+/**
+ * Record OpenAI API usage after request completion
+ */
+exports.recordApiUsage = functions.https.onCall(async (data, context) => {
+  try {
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Authentication required'
+      );
+    }
+    
+    const {
+      tokensIn,
+      tokensOut,
+      model = 'gpt-4o-mini',
+      userTier = 'free',
+      requestDuration,
+      success = true
+    } = data;
+    
+    if (!tokensIn || !tokensOut) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'tokensIn and tokensOut are required'
+      );
+    }
+    
+    const userId = context.auth.uid;
+    
+    // Record the usage
+    const cost = await recordTokenUsage(userId, tokensIn, tokensOut, model, userTier);
+    
+    // Get updated budget status
+    const budgetStatus = await getCurrentBudgetUtilization();
+    
+    return {
+      recorded: true,
+      cost,
+      budgetStatus: {
+        utilization: budgetStatus.budgetUtilization,
+        remainingEUR: budgetStatus.remainingBudgetEUR,
+        serviceLevel: determineServiceLevel(budgetStatus.budgetUtilization)
+      },
+      timestamp: new Date().toISOString()
+    };
+    
+  } catch (error) {
+    logger.error('API usage recording failed', {
+      error: error.message,
+      userId: context.auth?.uid
+    });
+    
+    throw new functions.https.HttpsError(
+      'internal',
+      'Failed to record API usage'
+    );
+  }
+});
+
+/**
+ * Get budget status and recommendations
+ */
+exports.getBudgetStatus = functions.https.onCall(async (data, context) => {
+  try {
+    // Allow unauthenticated access to general budget status for transparency
+    const budgetStatus = await getCurrentBudgetUtilization();
+    const serviceLevel = determineServiceLevel(budgetStatus.budgetUtilization);
+    
+    // Get user-specific data if authenticated
+    let userMonthlyUsage = null;
+    if (context.auth) {
+      const userId = context.auth.uid;
+      const now = new Date();
+      const userMonthlyRef = admin.firestore()
+        .collection('user_monthly_usage')
+        .doc(`${userId}_${now.getFullYear()}_${now.getMonth() + 1}`);
+      
+      const userMonthlyDoc = await userMonthlyRef.get();
+      userMonthlyUsage = userMonthlyDoc.exists ? userMonthlyDoc.data() : null;
+    }
+    
+    return {
+      budgetStatus,
+      serviceLevel,
+      userMonthlyUsage,
+      config: {
+        monthlyBudgetEUR: BUDGET_CONFIG.monthlyBudgetEUR,
+        throttlingThresholds: BUDGET_CONFIG.throttling
+      },
+      timestamp: new Date().toISOString()
+    };
+    
+  } catch (error) {
+    logger.error('Get budget status failed', { error: error.message });
+    
+    throw new functions.https.HttpsError(
+      'internal',
+      'Failed to get budget status'
+    );
+  }
+});

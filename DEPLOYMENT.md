@@ -187,6 +187,55 @@ python main.py "Test message"
 firebase functions:shell
 ```
 
+## GitHub Actions CI/CD Pipeline
+
+### Required GitHub Secrets
+
+The following secrets must be configured in your GitHub repository (`Settings > Secrets and variables > Actions`):
+
+#### 1. Firebase Authentication Token
+```
+FIREBASE_TOKEN
+```
+**How to obtain:**
+```bash
+firebase login:ci
+```
+
+#### 2. Google Cloud Service Account Key (Alternative)
+```
+GCP_SA_KEY
+```
+**How to obtain:**
+1. Go to Google Cloud Console
+2. Create service account with Firebase Admin, Cloud Functions Admin roles
+3. Generate JSON key, base64 encode it
+4. Add as GitHub secret
+
+### Pipeline Configuration
+
+#### Automatic Deployments
+- **Staging**: Auto-deploy on push to `main` branch
+- **Production**: Manual trigger with approval
+
+#### Environment URLs
+- **Staging**: https://acim-guide-test.web.app
+- **Production**: https://acim-guide-production.web.app
+
+### CI/CD Troubleshooting
+
+#### Authentication Failures
+**Error**: Missing credentials configuration
+**Solution**: Add `FIREBASE_TOKEN` or `GCP_SA_KEY` secret
+
+#### Build Script Missing
+**Solution**: Build scripts added to package.json:
+```bash
+npm run build          # Standard build
+npm run build:staging  # Staging build
+npm run deploy:staging # Deploy to staging
+```
+
 ## Next Steps: Mobile App
 
 ### Android Development Setup

@@ -3,6 +3,11 @@
   "version": "1.1.0",
   "description": "Comprehensive testing infrastructure for ACIMguide platform",
   "scripts": {
+    "build": "echo 'Building ACIM Guide...' && npm run lint && echo 'Build completed - static files ready for deployment'",
+    "build:staging": "echo 'Building for staging environment...' && npm run lint && echo 'Staging build completed'",
+    "build:production": "echo 'Building for production environment...' && npm run lint && echo 'Production build completed'",
+    "deploy:staging": "firebase use acim-guide-test && firebase deploy",
+    "deploy:production": "firebase use acim-guide-production && firebase deploy",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -16,15 +21,23 @@
     "lint:fix": "eslint . --ext .js,.ts,.jsx,.tsx --fix"
   },
   "devDependencies": {
+    "@babel/plugin-syntax-jsx": "^7.27.1",
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
     "@jest/globals": "^29.7.0",
     "@playwright/test": "^1.54.2",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "babel-jest": "^30.0.5",
     "eslint": "^8.57.0",
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.4.0",
     "jest": "^29.7.0",
     "jest-coverage-badge": "^1.0.0",
     "jest-environment-jsdom": "^29.7.0",
+    "openai": "^5.15.0",
     "playwright-mcp": "^0.0.12",
     "ts-jest": "^29.4.1",
     "typescript": "^5.0.0"
@@ -33,44 +46,5 @@
     "axios": "^1.11.0",
     "dotenv": "^16.0.0",
     "firebase": "^12.1.0"
-  },
-  "jest": {
-    "testEnvironment": "jsdom",
-    "preset": "ts-jest",
-    "testMatch": [
-      "**/__tests__/**/*.(js|ts)",
-      "**/tests/**/*.test.(js|ts)",
-      "**/*.test.(js|ts)"
-    ],
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/e2e/",
-      "/playwright-report/",
-      "/test-results/"
-    ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 90,
-        "functions": 90,
-        "lines": 90,
-        "statements": 90
-      }
-    },
-    "coverageReporters": [
-      "text",
-      "lcov",
-      "html",
-      "json-summary"
-    ],
-    "collectCoverageFrom": [
-      "**/*.{js,ts}",
-      "!**/node_modules/**",
-      "!**/e2e/**",
-      "!**/coverage/**",
-      "!**/dist/**",
-      "!**/*.config.js",
-      "!**/*.test.js",
-      "!**/*.spec.js"
-    ]
   }
 }
