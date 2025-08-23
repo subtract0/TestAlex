@@ -478,6 +478,54 @@
             box-shadow: none;
         }
         
+        /* Smart Clear Button */
+        .clear-button {
+            position: absolute;
+            right: 100px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(107, 114, 128, 0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--medium-gray);
+            transition: all var(--duration-normal) var(--ease-out);
+            z-index: 5;
+        }
+        
+        .clear-button:hover {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--error);
+            transform: scale(1.1);
+        }
+        
+        .clear-button.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.8);
+        }
+        
+        .clear-button.clearing {
+            background: var(--error);
+            color: white;
+            animation: clearPulse 2s linear;
+        }
+        
+        @keyframes clearPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Input container positioning for clear button */
+        .input-container {
+            position: relative;
+        }
+        
         .loading {
             display: none;
             text-align: center;
@@ -665,10 +713,24 @@
                 type="text" 
                 id="messageInput" 
                 class="message-input"
-placeholder="Ask about A Course in Miracles..."
-                onkeypress="handleKeyPress(event)" 
+                placeholder="Ask about A Course in Miracles..."
+                onkeypress="handleKeyPress(event)"
+                oninput="handleInputChange(event)" 
                 disabled
             >
+            <button 
+                id="clearButton" 
+                class="clear-button hidden"
+                onmousedown="startClearTimer(event)"
+                onmouseup="cancelClearTimer(event)"
+                onmouseleave="cancelClearTimer(event)"
+                ontouchstart="startClearTimer(event)"
+                ontouchend="cancelClearTimer(event)"
+                ondblclick="clearInput()"
+                title="Hold 2sec or double-click to clear"
+            >
+                ✕
+            </button>
             <button onclick="sendMessage()" id="sendButton" class="send-button" disabled>
                 Send
             </button>
@@ -1053,6 +1115,97 @@ placeholder="Ask about A Course in Miracles..."
             
             showLoading(false);
         }
+        
+        // ===== SMART INPUT CLEAR FUNCTIONALITY =====
+        let clearTimer = null;
+        let doubleClickTimeout = null;
+        let lastClickTime = 0;
+        
+        function handleInputChange(event) {
+            const input = event.target;
+            const clearButton = document.getElementById('clearButton');
+            
+            if (input.value.length > 0) {
+                clearButton.classList.remove('hidden');
+            } else {
+                clearButton.classList.add('hidden');
+            }
+        }
+        
+        function startClearTimer(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const currentTime = Date.now();
+            const timeSinceLastClick = currentTime - lastClickTime;
+            
+            // Check for double-click (within 500ms)
+            if (timeSinceLastClick < 500) {
+                clearTimeout(doubleClickTimeout);
+                clearInput();
+                return;
+            }
+            
+            lastClickTime = currentTime;
+            
+            // Start hold timer for 2 seconds
+            const clearButton = document.getElementById('clearButton');
+            clearButton.classList.add('clearing');
+            
+            clearTimer = setTimeout(() => {
+                clearInput();
+            }, 2000);
+            
+            // Set double-click timeout
+            doubleClickTimeout = setTimeout(() => {
+                lastClickTime = 0; // Reset if no second click
+            }, 500);
+        }
+        
+        function cancelClearTimer(event) {
+            if (clearTimer) {
+                clearTimeout(clearTimer);
+                clearTimer = null;
+                
+                const clearButton = document.getElementById('clearButton');
+                clearButton.classList.remove('clearing');
+            }
+        }
+        
+        function clearInput() {
+            const input = document.getElementById('messageInput');
+            const clearButton = document.getElementById('clearButton');
+            
+            // Clear the input
+            input.value = '';
+            
+            // Hide the clear button with animation
+            clearButton.classList.add('hidden');
+            clearButton.classList.remove('clearing');
+            
+            // Focus back on input
+            input.focus();
+            
+            // Clean up timers
+            if (clearTimer) {
+                clearTimeout(clearTimer);
+                clearTimer = null;
+            }
+            if (doubleClickTimeout) {
+                clearTimeout(doubleClickTimeout);
+                doubleClickTimeout = null;
+            }
+            
+            console.log('✨ Input cleared');
+        }
+        
+        // Update handleInputChange to also update clear button on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('messageInput');
+            if (input) {
+                handleInputChange({ target: input });
+            }
+        });
     </script>
 </body>
 </html>
