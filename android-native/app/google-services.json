@@ -1,0 +1,43 @@
+{
+  "project_info": {
+    "project_number": "1002911619347",
+    "project_id": "acim-guide-production",
+    "storage_bucket": "acim-guide-production.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1002911619347:android:71u6bm8o293qraj002lk53ocaagtb8ri",
+        "android_client_info": {
+          "package_name": "com.acimguide.mvp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1002911619347-71u6bm8o293qraj002lk53ocaagtb8ri.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.acimguide.mvp",
+            "certificate_hash": "e40b7153688361510a1c19db6318bcb8f879e290"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDc7XKEwrXn7W74tv9dEMH311ETEPh_trA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1002911619347-71u6bm8o293qraj002lk53ocaagtb8ri.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

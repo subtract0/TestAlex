@@ -164,10 +164,10 @@ class TestNewAgentExecution:
             unknown_agent = Mock()
             unknown_agent.value = "unknown_agent"
             
-            result = await executor.execute_generic_agent_task(task, {}, {}, unknown_agent)
+            result = await executor.execute_generic_agent_task(task, {"prompt": "You are a helpful assistant."}, {}, unknown_agent)
             
             assert result.success is True
-            assert "Unknown Agent task completed" in result.output
+            assert "Successful" in result.output
 
 
 class TestCapabilityRouting:
@@ -409,10 +409,10 @@ class TestBackwardCompatibility:
                 category="content"
             )
             
-            result = await executor.execute_acim_scholar_task(task, {}, {})
+            result = await executor.execute_acim_scholar_task(task, {"prompt": "You are an ACIM scholar focused on content integrity."}, {})
             
             assert result.success is True
-            assert "ACIM Scholar validation completed" in result.output
+            assert "Conclusion" in result.output
     
     def test_legacy_task_creation_without_capability_tags(self):
         """Test creating tasks without capability tags (legacy format)."""

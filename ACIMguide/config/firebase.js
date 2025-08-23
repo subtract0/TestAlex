@@ -5,13 +5,12 @@ import { getFunctions } from 'firebase/functions';
 
 // Your Firebase config
 const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'acim-guide-test.firebaseapp.com',
-  projectId: 'acim-guide-test',
-  storageBucket: 'acim-guide-test.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId: 'YOUR_APP_ID',
-  measurementId: 'YOUR_MEASUREMENT_ID'
+  apiKey: 'AIzaSyDc7XKEwrXn7W74tv9dEMH311ETEPh_trA',
+  authDomain: 'acim-guide-production.firebaseapp.com',
+  projectId: 'acim-guide-production',
+  storageBucket: 'acim-guide-production.firebasestorage.app',
+  messagingSenderId: '1002911619347',
+  appId: '1:1002911619347:web:d497f100e932d40639a2e6'
 };
 
 // Initialize Firebase
