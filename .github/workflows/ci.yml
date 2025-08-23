@@ -142,7 +142,7 @@ jobs:
           name: python-coverage
           
       - name: Archive Python test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: python-test-results
@@ -217,7 +217,7 @@ jobs:
           fi
           
       - name: Upload mutation test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mutation-test-results
@@ -332,7 +332,7 @@ jobs:
           npm run test:e2e -- --project=${{ matrix.browser }}
           
       - name: Upload Playwright test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report-${{ matrix.browser }}
@@ -402,7 +402,7 @@ jobs:
           lhci autorun || true
           
       - name: Upload Lighthouse results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: lighthouse-results
@@ -447,7 +447,7 @@ jobs:
           bandit -r orchestration/ scripts/ -f json -o bandit-report.json || true
           
       - name: Upload security reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: security-reports
@@ -468,7 +468,7 @@ jobs:
     
     steps:
       - name: Download all coverage artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: coverage-artifacts/
           
@@ -501,7 +501,7 @@ jobs:
           cat coverage-summary.md
           
       - name: Upload coverage summary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-summary
           path: coverage-summary.md
@@ -555,7 +555,7 @@ jobs:
           cat test-summary.md
           
       - name: Upload test summary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-execution-summary
           path: test-summary.md
@@ -597,7 +597,7 @@ jobs:
           cat nightly-report.md
           
       - name: Upload nightly report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: nightly-e2e-report
           path: nightly-report.md

@@ -18,7 +18,9 @@
     "test:mutant:results": "mutmut results",
     "install:playwright": "playwright install",
     "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
-    "lint:fix": "eslint . --ext .js,.ts,.jsx,.tsx --fix"
+    "lint:fix": "eslint . --ext .js,.ts,.jsx,.tsx --fix",
+    "health-check": "node scripts/health-check.js",
+    "test:verbose": "jest --verbose"
   },
   "devDependencies": {
     "@babel/plugin-syntax-jsx": "^7.27.1",

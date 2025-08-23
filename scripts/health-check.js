@@ -127,7 +127,17 @@ class HealthChecker {
       const startTime = Date.now();
       const timeout = options.timeout || 5000;
       
-      const request = https.get(url, { timeout }, (response) => {
+      const urlObj = new URL(url);
+      const requestOptions = {
+        hostname: urlObj.hostname,
+        port: urlObj.port || 443,
+        path: urlObj.pathname + urlObj.search,
+        method: options.method || 'GET',
+        headers: options.headers || {},
+        timeout
+      };
+      
+      const request = https.request(requestOptions, (response) => {
         let data = '';
         
         response.on('data', (chunk) => {
@@ -153,6 +163,8 @@ class HealthChecker {
       request.on('error', (error) => {
         reject(error);
       });
+      
+      request.end();
     });
   }
 }
@@ -219,7 +231,32 @@ healthChecker.addCheck('Firebase Functions', async () => {
     
     // Get project info
     const projectInfo = execSync('firebase projects:list --json', { stdio: 'pipe' }).toString();
-    const projects = JSON.parse(projectInfo);
+    let projects;
+    
+    try {
+      const parsed = JSON.parse(projectInfo);
+      // Handle different possible response structures
+      if (Array.isArray(parsed)) {
+        projects = parsed;
+      } else if (parsed.result && Array.isArray(parsed.result)) {
+        projects = parsed.result;
+      } else if (parsed.projects && Array.isArray(parsed.projects)) {
+        projects = parsed.projects;
+      } else {
+        return {
+          success: false,
+          message: 'Firebase CLI returned unexpected response structure',
+          duration: Date.now() - startTime,
+          details: { responseStructure: Object.keys(parsed) }
+        };
+      }
+    } catch (parseError) {
+      return {
+        success: false,
+        message: `Failed to parse Firebase CLI response: ${parseError.message}`,
+        duration: Date.now() - startTime
+      };
+    }
     
     const currentProject = projects.find(p => p.projectId === process.env.FIREBASE_PROJECT_ID);
     
@@ -268,7 +305,11 @@ healthChecker.addCheck('OpenAI API', async () => {
   try {
     // Test OpenAI API connectivity
     const response = await healthChecker.makeRequest('https://api.openai.com/v1/models', {
-      timeout: 10000
+      timeout: 10000,
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
     });
     
     const duration = Date.now() - startTime;
@@ -369,9 +410,20 @@ healthChecker.addCheck('Test Suite', async () => {
     const output = execSync('npm test -- --passWithNoTests', { stdio: 'pipe' }).toString();
     const duration = Date.now() - startTime;
     
-    // Parse test results
-    const testResults = output.match(/Tests:.*?(\d+)\s+passed/);
-    const passedTests = testResults ? parseInt(testResults[1]) : 0;
+    // Parse test results - look for multiple patterns
+    let passedTests = 0;
+    
+    // Try to find "Tests: X passed" pattern first
+    const testResultsPattern1 = output.match(/Tests:\s*(\d+)\s+passed/);
+    if (testResultsPattern1) {
+      passedTests = parseInt(testResultsPattern1[1]);
+    } else {
+      // Alternative pattern: just count passed tests if pattern not found
+      const passedPattern = output.match(/✓.*?/g);
+      if (passedPattern) {
+        passedTests = passedPattern.length;
+      }
+    }
     
     return {
       success: true,

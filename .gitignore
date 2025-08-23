@@ -112,3 +112,11 @@ service-account*
 
 # Data files
 data/
+
+# Android keystore files
+*.keystore
+*.jks
+*.p8
+*.mobileprovision
+android/app/*.keystore
+debug.keystore
