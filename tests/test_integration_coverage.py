@@ -177,14 +177,19 @@ class TestTaskQueueCoverage:
                 registry_path=str(registry_path)
             )
             
+            # Set workloads to ensure deterministic behavior
+            queue.agent_workload[AgentRole.QA_TESTER] = 2  # Higher workload
+            queue.agent_workload[AgentRole.PLAYWRIGHT_TESTER] = 1
+            queue.agent_workload[AgentRole.EXA_SEARCHER] = 0  # Lowest workload
+            
             # Test routing for different capability combinations
             test_cases = [
                 (["search"], AgentRole.EXA_SEARCHER),
-                (["testing"], AgentRole.PLAYWRIGHT_TESTER),  # First in list
+                (["testing"], AgentRole.PLAYWRIGHT_TESTER),  # PLAYWRIGHT_TESTER has lower workload than QA_TESTER
                 (["revenue"], AgentRole.REVENUE_ANALYST),
                 (["content"], AgentRole.ACIM_SCHOLAR),
                 (["devops"], AgentRole.DEVOPS_SRE),
-                (["search", "testing"], AgentRole.EXA_SEARCHER),  # Should pick first match
+                (["search", "testing"], AgentRole.EXA_SEARCHER),  # EXA_SEARCHER has lowest workload among all suitable agents
             ]
             
             for capability_tags, expected_agent in test_cases:

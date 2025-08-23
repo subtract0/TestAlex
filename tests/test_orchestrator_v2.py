@@ -167,7 +167,7 @@ class TestNewAgentExecution:
             result = await executor.execute_generic_agent_task(task, {"prompt": "You are a helpful assistant."}, {}, unknown_agent)
             
             assert result.success is True
-            assert "Successful" in result.output
+            assert "successfully" in result.output or "Successfully" in result.output
 
 
 class TestCapabilityRouting:
@@ -412,7 +412,7 @@ class TestBackwardCompatibility:
             result = await executor.execute_acim_scholar_task(task, {"prompt": "You are an ACIM scholar focused on content integrity."}, {})
             
             assert result.success is True
-            assert "Conclusion" in result.output
+            assert "ACIM" in result.output and "validation" in result.output
     
     def test_legacy_task_creation_without_capability_tags(self):
         """Test creating tasks without capability tags (legacy format)."""

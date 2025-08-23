@@ -1,0 +1,143 @@
+name: ACIM Guide CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  NODE_VERSION: '18'
+  FIREBASE_PROJECT_STAGING: 'acim-guide-test'
+  FIREBASE_PROJECT_PROD: 'acim-guide-production'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: 🧪 Test & Quality Check
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run linting
+      run: npm run lint
+      
+    - name: Run health check
+      run: npm run health-check
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        FIREBASE_PROJECT_ID: ${{ env.FIREBASE_PROJECT_STAGING }}
+        OPENAI_ASSISTANT_ID: ${{ secrets.OPENAI_ASSISTANT_ID }}
+        ANDROID_OAUTH_CLIENT_ID: ${{ secrets.ANDROID_OAUTH_CLIENT_ID }}
+        
+    - name: Run tests with coverage
+      run: npm run test:coverage
+      
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        
+  security-scan:
+    runs-on: ubuntu-latest
+    name: 🔒 Security Analysis
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run security audit
+      run: npm audit --audit-level=high
+      
+    - name: Check for secrets
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        
+  deploy-staging:
+    needs: [test, security-scan]
+    runs-on: ubuntu-latest
+    name: 🚀 Deploy to Staging
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build for staging
+      run: npm run build:staging
+      
+    - name: Deploy to Firebase Staging
+      run: npm run deploy:staging
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        
+  deploy-production:
+    needs: [test, security-scan]
+    runs-on: ubuntu-latest
+    name: 🎯 Deploy to Production
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Final health check
+      run: npm run health-check
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY_PROD }}
+        FIREBASE_PROJECT_ID: ${{ env.FIREBASE_PROJECT_PROD }}
+        OPENAI_ASSISTANT_ID: ${{ secrets.OPENAI_ASSISTANT_ID_PROD }}
+        
+    - name: Build for production
+      run: npm run build:production
+      
+    - name: Deploy to Firebase Production
+      run: npm run deploy:production
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        
+    - name: Post-deployment health check
+      run: npm run health-check
+      if: success()
+      
+  notify:
+    needs: [deploy-production]
+    runs-on: ubuntu-latest
+    name: 📢 Notify Success
+    if: success()
+    
+    steps:
+    - name: Notify deployment success
+      run: |
+        echo "✅ Production deployment successful!"
+        echo "🌐 App URL: https://acim-guide-production.web.app"

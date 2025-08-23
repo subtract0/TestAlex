@@ -594,5 +594,89 @@
     "estimated_hours": null,
     "actual_hours": null,
     "metadata": {}
+  },
+  "task_3b56597d": {
+    "id": "task_3b56597d",
+    "title": "Critical ACIM Issue",
+    "description": "Critical content validation issue",
+    "priority": "critical",
+    "category": "content",
+    "assignee": null,
+    "dependencies": [],
+    "tags": [
+      "acim",
+      "critical"
+    ],
+    "capability_tags": [],
+    "status": "pending",
+    "created_at": "2025-08-23T18:44:24.698924",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": null,
+    "actual_hours": null,
+    "metadata": {}
+  },
+  "task_750e2d33": {
+    "id": "task_750e2d33",
+    "title": "Critical ACIM Issue",
+    "description": "Critical content validation issue",
+    "priority": "critical",
+    "category": "content",
+    "assignee": null,
+    "dependencies": [],
+    "tags": [
+      "acim",
+      "critical"
+    ],
+    "capability_tags": [],
+    "status": "pending",
+    "created_at": "2025-08-23T18:53:37.849958",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": null,
+    "actual_hours": null,
+    "metadata": {}
+  },
+  "task_eb2b9215": {
+    "id": "task_eb2b9215",
+    "title": "Critical ACIM Issue",
+    "description": "Critical content validation issue",
+    "priority": "critical",
+    "category": "content",
+    "assignee": null,
+    "dependencies": [],
+    "tags": [
+      "acim",
+      "critical"
+    ],
+    "capability_tags": [],
+    "status": "pending",
+    "created_at": "2025-08-23T18:55:33.671441",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": null,
+    "actual_hours": null,
+    "metadata": {}
+  },
+  "task_075b402c": {
+    "id": "task_075b402c",
+    "title": "Critical ACIM Issue",
+    "description": "Critical content validation issue",
+    "priority": "critical",
+    "category": "content",
+    "assignee": null,
+    "dependencies": [],
+    "tags": [
+      "acim",
+      "critical"
+    ],
+    "capability_tags": [],
+    "status": "pending",
+    "created_at": "2025-08-23T18:58:21.205597",
+    "assigned_at": null,
+    "completed_at": null,
+    "estimated_hours": null,
+    "actual_hours": null,
+    "metadata": {}
   }
 }

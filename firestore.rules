@@ -2,12 +2,48 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can only access their own data
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    
+    // Helper functions for security
+    function isAuthenticated() {
+      return request.auth != null;
     }
     
-    // Messages are user-specific
+    function isOwner(resource) {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+    
+    function isValidUserData() {
+      return request.resource.data.keys().hasAll(['userId', 'email', 'createdAt']) &&
+             request.resource.data.userId is string &&
+             request.resource.data.email is string &&
+             request.resource.data.createdAt is timestamp;
+    }
+    
+    function isValidUsageData() {
+      return request.resource.data.keys().hasAll(['userId', 'timestamp', 'tokens', 'cost']) &&
+             request.resource.data.userId is string &&
+             request.resource.data.timestamp is timestamp &&
+             request.resource.data.tokens is number &&
+             request.resource.data.cost is number;
+    }
+    
+    // User profiles
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      allow create: if isAuthenticated() && request.auth.uid == userId && isValidUserData();
+      allow update: if isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // User conversations and threads
+    match /users/{userId}/conversations/{conversationId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      
+      match /messages/{messageId} {
+        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      }
+    }
+    
+    // Legacy messages collection (backwards compatibility)
     match /messages/{messageId} {
       allow read, write: if request.auth != null && 
         request.auth.uid == resource.data.userId;
@@ -15,19 +51,84 @@ service cloud.firestore {
         request.auth.uid == request.resource.data.userId;
     }
     
-    // Rate limits are user-specific
+    // Usage tracking (API costs, tokens)
+    match /usage/{usageId} {
+      allow read: if isOwner(resource);
+      allow create: if isAuthenticated() && isValidUsageData() && 
+                   request.auth.uid == request.resource.data.userId;
+      // Prevent modification of usage records for audit trail
+      allow update, delete: if false;
+    }
+    
+    // Rate limits are user-specific  
     match /rateLimits/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Health checks collection - temporary for deployment validation
+    // Aggregated user usage statistics
+    match /userStats/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if false; // Only backend functions can write
+    }
+    
+    // System monitoring (read-only for authenticated admin users)
+    match /monitoring/{document=**} {
+      allow read: if isAuthenticated(); 
+      allow write: if false; // Only backend functions can write
+    }
+    
+    // Health check data (public read for monitoring tools)
+    match /health/{document} {
+      allow read: if true; // Public health endpoint
+      allow write: if false; // Only backend functions can write
+    }
+    
+    // Legacy health checks collection
     match /health-checks/{checkId} {
       allow read, write: if request.auth != null;
+    }
+    
+    // Alerts and notifications
+    match /alerts/{alertId} {
+      allow read: if isAuthenticated(); 
+      allow write: if false; // Only backend functions can write
+    }
+    
+    // User preferences and settings
+    match /users/{userId}/preferences/{document=**} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Feedback and support tickets
+    match /support/{ticketId} {
+      allow read: if isOwner(resource);
+      allow create: if isAuthenticated() && 
+                   request.resource.data.userId == request.auth.uid &&
+                   request.resource.data.keys().hasAll(['userId', 'subject', 'message', 'timestamp']);
+      allow update: if isOwner(resource) && 
+                   !request.resource.data.diff(resource.data).affectedKeys().hasAny(['userId', 'timestamp']);
+    }
+    
+    // Analytics data (aggregated, no PII)
+    match /analytics/{document=**} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only backend functions can write
+    }
+    
+    // Configuration and feature flags (public read)
+    match /config/{document} {
+      allow read: if true;
+      allow write: if false; // Only admin functions can write
     }
     
     // Admin-only collections (for future use)
     match /admin/{document=**} {
       allow read, write: if false; // Only server-side access
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
