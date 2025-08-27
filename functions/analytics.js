@@ -398,7 +398,7 @@ function generateInsights(interactions) {
   return insights;
 }
 
-function identifyBehaviorPatterns(interactions) {
+function identifyBehaviorPatterns() {
   // Implement ML-based pattern recognition
   return {
     sessionLength: "medium", // short, medium, long
@@ -428,19 +428,19 @@ function generateSessionId() {
 }
 
 // Placeholder functions for dashboard metrics
-async function getActiveUsers(startDate, endDate) {
+async function getActiveUsers() {
   return Math.floor(Math.random() * 100) + 50; // Placeholder
 }
 
-async function getTotalInteractions(startDate, endDate) {
+async function getTotalInteractions() {
   return Math.floor(Math.random() * 1000) + 500; // Placeholder
 }
 
-async function getAverageSessionDuration(startDate, endDate) {
+async function getAverageSessionDuration() {
   return Math.floor(Math.random() * 600) + 300; // 5-15 minutes
 }
 
-async function getTopCategories(startDate, endDate) {
+async function getTopCategories() {
   return [
     { category: "spiritual_guidance", count: 245 },
     { category: "meditation", count: 189 },
@@ -493,8 +493,9 @@ function identifyImprovementAreas(contentData) {
   ];
 }
 
-function generatePersonalizedContent(userId, contentData) {
+function generatePersonalizedContent(userId) {
   // Placeholder implementation - generate personalized recommendations
+  logger.info("Generating personalized content for user", { userId });
   return [
     { type: "lesson", title: "Understanding Forgiveness", priority: "high" },
     { type: "meditation", title: "Peace Meditation", priority: "medium" },
