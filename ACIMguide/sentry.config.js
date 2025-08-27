@@ -1,3 +1,6 @@
+/* eslint-env react-native */
+/* global __DEV__ */
+
 /**
  * Sentry Configuration for ACIMguide React Native App
  * Maintains spiritual integrity while providing mobile error tracking
@@ -85,8 +88,8 @@ export function initSentryMobile() {
         // Track navigation performance while protecting spiritual content
         routingInstrumentation: new Sentry.ReactNavigationInstrumentation(),
         enableNativeFramesTracking: !__DEV__, // Only in production
-        enableStallTracking: false, // Avoid performance overhead
-      }),
+        enableStallTracking: false // Avoid performance overhead
+      })
     ],
 
     // Enhanced error context while protecting spiritual content
@@ -113,7 +116,7 @@ export function initSentryMobile() {
     // Mobile-specific settings
     enableNativeCrashHandling: !__DEV__,
     enableAutoPerformanceTracing: true,
-    enableUserInteractionTracing: false, // Disable to protect spiritual interactions
+    enableUserInteractionTracing: false // Disable to protect spiritual interactions
   });
 
   console.log('Sentry initialized for ACIMguide mobile app', {

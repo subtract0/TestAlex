@@ -27,7 +27,11 @@
     "deploy:fixes": "node autonomous-fix-deployer.js",
     "deploy:fixes:dry-run": "node autonomous-fix-deployer.js --dry-run",
     "deploy:fixes:auto-merge": "node autonomous-fix-deployer.js --auto-merge",
-    "validate:autonomous": "node validate-autonomous-system.js"
+    "validate:autonomous": "node validate-autonomous-system.js",
+    "start:ref-tools": "node scripts/start-ref-tools-mcp.js",
+    "start:ref-tools:dev": "TRANSPORT=http REF_MCP_PORT=4102 ref-tools-mcp",
+    "check:ref-tools": "node scripts/start-ref-tools-mcp.js --check",
+    "kill:ref-tools": "node scripts/start-ref-tools-mcp.js --kill"
   },
   "devDependencies": {
     "@babel/plugin-syntax-jsx": "^7.27.1",

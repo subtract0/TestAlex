@@ -16,6 +16,17 @@ import openai
 from task_queue import TaskQueue, Priority, AgentRole, Task
 from value_generation_engine import ValueGenerationEngine, ValueOpportunity
 
+# Import Ref-Tools MCP client
+try:
+    import sys
+    sys.path.append(str(Path(__file__).parent.parent / "utils"))
+    from ref_tools_client import RefToolsClient, AgentRefToolsHelper, RefToolsConnectionError
+except ImportError as e:
+    logger.warning(f"Ref-Tools MCP client not available: {e}")
+    RefToolsClient = None
+    AgentRefToolsHelper = None
+    RefToolsConnectionError = Exception
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -44,6 +55,10 @@ class AgentIntegrationSystem:
         self.value_engine = ValueGenerationEngine()
         self.agents = self._initialize_agents()
         self.agent_prompts = {}
+        
+        # Initialize Ref-Tools MCP client if available
+        self.ref_tools = None
+        self._init_ref_tools_client()
         
     def _initialize_agents(self) -> Dict[AgentRole, AgentCapability]:
         """Initialize all agent capabilities based on role files."""
@@ -210,6 +225,77 @@ class AgentIntegrationSystem:
                 value_focus_areas=["user_onboarding", "developer_experience", "knowledge_sharing"]
             )
         }
+    
+    def _init_ref_tools_client(self):
+        """Initialize Ref-Tools MCP client if available."""
+        if RefToolsClient is not None:
+            try:
+                self.ref_tools = RefToolsClient()
+                health = self.ref_tools.health_check()
+                if health.get('status') == 'healthy':
+                    logger.info("✅ Ref-Tools MCP client initialized successfully")
+                else:
+                    logger.warning(f"⚠️ Ref-Tools MCP service not healthy: {health}")
+                    self.ref_tools = None
+            except RefToolsConnectionError:
+                logger.warning("⚠️ Ref-Tools MCP service unavailable - continuing without it")
+                self.ref_tools = None
+            except Exception as e:
+                logger.warning(f"⚠️ Could not initialize Ref-Tools MCP client: {e}")
+                self.ref_tools = None
+        else:
+            logger.warning("⚠️ Ref-Tools MCP client not available - install utils/ref_tools_client.py")
+    
+    def get_agent_docs_context(self, agent_capability: AgentCapability, task: Task) -> str:
+        """Get relevant documentation context for agent using Ref-Tools MCP."""
+        if not self.ref_tools:
+            return ""
+        
+        try:
+            # Extract relevant technologies from the task and agent role
+            technologies = []
+            
+            # Map agent roles to relevant technologies
+            role_tech_mapping = {
+                AgentRole.BACKEND_ENGINEER: ['firebase', 'nodejs', 'openai'],
+                AgentRole.CLOUD_FUNCTIONS_ENGINEER: ['firebase', 'nodejs', 'serverless'],
+                AgentRole.ANDROID_ENGINEER: ['android', 'kotlin', 'firebase'],
+                AgentRole.DEVOPS_SRE: ['firebase', 'docker', 'ci-cd'],
+                AgentRole.UI_UX_DESIGNER: ['react', 'html', 'css'],
+                AgentRole.QA_TESTER: ['testing', 'playwright', 'jest']
+            }
+            
+            if agent_capability.role in role_tech_mapping:
+                technologies.extend(role_tech_mapping[agent_capability.role])
+            
+            # Extract technologies from task description
+            task_text = f"{task.title} {task.description}".lower()
+            if 'firebase' in task_text:
+                technologies.append('firebase')
+            if 'openai' in task_text:
+                technologies.append('openai')
+            if 'react' in task_text:
+                technologies.append('react')
+            if 'typescript' in task_text:
+                technologies.append('typescript')
+            
+            # Get documentation for relevant technologies
+            docs_context = []
+            for tech in set(technologies[:3]):  # Limit to top 3 to avoid token bloat
+                try:
+                    docs = self.ref_tools.get_docs(tech, task.description, max_tokens=500)
+                    if docs and 'content' in docs:
+                        docs_context.append(f"## {tech.upper()} Documentation\n{docs['content'][:800]}...")
+                except Exception as e:
+                    logger.debug(f"Could not get docs for {tech}: {e}")
+            
+            if docs_context:
+                return f"\n\n## 📚 Technical Reference (via Ref-Tools MCP)\n\n" + "\n\n".join(docs_context)
+            
+        except Exception as e:
+            logger.debug(f"Error getting docs context: {e}")
+        
+        return ""
     
     async def load_agent_prompts(self):
         """Load all agent prompts from their respective files."""
@@ -416,6 +502,11 @@ Deliver concrete, implementable solutions.
         # Add task-specific context based on metadata
         if task.metadata:
             context_parts.append(f"**Task Metadata**: {json.dumps(task.metadata, indent=2)}")
+        
+        # Add Ref-Tools MCP documentation context if available
+        docs_context = self.get_agent_docs_context(agent_capability, task)
+        if docs_context:
+            context_parts.append(docs_context)
         
         return "\n".join(context_parts)
     

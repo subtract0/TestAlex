@@ -10,9 +10,7 @@
  */
 
 const { Octokit } = require('@octokit/rest');
-const fs = require('fs').promises;
 const path = require('path');
-const crypto = require('crypto');
 
 class AutonomousFixDeployer {
   constructor() {
