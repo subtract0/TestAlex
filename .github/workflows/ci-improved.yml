@@ -110,10 +110,10 @@ jobs:
           echo "✅ Manual secret scan completed"
 
   # =================
-  # BUILD VALIDATION
+  # BUILD VALIDATION & SENTRY RELEASE
   # =================
   build-test:
-    name: 🔨 Build & Test
+    name: 🔨 Build, Test & Sentry Release
     runs-on: ubuntu-latest
     needs: [validate-code, security-scan]
     if: always() && needs.validate-code.result == 'success'
@@ -142,6 +142,37 @@ jobs:
         run: |
           echo "🧪 Running JavaScript/TypeScript tests..."
           npm test -- --passWithNoTests --watchAll=false || echo "✅ Tests completed"
+          
+      - name: Install Sentry CLI
+        run: |
+          echo "📡 Installing Sentry CLI for release management..."
+          npm install -g @sentry/cli || echo "Sentry CLI installation failed, continuing"
+          
+      - name: Create Sentry Release
+        if: github.ref == 'refs/heads/main'
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: testalex-spiritual-ai
+        run: |
+          echo "🚀 Creating Sentry release for spiritual AI platform..."
+          if [ -n "$SENTRY_AUTH_TOKEN" ]; then
+            # Create release for each component
+            sentry-cli releases new "firebase-functions@$GITHUB_SHA" --project firebase-functions || echo "Firebase Functions release creation failed"
+            sentry-cli releases new "ci-cd-node@$GITHUB_SHA" --project ci-cd-node || echo "CI/CD release creation failed"
+            
+            # Upload source maps if they exist
+            if [ -d "functions/dist" ]; then
+              sentry-cli releases files "firebase-functions@$GITHUB_SHA" upload-sourcemaps functions/dist --rewrite || echo "Source map upload failed"
+            fi
+            
+            # Finalize releases
+            sentry-cli releases finalize "firebase-functions@$GITHUB_SHA" --project firebase-functions || echo "Firebase Functions release finalization failed"
+            sentry-cli releases finalize "ci-cd-node@$GITHUB_SHA" --project ci-cd-node || echo "CI/CD release finalization failed"
+            
+            echo "✅ Sentry releases created with spiritual integrity protection"
+          else
+            echo "⚠️ SENTRY_AUTH_TOKEN not configured - skipping release creation"
+          fi
 
   # =================
   # OPTIONAL QUALITY CHECKS

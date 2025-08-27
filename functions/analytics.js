@@ -475,7 +475,7 @@ function findTopResponses(contentData, metric) {
     .map(item => ({ response: item.response || "Helpful guidance", score: item[metric] }));
 }
 
-function analyzeContentPreferences(contentData) {
+function analyzeContentPreferences() {
   // Placeholder implementation - analyze content preferences
   const preferences = {
     preferredTopics: ["forgiveness", "peace", "love"],
@@ -485,7 +485,7 @@ function analyzeContentPreferences(contentData) {
   return preferences;
 }
 
-function identifyImprovementAreas(contentData) {
+function identifyImprovementAreas() {
   // Placeholder implementation - identify areas for improvement
   return [
     { area: "response_time", priority: "medium", suggestion: "Optimize response generation" },
@@ -531,7 +531,7 @@ async function cleanupOldData() {
   return true;
 }
 
-function identifyCommonPaths(journeySteps) {
+function identifyCommonPaths() {
   // Placeholder implementation - identify common user journey paths
   return [
     { path: ["question", "guidance", "reflection"], frequency: 0.45 },

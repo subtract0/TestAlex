@@ -249,6 +249,135 @@ class CIHealthChecker {
     }
   }
 
+  async checkSentryIntegration() {
+    const startTime = Date.now();
+    
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      
+      // Check Sentry configuration files
+      const sentryFiles = [
+        'functions/sentry-config.js',
+        'ACIMguide/sentry.config.js', 
+        'sentry_python_config.py',
+        'sentry-alerts-dashboards-config.json',
+        'SENTRY_INTEGRATION_GUIDE.md'
+      ];
+      
+      const missingSentryFiles = [];
+      const sentryDetails = {};
+      
+      for (const file of sentryFiles) {
+        if (fs.existsSync(file)) {
+          sentryDetails[file] = 'CONFIGURED';
+        } else {
+          missingSentryFiles.push(file);
+          sentryDetails[file] = 'MISSING';
+        }
+      }
+      
+      // Check if Sentry packages are installed
+      const packageJson = require('../package.json');
+      const functionsPackageJson = require('../functions/package.json');
+      
+      const hasSentryNode = packageJson.devDependencies && packageJson.devDependencies['@sentry/node'];
+      const hasSentryFunctions = functionsPackageJson.dependencies && 
+        (functionsPackageJson.dependencies['@sentry/serverless'] || functionsPackageJson.dependencies['@sentry/tracing']);
+      
+      sentryDetails.sentry_node_installed = hasSentryNode ? 'YES' : 'NO';
+      sentryDetails.sentry_functions_installed = hasSentryFunctions ? 'YES' : 'NO';
+      
+      // Check CI workflow has Sentry integration
+      const ciWorkflow = fs.existsSync('.github/workflows/ci-improved.yml') ? 
+        fs.readFileSync('.github/workflows/ci-improved.yml', 'utf8') : '';
+      const hasSentryCIIntegration = ciWorkflow.includes('sentry-cli') || ciWorkflow.includes('SENTRY_AUTH_TOKEN');
+      sentryDetails.ci_sentry_integration = hasSentryCIIntegration ? 'CONFIGURED' : 'MISSING';
+      
+      // Validate Sentry health without making actual API calls
+      const duration = Date.now() - startTime;
+      const configuredFiles = sentryFiles.length - missingSentryFiles.length;
+      const totalChecks = configuredFiles + (hasSentryNode ? 1 : 0) + (hasSentryFunctions ? 1 : 0) + (hasSentryCIIntegration ? 1 : 0);
+      
+      return {
+        success: configuredFiles >= 3 && (hasSentryNode || hasSentryFunctions),
+        message: `Sentry integration: ${configuredFiles}/${sentryFiles.length} files configured, ${totalChecks} checks passed`,
+        duration,
+        details: sentryDetails
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Sentry integration check failed: ${error.message}`,
+        duration: Date.now() - startTime
+      };
+    }
+  }
+
+  async checkSpiritualIntegrity() {
+    const startTime = Date.now();
+    
+    try {
+      const fs = require('fs');
+      
+      // Check for spiritual content protection in configurations
+      const protectionChecks = [];
+      const details = {};
+      
+      // Check Firebase Functions has spiritual content scrubbing
+      if (fs.existsSync('functions/sentry-config.js')) {
+        const sentryConfig = fs.readFileSync('functions/sentry-config.js', 'utf8');
+        const hasACIMScrubbing = sentryConfig.includes('scrubACIMContent') || sentryConfig.includes('ACIM_CONTENT_REDACTED');
+        protectionChecks.push(hasACIMScrubbing);
+        details.firebase_functions_protection = hasACIMScrubbing ? 'ENABLED' : 'MISSING';
+      }
+      
+      // Check Python config has spiritual content protection
+      if (fs.existsSync('sentry_python_config.py')) {
+        const pythonConfig = fs.readFileSync('sentry_python_config.py', 'utf8');
+        const hasPythonScrubbing = pythonConfig.includes('scrub_acim_content') || pythonConfig.includes('spiritual_integrity');
+        protectionChecks.push(hasPythonScrubbing);
+        details.python_systems_protection = hasPythonScrubbing ? 'ENABLED' : 'MISSING';
+      }
+      
+      // Check mobile app has protection
+      if (fs.existsSync('ACIMguide/sentry.config.js')) {
+        const mobileConfig = fs.readFileSync('ACIMguide/sentry.config.js', 'utf8');
+        const hasMobileScrubbing = mobileConfig.includes('scrubACIMContentMobile') || mobileConfig.includes('spiritual_integrity');
+        protectionChecks.push(hasMobileScrubbing);
+        details.mobile_app_protection = hasMobileScrubbing ? 'ENABLED' : 'MISSING';
+      }
+      
+      // Check alerts configuration protects spiritual content
+      if (fs.existsSync('sentry-alerts-dashboards-config.json')) {
+        const alertsConfig = fs.readFileSync('sentry-alerts-dashboards-config.json', 'utf8');
+        const hasProtectedConfig = alertsConfig.includes('spiritual-ai') || alertsConfig.includes('acim_pure');
+        protectionChecks.push(hasProtectedConfig);
+        details.alerts_spiritual_context = hasProtectedConfig ? 'CONFIGURED' : 'MISSING';
+      }
+      
+      const duration = Date.now() - startTime;
+      const passedChecks = protectionChecks.filter(check => check).length;
+      
+      return {
+        success: passedChecks >= 2, // At least 2 components must have spiritual protection
+        message: `Spiritual integrity protection: ${passedChecks}/${protectionChecks.length} components secured`,
+        duration,
+        details: {
+          ...details,
+          protection_score: `${passedChecks}/${protectionChecks.length}`,
+          acim_purity_maintained: passedChecks >= 2 ? 'YES' : 'AT_RISK'
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Spiritual integrity check failed: ${error.message}`,
+        duration: Date.now() - startTime
+      };
+    }
+  }
+
   printSummary() {
     console.log('═══════════════════════════════════════');
     console.log('📊 CI HEALTH CHECK SUMMARY');
@@ -343,11 +472,39 @@ async function main() {
   };
   console.log(`${testFramework.success ? '✅' : '❌'} Test Framework: ${testFramework.message}`);
   
+  console.log('⏳ Running Sentry Integration check...');
+  const sentryIntegration = await checker.checkSentryIntegration();
+  checker.results.checks['Sentry Integration'] = {
+    status: sentryIntegration.success ? 'healthy' : 'unhealthy',
+    message: sentryIntegration.message,
+    duration: sentryIntegration.duration,
+    details: sentryIntegration.details
+  };
+  console.log(`${sentryIntegration.success ? '✅' : '⚠️'} Sentry Integration: ${sentryIntegration.message}`);
+  
+  console.log('⏳ Running Spiritual Integrity check...');
+  const spiritualIntegrity = await checker.checkSpiritualIntegrity();
+  checker.results.checks['Spiritual Integrity'] = {
+    status: spiritualIntegrity.success ? 'healthy' : 'unhealthy',
+    message: spiritualIntegrity.message,
+    duration: spiritualIntegrity.duration,
+    details: spiritualIntegrity.details
+  };
+  console.log(`${spiritualIntegrity.success ? '🕊️' : '⚠️'} Spiritual Integrity: ${spiritualIntegrity.message}`);
+  
   // Calculate overall health
   const hasFailures = [fileStructure, packageIntegrity, configFiles, testFramework]
     .some(result => !result.success);
   
-  checker.results.overall = hasFailures ? 'degraded' : 'healthy';
+  const hasCriticalFailures = [spiritualIntegrity].some(result => !result.success);
+  
+  if (hasCriticalFailures) {
+    checker.results.overall = 'critical'; // Spiritual integrity is non-negotiable
+  } else if (hasFailures) {
+    checker.results.overall = 'degraded';
+  } else {
+    checker.results.overall = 'healthy';
+  }
   
   // Print summary
   checker.printSummary();

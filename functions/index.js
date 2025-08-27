@@ -1,6 +1,7 @@
 /**
  * ACIM Guide Cloud Functions - Streamlined Version
  * Real CourseGPT integration with robust error handling
+ * Enhanced with Sentry monitoring while maintaining spiritual integrity
  */
 
 require("dotenv").config();
@@ -8,6 +9,7 @@ const {onCall} = require("firebase-functions/https");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
 const OpenAI = require("openai");
+const { initSentry, wrapFunction, createTransaction, captureError } = require('./sentry-config');
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
@@ -25,6 +27,9 @@ if (!ASSISTANT_ID) {
   throw new Error("ASSISTANT_ID environment variable is required");
 }
 
+// Initialize Sentry for spiritual AI platform monitoring
+initSentry();
+
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY
@@ -33,6 +38,7 @@ const openai = new OpenAI({
 logger.info("ACIM Guide Functions initialized", {
   hasApiKey: !!OPENAI_API_KEY,
   hasAssistantId: !!ASSISTANT_ID,
+  sentryEnabled: !!process.env.SENTRY_DSN_FUNCTIONS,
   timestamp: new Date().toISOString()
 });
 
@@ -94,18 +100,27 @@ async function getOrCreateThread(userId) {
 }
 
 /**
- * Chat with CourseGPT Assistant - Streamlined Version
+ * Chat with CourseGPT Assistant - Enhanced with Sentry Monitoring
+ * Maintains spiritual integrity while providing enterprise-grade observability
  */
 exports.chatWithAssistant = onCall({
   memory: "512MB",
   timeoutSeconds: 60,
   maxInstances: 10
-}, async (request) => {
+}, wrapFunction(async (request) => {
   const startTime = Date.now();
+  const transaction = createTransaction('chatWithAssistant', 'spiritual-guidance');
   
   try {
     const {message, tone = "gentle"} = request.data;
     const userId = request.auth && request.auth.uid;
+
+    // Set user context for Sentry (privacy-safe)
+    const Sentry = require('@sentry/serverless');
+    Sentry.setUser({
+      id: userId ? require('crypto').createHash('sha256').update(userId).digest('hex').substring(0, 16) : 'anonymous',
+      segment: 'spiritual-seeker' // Business context only
+    });
 
     if (!userId) {
       throw new Error("Authentication required");
@@ -155,16 +170,20 @@ exports.chatWithAssistant = onCall({
       logger.warn("Firestore write failed, continuing without storage", {error: firestoreError.message});
     }
 
-    // Add user message to OpenAI thread
+    // Add user message to OpenAI thread (with performance tracking)
+    const addMessageSpan = transaction.startChild({ op: 'openai', description: 'Add message to thread' });
     await openai.beta.threads.messages.create(userThreadId, {
       role: "user",
       content: message
     });
+    addMessageSpan.finish();
 
-    // Create and run the assistant
+    // Create and run the assistant (with performance tracking)
+    const runSpan = transaction.startChild({ op: 'openai', description: 'Create assistant run' });
     const run = await openai.beta.threads.runs.create(userThreadId, {
       assistant_id: ASSISTANT_ID
     });
+    runSpan.finish();
 
     logger.info("Assistant run started", {runId: run.id, threadId: userThreadId});
 
@@ -188,11 +207,13 @@ exports.chatWithAssistant = onCall({
     }
 
     if (runStatus.status === "completed") {
-      // Get the assistant's response
+      // Get the assistant's response (with performance tracking)
+      const getResponseSpan = transaction.startChild({ op: 'openai', description: 'Retrieve assistant response' });
       const messages = await openai.beta.threads.messages.list(userThreadId);
       const assistantMessage = messages.data.find((msg) =>
         msg.role === "assistant" && msg.run_id === run.id
       );
+      getResponseSpan.finish();
 
       if (assistantMessage) {
         let response = (assistantMessage.content[0] && assistantMessage.content[0].text && assistantMessage.content[0].text.value) || "No response generated";
@@ -209,8 +230,9 @@ exports.chatWithAssistant = onCall({
           .replace(/\n{3,}/g, "\n\n") // Clean up excessive line breaks
           .trim();
 
-        // Update message document if we created one
+        // Update message document if we created one (with performance tracking)
         if (messageRef) {
+          const updateSpan = transaction.startChild({ op: 'firestore', description: 'Update message document' });
           try {
             await messageRef.update({
               assistantResponse: response,
@@ -220,9 +242,12 @@ exports.chatWithAssistant = onCall({
               latency: Date.now() - startTime,
               runId: run.id
             });
+            updateSpan.setStatus('ok');
           } catch (updateError) {
             logger.warn("Failed to update message document", {error: updateError.message});
+            updateSpan.setStatus('internal_error');
           }
+          updateSpan.finish();
         }
 
         logger.info("Chat completed successfully", {
@@ -231,6 +256,11 @@ exports.chatWithAssistant = onCall({
           responseLength: response.length,
           latency: Date.now() - startTime
         });
+
+        // Mark transaction as successful
+        transaction.setStatus('ok');
+        transaction.setTag('spiritual_guidance_success', true);
+        transaction.finish();
 
         // Return response for immediate display
         return {
@@ -260,6 +290,19 @@ exports.chatWithAssistant = onCall({
       stack: error.stack,
       userId: (request.auth && request.auth.uid)
     });
+    
+    // Mark transaction as failed and capture error
+    transaction.setStatus('internal_error');
+    transaction.setTag('spiritual_guidance_success', false);
+    transaction.finish();
+    
+    // Capture error with spiritual content protection
+    captureError(error, {
+      userId: request.auth?.uid ? 'authenticated' : 'anonymous',
+      messageLength: request.data?.message?.length || 0,
+      function: 'chatWithAssistant'
+    });
+    
     throw error;
   }
 });

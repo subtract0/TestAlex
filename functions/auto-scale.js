@@ -6,7 +6,6 @@
 
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const {GoogleAuth} = require("google-auth-library");
 const logger = require("firebase-functions/logger");
 
 // Initialize Firebase Admin if not already initialized
@@ -314,7 +313,7 @@ async function sendScalingAlerts(metrics, scalingDecision) {
  */
 exports.autoScaleCloudFunctions = functions.pubsub
   .schedule("every 10 minutes")
-  .onRun(async (context) => {
+  .onRun(async () => {
     try {
       logger.info("Auto-scaling function triggered");
       

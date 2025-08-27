@@ -32,104 +32,7 @@ const VECTOR_STORE_ID = process.env.VECTOR_STORE_ID || (config.vector && config.
 const DAILY_OUT_TOKENS_CAP = parseInt(process.env.DAILY_OUT_TOKENS_CAP || (config.tokens && config.tokens.daily_cap)) || 10000;
 const RATE_LIMIT_RPM = 10; // Requests per minute per user
 
-// Auto-scaling configuration based on usage metrics
-// Dynamic maxInstances based on daily usage patterns and cost control
-const AUTO_SCALE_CONFIG = {
-  // Base configuration
-  minInstances: 0,
-  maxInstancesLow: 5, // Off-peak hours
-  maxInstancesPeak: 20, // Peak hours (9 AM - 9 PM)
-  maxInstancesHigh: 35, // High usage periods
 
-  // Usage thresholds for scaling decisions
-  thresholds: {
-    dailyTokensLow: 10000, // < 10K tokens/day = low usage
-    dailyTokensMedium: 30000, // 10K-30K tokens/day = medium usage
-    dailyTokensHigh: 45000, // > 30K tokens/day = high usage
-    requestsPerMinute: {
-      low: 10,
-      medium: 30,
-      high: 60
-    }
-  }
-};
-
-/**
- * Determine optimal maxInstances based on current usage metrics
- * @return {Promise<number>} Optimal maxInstances value
- */
-async function calculateOptimalMaxInstances() {
-  try {
-    const now = new Date();
-    const hour = now.getHours();
-    const dayStart = new Date().setHours(0, 0, 0, 0);
-
-    // Get current daily token usage across all users
-    const rateLimitsSnapshot = await admin.firestore().collection("rateLimits").get();
-    let totalDailyTokens = 0;
-    let activeUsers = 0;
-
-    rateLimitsSnapshot.docs.forEach((doc) => {
-      const data = doc.data();
-      if (data.lastReset >= dayStart) {
-        totalDailyTokens += data.dailyTokens || 0;
-        if (data.dailyTokens > 0) activeUsers++;
-      }
-    });
-
-    // Get recent request rate (last 10 minutes)
-    const recentMetricsSnapshot = await admin.firestore()
-      .collection("metrics")
-      .doc("requests")
-      .get();
-
-    const recentData = recentMetricsSnapshot.exists ? recentMetricsSnapshot.data() : {};
-    const recentRequests = recentData.last10Minutes || 0;
-
-    // Determine time-based scaling
-    let timeBasedMax;
-    if (hour >= 9 && hour <= 21) {
-      // Peak hours: 9 AM - 9 PM
-      timeBasedMax = AUTO_SCALE_CONFIG.maxInstancesPeak;
-    } else {
-      // Off-peak hours
-      timeBasedMax = AUTO_SCALE_CONFIG.maxInstancesLow;
-    }
-
-    // Determine usage-based scaling
-    let usageBasedMax;
-    if (totalDailyTokens >= AUTO_SCALE_CONFIG.thresholds.dailyTokensHigh) {
-      usageBasedMax = AUTO_SCALE_CONFIG.maxInstancesHigh;
-    } else if (totalDailyTokens >= AUTO_SCALE_CONFIG.thresholds.dailyTokensMedium) {
-      usageBasedMax = AUTO_SCALE_CONFIG.maxInstancesPeak;
-    } else {
-      usageBasedMax = AUTO_SCALE_CONFIG.maxInstancesLow;
-    }
-
-    // Take the minimum of time-based and usage-based scaling for cost control
-    const optimalMax = Math.min(timeBasedMax, usageBasedMax);
-
-    // Log scaling decision for monitoring
-    logger.info("Auto-scaling calculation", {
-      hour,
-      totalDailyTokens,
-      activeUsers,
-      recentRequests,
-      timeBasedMax,
-      usageBasedMax,
-      optimalMax,
-      currentBudgetUtilization: totalDailyTokens / DAILY_OUT_TOKENS_CAP
-    });
-
-    return Math.max(1, optimalMax); // Always allow at least 1 instance
-  } catch (error) {
-    logger.warn("Auto-scaling calculation failed, using default", {
-      error: error.message,
-      defaultMax: AUTO_SCALE_CONFIG.maxInstancesLow
-    });
-    return AUTO_SCALE_CONFIG.maxInstancesLow;
-  }
-}
 
 // Note: Global options not available in Functions v1
 // Function-specific options are set individually in each export
@@ -297,7 +200,6 @@ function detectLanguage(message) {
     });
 
     // Check for language-specific words
-    const words = text.split(/\s+/);
     Object.entries(languagePatterns).forEach(([lang, patterns]) => {
       // Word matching (higher weight)
       patterns.words.forEach((word) => {
@@ -375,8 +277,7 @@ exports.chatWithAssistant = onCall({
   let tokenIn = 0;
   let tokenOut = 0;
   let budgetAllowed = true;
-  let serviceLevel = "normal";
-  let maxTokens = 500;
+  // Note: serviceLevel and maxTokens would be used for budget management in production
 
   try {
     const {message, tone = "gentle", userTier = "free"} = request.data;
@@ -428,8 +329,7 @@ exports.chatWithAssistant = onCall({
       });
 
       budgetAllowed = budgetCheck.allowed;
-      serviceLevel = budgetCheck.serviceLevel;
-      maxTokens = budgetCheck.maxTokens;
+      // Note: serviceLevel and maxTokens from budgetCheck would be used in production
 
       if (!budgetAllowed) {
         throw new Error(budgetCheck.reason || "Service temporarily unavailable due to budget constraints");
@@ -440,8 +340,7 @@ exports.chatWithAssistant = onCall({
         userId
       });
       // Continue with reduced service in case of budget check failure
-      maxTokens = 300;
-      serviceLevel = "warning";
+      // Note: Reduced service parameters would be used for budget management
     }
 
     // Detect user's language for multilingual response

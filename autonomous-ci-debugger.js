@@ -12,6 +12,32 @@
 const { Octokit } = require('@octokit/rest');
 const fs = require('fs').promises;
 const path = require('path');
+const Sentry = require('@sentry/node');
+
+// Initialize Sentry for CI/CD monitoring
+Sentry.init({
+  dsn: process.env.SENTRY_DSN_CI,
+  environment: process.env.CI ? 'ci' : 'local',
+  tracesSampleRate: 0.2,
+  beforeSend: (event) => {
+    // Scrub sensitive CI/CD data
+    if (event.request?.headers) {
+      delete event.request.headers.authorization;
+      delete event.request.headers['x-github-token'];
+    }
+    if (event.contexts?.github?.token) {
+      delete event.contexts.github.token;
+    }
+    return event;
+  },
+  initialScope: {
+    tags: {
+      component: 'autonomous-ci',
+      platform: 'spiritual-ai',
+      service: 'devops'
+    }
+  }
+});
 
 class AutonomousCIDebugger {
   constructor() {
@@ -157,6 +183,21 @@ class AutonomousCIDebugger {
         
         // Generate fixes if patterns are detected
         if (analysis.detectedPatterns.length > 0) {
+          // Capture CI/CD failure in Sentry
+          Sentry.captureException(new Error(`CI/CD Pattern Detected: ${analysis.detectedPatterns.map(p => p.category).join(', ')}`), {
+            tags: {
+              workflow_name: run.name,
+              failure_patterns: analysis.detectedPatterns.length,
+              auto_fix_applied: true
+            },
+            extra: {
+              run_id: run.id,
+              run_url: run.html_url,
+              detected_patterns: analysis.detectedPatterns,
+              github_repo: this.repo
+            }
+          });
+          
           await this.generateAutonomousFixes(analysis);
         }
       }

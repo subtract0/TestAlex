@@ -407,9 +407,6 @@ exports.handleGitHubWebhook = functions.https.onRequest(async (req, res) => {
   console.log("🎯 GitHub webhook received");
   
   // Verify GitHub webhook signature (recommended for production)
-  const signature = req.get("X-Hub-Signature-256");
-  const payload = JSON.stringify(req.body);
-  
   // For demo purposes, we'll skip signature verification
   // In production, implement proper webhook signature validation
   
@@ -449,7 +446,7 @@ exports.handleGitHubWebhook = functions.https.onRequest(async (req, res) => {
 /**
  * Scheduled function to proactively monitor CI/CD health
  */
-exports.scheduledCIMonitoring = functions.pubsub.schedule("every 30 minutes").onRun(async (context) => {
+exports.scheduledCIMonitoring = functions.pubsub.schedule("every 30 minutes").onRun(async () => {
   console.log("⏰ Running scheduled CI/CD monitoring...");
   
   const autonomousCI = new AutonomousCI();

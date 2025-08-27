@@ -1,0 +1,564 @@
+{
+  "organization": "testalex-spiritual-ai",
+  "platform": "spiritual-ai",
+  "alert_rules": {
+    "acimguide_web": {
+      "project": "acimguide-web",
+      "alerts": [
+        {
+          "name": "Web Application Error Rate Alert",
+          "conditions": [
+            {
+              "id": "sentry.rules.conditions.event_frequency.EventFrequencyCondition",
+              "value": 5,
+              "interval": "1m",
+              "comparisonType": "count"
+            }
+          ],
+          "actions": [
+            {
+              "id": "sentry.rules.actions.notify_event_service.NotifyEventServiceAction",
+              "service": "slack",
+              "channel": "#acim-ops",
+              "tags": "production,web,spiritual-guidance"
+            }
+          ],
+          "actionMatch": "all"
+        },
+        {
+          "name": "Web Performance Degradation",
+          "conditions": [
+            {
+              "id": "sentry.rules.conditions.event_frequency.EventUniqueUserFrequencyCondition", 
+              "value": 10,
+              "interval": "5m",
+              "comparisonType": "count"
+            }
+          ],
+          "actions": [
+            {
+              "id": "sentry.rules.actions.notify_event_service.NotifyEventServiceAction",
+              "service": "slack",
+              "channel": "#acim-ops",
+              "tags": "production,performance,spiritual-platform"
+            }
+          ]
+        }
+      ]
+    },
+    "acimguide_mobile": {
+      "project": "acimguide-mobile", 
+      "alerts": [
+        {
+          "name": "Mobile App Crash Rate Alert",
+          "conditions": [
+            {
+              "id": "sentry.rules.conditions.event_frequency.EventFrequencyCondition",
+              "value": 3,
+              "interval": "5m",
+              "comparisonType": "count"
+            }
+          ],
+          "actions": [
+            {
+              "id": "sentry.rules.actions.notify_event_service.NotifyEventServiceAction",
+              "service": "slack", 
+              "channel": "#acim-ops",
+              "tags": "production,mobile,crashes"
+            }
+          ]
+        },
+        {
+          "name": "Mobile Performance Issues",
+          "conditions": [
+            {
+              "id": "sentry.rules.conditions.tagged_event.TaggedEventCondition",
+              "key": "transaction",
+              "match": "co",
+              "value": "spiritual_guidance"
+            },
+            {
+              "id": "sentry.rules.conditions.event_frequency.EventFrequencyCondition", 
+              "value": 10,
+              "interval": "10m"
+            }
+          ],
+          "actions": [
+            {
+              "id": "sentry.rules.actions.notify_event_service.NotifyEventServiceAction",
+              "service": "email",
+              "targetType": "Member",
+              "targetIdentifier": "platform-team@acimguide.com"
+            }
+          ]
+        }
+      ]
+    },
+    "firebase_functions": {
+      "project": "firebase-functions",
+      "alerts": [
+        {
+          "name": "CourseGPT Function Failures",
+          "conditions": [
+            {
+              "id": "sentry.rules.conditions.tagged_event.TaggedEventCondition",
+              "key": "transaction",
+              "match": "eq", 
+              "value": "chatWithAssistant"
+            },
+            {
+              "id": "sentry.rules.conditions.event_frequency.EventFrequencyCondition",
+              "value": 2,
+              "interval": "5m"
+            }
+          ],
+          "actions": [
+            {
+              "id": "sentry.rules.actions.notify_event_service.NotifyEventServiceAction",
+              "service": "slack",
+              "channel": "#acim-ops",
+              "tags": "critical,coursegpt,spiritual-guidance"
+            },
+            {
+              "id": "sentry.rules.actions.notify_event_service.NotifyEventServiceAction", 
+              "service": "pagerduty",
+              "integration_id": "coursegpt-incidents"
+            }
+          ]
+        },
+        {
+          "name": "Firebase Functions High Response Time",
+          "conditions": [
+            {
+              "id": "sentry.rules.conditions.event_frequency.EventFrequencyPercentCondition",
+              "value": 95,
+              "interval": "5m",
+              "comparisonType": "percent",
+              "comparisonInterval": "5m"
+            }
+          ],
+          "actions": [
+            {
+              "id": "sentry.rules.actions.notify_event_service.NotifyEventServiceAction",
+              "service": "slack",
+              "channel": "#acim-dev",
+              "tags": "performance,firebase,spiritual-ai"
+            }
+          ]
+        }
+      ]
+    },
+    "ai_automation": {
+      "project": "ai-automation-py",
+      "alerts": [
+        {
+          "name": "AI Business Automation Failures",
+          "conditions": [
+            {
+              "id": "sentry.rules.conditions.tagged_event.TaggedEventCondition",
+              "key": "component",
+              "match": "eq",
+              "value": "ai-systems"
+            },
+            {
+              "id": "sentry.rules.conditions.event_frequency.EventFrequencyCondition",
+              "value": 5,
+              "interval": "15m"
+            }
+          ],
+          "actions": [
+            {
+              "id": "sentry.rules.actions.notify_event_service.NotifyEventServiceAction",
+              "service": "slack",
+              "channel": "#ai-automation",
+              "tags": "business-automation,ai-systems"
+            }
+          ]
+        }
+      ]
+    },
+    "rag_systems": {
+      "project": "rag-systems-py",
+      "alerts": [
+        {
+          "name": "RAG System Performance Issues",
+          "conditions": [
+            {
+              "id": "sentry.rules.conditions.tagged_event.TaggedEventCondition", 
+              "key": "component",
+              "match": "eq",
+              "value": "rag-systems"
+            },
+            {
+              "id": "sentry.rules.conditions.event_frequency.EventFrequencyCondition",
+              "value": 3,
+              "interval": "10m"
+            }
+          ],
+          "actions": [
+            {
+              "id": "sentry.rules.actions.notify_event_service.NotifyEventServiceAction",
+              "service": "slack",
+              "channel": "#rag-systems",
+              "tags": "knowledge-retrieval,vector-db"
+            }
+          ]
+        }
+      ]
+    },
+    "ci_cd": {
+      "project": "ci-cd-node",
+      "alerts": [
+        {
+          "name": "Autonomous CI/CD System Failures",
+          "conditions": [
+            {
+              "id": "sentry.rules.conditions.tagged_event.TaggedEventCondition",
+              "key": "component", 
+              "match": "eq",
+              "value": "autonomous-ci"
+            },
+            {
+              "id": "sentry.rules.conditions.event_frequency.EventFrequencyCondition",
+              "value": 1,
+              "interval": "5m"
+            }
+          ],
+          "actions": [
+            {
+              "id": "sentry.rules.actions.notify_event_service.NotifyEventServiceAction",
+              "service": "slack",
+              "channel": "#devops-alerts",
+              "tags": "ci-cd,autonomous-system,devops"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "performance_alerts": {
+    "firebase_functions": [
+      {
+        "name": "CourseGPT P95 Response Time Alert",
+        "project": "firebase-functions",
+        "metric": "transaction.duration",
+        "query": "transaction:chatWithAssistant",
+        "aggregate": "p95",
+        "timeWindow": 5,
+        "threshold": 2000,
+        "thresholdType": "above",
+        "triggers": [
+          {
+            "alertThreshold": 2000,
+            "actions": [
+              {
+                "type": "slack",
+                "channel": "#acim-ops",
+                "message": "🚨 CourseGPT spiritual guidance response time exceeded 2s (P95). Seekers are waiting for divine wisdom."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Firebase Auth Latency Alert",
+        "project": "firebase-functions", 
+        "metric": "transaction.duration",
+        "query": "transaction:authentication",
+        "aggregate": "p95",
+        "timeWindow": 5,
+        "threshold": 500,
+        "thresholdType": "above"
+      }
+    ],
+    "acimguide_mobile": [
+      {
+        "name": "Mobile App Launch Performance",
+        "project": "acimguide-mobile",
+        "metric": "app_start_cold",
+        "aggregate": "p95", 
+        "timeWindow": 10,
+        "threshold": 3000,
+        "thresholdType": "above",
+        "triggers": [
+          {
+            "alertThreshold": 3000,
+            "actions": [
+              {
+                "type": "slack", 
+                "channel": "#mobile-performance",
+                "message": "📱 ACIMguide mobile app cold start time exceeding 3s. Spiritual seekers deserve swift access to guidance."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "dashboards": {
+    "spiritual_platform_health": {
+      "name": "🕊️ Spiritual Platform Health Dashboard",
+      "widgets": [
+        {
+          "title": "CourseGPT Guidance Sessions",
+          "displayType": "line_chart",
+          "queries": [
+            {
+              "name": "Successful Guidance Sessions",
+              "conditions": "transaction:chatWithAssistant",
+              "fields": ["count()"],
+              "aggregates": ["count()"],
+              "columns": ["transaction"],
+              "interval": "1h"
+            }
+          ]
+        },
+        {
+          "title": "Spiritual Response Times (P95)",
+          "displayType": "line_chart", 
+          "queries": [
+            {
+              "name": "CourseGPT Response Time",
+              "conditions": "transaction:chatWithAssistant",
+              "fields": ["p95(transaction.duration)"],
+              "interval": "5m"
+            }
+          ]
+        },
+        {
+          "title": "Platform Error Rate", 
+          "displayType": "line_chart",
+          "queries": [
+            {
+              "name": "Error Rate %",
+              "conditions": "",
+              "fields": ["failure_rate()"],
+              "interval": "5m"
+            }
+          ]
+        },
+        {
+          "title": "User Engagement by Platform",
+          "displayType": "pie_chart",
+          "queries": [
+            {
+              "name": "Platform Usage",
+              "conditions": "",
+              "fields": ["count()"],
+              "columns": ["platform"],
+              "interval": "24h"
+            }
+          ]
+        },
+        {
+          "title": "OpenAI API Performance",
+          "displayType": "line_chart",
+          "queries": [
+            {
+              "name": "OpenAI API Latency",
+              "conditions": "op:openai", 
+              "fields": ["p95(span.duration)"],
+              "interval": "10m"
+            }
+          ]
+        },
+        {
+          "title": "Firebase Authentication Success Rate",
+          "displayType": "number",
+          "queries": [
+            {
+              "name": "Auth Success Rate",
+              "conditions": "transaction:authentication",
+              "fields": ["success_rate()"],
+              "interval": "1h"
+            }
+          ]
+        }
+      ]
+    },
+    "business_automation_insights": {
+      "name": "🤖 AI Business Automation Dashboard",
+      "widgets": [
+        {
+          "title": "Product Generation Success Rate",
+          "displayType": "number",
+          "queries": [
+            {
+              "name": "Generation Success",
+              "conditions": "transaction:generate_product",
+              "fields": ["success_rate()"],
+              "interval": "6h"
+            }
+          ]
+        },
+        {
+          "title": "Marketing Campaign Performance",
+          "displayType": "bar_chart", 
+          "queries": [
+            {
+              "name": "Campaign Results",
+              "conditions": "component:ai-systems transaction:marketing_campaign",
+              "fields": ["count()"],
+              "columns": ["campaign_type"],
+              "interval": "1d"
+            }
+          ]
+        },
+        {
+          "title": "Cost Monitoring Alerts",
+          "displayType": "line_chart",
+          "queries": [
+            {
+              "name": "Cost Anomalies",
+              "conditions": "transaction:cost_monitor level:warning",
+              "fields": ["count()"],
+              "interval": "1h"
+            }
+          ]
+        }
+      ]
+    },
+    "technical_infrastructure": {
+      "name": "⚙️ Technical Infrastructure Dashboard",
+      "widgets": [
+        {
+          "title": "CI/CD Pipeline Health",
+          "displayType": "number",
+          "queries": [
+            {
+              "name": "Pipeline Success Rate",
+              "conditions": "component:autonomous-ci",
+              "fields": ["success_rate()"],
+              "interval": "6h"
+            }
+          ]
+        },
+        {
+          "title": "Database Performance",
+          "displayType": "line_chart",
+          "queries": [
+            {
+              "name": "Firestore Latency",
+              "conditions": "op:firestore",
+              "fields": ["p95(span.duration)"],
+              "interval": "5m"
+            },
+            {
+              "name": "Vector DB Performance", 
+              "conditions": "op:vector-db",
+              "fields": ["p95(span.duration)"],
+              "interval": "5m"
+            }
+          ]
+        },
+        {
+          "title": "API Endpoint Monitoring",
+          "displayType": "table",
+          "queries": [
+            {
+              "name": "Endpoint Performance",
+              "conditions": "",
+              "fields": ["transaction", "p95(transaction.duration)", "count()"],
+              "columns": ["transaction"],
+              "interval": "1h",
+              "orderby": "-p95_transaction_duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "notification_settings": {
+    "slack_integration": {
+      "workspace": "acimguide-team",
+      "channels": {
+        "#acim-ops": {
+          "description": "Production alerts and critical spiritual platform issues",
+          "alert_types": ["errors", "performance", "availability"],
+          "severity": ["critical", "high"]
+        },
+        "#acim-dev": {
+          "description": "Development and staging environment alerts", 
+          "alert_types": ["errors", "performance"],
+          "severity": ["medium", "low"]
+        },
+        "#ai-automation": {
+          "description": "Business automation system alerts",
+          "alert_types": ["errors", "performance"],
+          "component_filter": "ai-systems"
+        },
+        "#rag-systems": {
+          "description": "RAG and knowledge retrieval system alerts",
+          "alert_types": ["errors", "performance"],
+          "component_filter": "rag-systems"
+        },
+        "#devops-alerts": {
+          "description": "CI/CD and infrastructure alerts",
+          "alert_types": ["errors", "performance"],
+          "component_filter": "autonomous-ci"
+        }
+      }
+    },
+    "email_integration": {
+      "distribution_lists": {
+        "platform-team@acimguide.com": {
+          "description": "Core platform team for critical issues",
+          "alert_types": ["critical_errors", "security"],
+          "escalation_delay": "15m"
+        },
+        "on-call@acimguide.com": {
+          "description": "24/7 on-call rotation for production issues",
+          "alert_types": ["critical_errors", "availability"],
+          "escalation_delay": "5m"
+        }
+      }
+    },
+    "pagerduty_integration": {
+      "services": {
+        "coursegpt-incidents": {
+          "description": "Critical CourseGPT spiritual guidance failures",
+          "escalation_policy": "spiritual-platform-escalation",
+          "auto_resolve": false
+        },
+        "platform-infrastructure": {
+          "description": "Core infrastructure and database issues",
+          "escalation_policy": "infrastructure-escalation", 
+          "auto_resolve": true,
+          "auto_resolve_timeout": "30m"
+        }
+      }
+    }
+  },
+  "global_settings": {
+    "data_scrubbing": {
+      "scrub_data": true,
+      "sensitive_fields": [
+        "password",
+        "api_key", 
+        "token",
+        "secret",
+        "authorization",
+        "user_message",
+        "spiritual_content",
+        "acim_guidance"
+      ]
+    },
+    "sampling": {
+      "error_sampling": 1.0,
+      "performance_sampling": 0.2,
+      "session_replay_sampling": 0.01,
+      "profiling_sampling": 0.1
+    },
+    "retention": {
+      "error_retention": "90d",
+      "performance_retention": "30d", 
+      "session_replay_retention": "7d"
+    },
+    "privacy": {
+      "ip_address_anonymization": true,
+      "user_context_scrubbing": true,
+      "spiritual_content_protection": true,
+      "gdpr_compliant": true
+    }
+  }
+}
