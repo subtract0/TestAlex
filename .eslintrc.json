@@ -48,6 +48,18 @@
         "no-undef": "off",
         "no-unused-vars": "off"
       }
+    },
+    {
+      "files": [
+        "autonomous-*.js",
+        "validate-*.js",
+        "scripts/*.js",
+        "**/debug*.js",
+        "**/cli*.js"
+      ],
+      "rules": {
+        "no-console": "off"
+      }
     }
   ]
 }

@@ -226,7 +226,7 @@ class AutonomousSystemValidator {
     ];
     
     // Test fix prioritization
-    const sortedPatterns = testPatterns.sort((a, b) => {
+    testPatterns.sort((a, b) => {
       const severityOrder = { high: 3, medium: 2, low: 1 };
       return (severityOrder[b.severity] || 0) - (severityOrder[a.severity] || 0);
     });

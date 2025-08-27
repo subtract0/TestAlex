@@ -262,7 +262,7 @@ All configuration files follow best practices and include:
       console.log(`    ✅ Created branch: ${branchName}`);
 
       // Apply fixes to files
-      const changes = await this.applyFixesToBranch(fixType, branchName, patterns);
+      const changes = await this.applyFixesToBranch(fixType, branchName);
 
       // Create pull request
       const { data: pullRequest } = await this.octokit.rest.pulls.create({
@@ -318,7 +318,7 @@ All configuration files follow best practices and include:
   /**
    * Apply fixes to files in the target branch
    */
-  async applyFixesToBranch(fixType, branchName, patterns) {
+  async applyFixesToBranch(fixType, branchName) {
     const changes = [];
     
     const fixMethods = {
@@ -795,7 +795,7 @@ async function main() {
     // Then deploy fixes
     if (analysisResults.some(result => result.detectedPatterns.length > 0)) {
       console.log('\n🔧 Detected failures - deploying autonomous fixes...');
-      const deploymentResults = await deployer.deployFixes(analysisResults);
+      await deployer.deployFixes(analysisResults);
       
       console.log('\n✅ Autonomous fix deployment completed successfully!');
       
