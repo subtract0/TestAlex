@@ -16,21 +16,21 @@ console.log('🔐 Starting secure deployment process...');
 
 // Check for required environment variables
 const requiredEnvVars = [
-    'GOOGLE_CLOUD_API_KEY',
-    'FIREBASE_PROJECT_ID'
+  'GOOGLE_CLOUD_API_KEY',
+  'FIREBASE_PROJECT_ID'
 ];
 
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingEnvVars.length > 0) {
-    console.error('❌ Missing required environment variables:');
-    missingEnvVars.forEach(varName => {
-        console.error(`   - ${varName}`);
-    });
-    console.error('\nPlease set these environment variables in .env file before deploying.');
-    console.error('GOOGLE_CLOUD_API_KEY: The Firebase Web API key from Google Cloud Console');
-    console.error('FIREBASE_PROJECT_ID: Your Firebase project ID (default: acim-guide-production)');
-    process.exit(1);
+  console.error('❌ Missing required environment variables:');
+  missingEnvVars.forEach(varName => {
+    console.error(`   - ${varName}`);
+  });
+  console.error('\nPlease set these environment variables in .env file before deploying.');
+  console.error('GOOGLE_CLOUD_API_KEY: The Firebase Web API key from Google Cloud Console');
+  console.error('FIREBASE_PROJECT_ID: Your Firebase project ID (default: acim-guide-production)');
+  process.exit(1);
 }
 
 // Read the template HTML file
@@ -45,20 +45,20 @@ console.log('🔄 Replacing API key placeholder with secure configuration...');
 
 // Replace the placeholder API key
 htmlContent = htmlContent.replace(
-    'apiKey: "PLACEHOLDER_TO_BE_REPLACED_BY_BUILD_PROCESS"',
-    `apiKey: "${actualApiKey}"`
+  'apiKey: "PLACEHOLDER_TO_BE_REPLACED_BY_BUILD_PROCESS"',
+  `apiKey: "${actualApiKey}"`
 );
 
 // Verify the project ID matches
 htmlContent = htmlContent.replace(
-    /projectId: "acim-guide-production"/g,
-    `projectId: "${actualProjectId}"`
+  /projectId: "acim-guide-production"/g,
+  `projectId: "${actualProjectId}"`
 );
 
 // Write the processed HTML to a temporary deployment directory
 const deployDir = path.join(__dirname, '..', 'deploy');
 if (!fs.existsSync(deployDir)) {
-    fs.mkdirSync(deployDir, { recursive: true });
+  fs.mkdirSync(deployDir, { recursive: true });
 }
 
 const deployHtmlPath = path.join(deployDir, 'index.html');

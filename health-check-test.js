@@ -16,11 +16,11 @@ require('dotenv').config();
 // Firebase configuration - uses environment variables for security
 const firebaseConfig = {
   apiKey: process.env.GOOGLE_CLOUD_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN || "acim-guide-production.firebaseapp.com",
-  projectId: process.env.FIREBASE_PROJECT_ID || "acim-guide-production",
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "acim-guide-production.firebasestorage.app",
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "1002911619347",
-  appId: process.env.FIREBASE_APP_ID || "1:1002911619347:web:d497f100e932d40639a2e6"
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN || 'acim-guide-production.firebaseapp.com',
+  projectId: process.env.FIREBASE_PROJECT_ID || 'acim-guide-production',
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'acim-guide-production.firebasestorage.app',
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || '1002911619347',
+  appId: process.env.FIREBASE_APP_ID || '1:1002911619347:web:d497f100e932d40639a2e6'
 };
 
 // Validate required environment variables

@@ -2,14 +2,14 @@ let Status = {
   SUCCESS_HEADER: -1,
   SUCCESS_EOF: -2,
   ERROR_TIMEOUT: -3,
-  ERROR_EXCEPTION: -4,
+  ERROR_EXCEPTION: -4
 };
 
 let connections = {};
 let nextConnectionID = 1;
 const encoder = new TextEncoder();
 
-self.addEventListener("message", async function (event) {
+self.addEventListener('message', async function (event) {
   if (event.data.close) {
     let connectionID = event.data.close;
     delete connections[connectionID];
@@ -37,7 +37,7 @@ self.addEventListener("message", async function (event) {
         connections[connectionID].value = readResponse.value;
         value = readResponse.value;
       } catch (error) {
-        console.log("Request exception:", error);
+        console.log('Request exception:', error);
         let errorBytes = encoder.encode(error.message);
         let written = errorBytes.length;
         byteBuffer.set(errorBytes);
@@ -76,7 +76,7 @@ self.addEventListener("message", async function (event) {
       let headerObj = {
         headers: headers,
         status: response.status,
-        connectionID,
+        connectionID
       };
       const headerText = JSON.stringify(headerObj);
       let headerBytes = encoder.encode(headerText);
@@ -89,7 +89,7 @@ self.addEventListener("message", async function (event) {
         intBuffer: intBuffer,
         byteBuffer: byteBuffer,
         value: undefined,
-        curOffset: 0,
+        curOffset: 0
       };
       // set header ready
       Atomics.store(intBuffer, 0, Status.SUCCESS_HEADER);
@@ -97,7 +97,7 @@ self.addEventListener("message", async function (event) {
       // all fetching after this goes through a new postmessage call with getMore
       // this allows for parallel requests
     } catch (error) {
-      console.log("Request exception:", error);
+      console.log('Request exception:', error);
       let errorBytes = encoder.encode(error.message);
       let written = errorBytes.length;
       byteBuffer.set(errorBytes);

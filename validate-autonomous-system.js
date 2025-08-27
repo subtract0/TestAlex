@@ -278,7 +278,7 @@ class AutonomousSystemValidator {
       
       // Score based on performance vs target (lower is better)
       const score = testDuration <= perfTest.target ? 100 : 
-                   Math.max(0, 100 - ((testDuration - perfTest.target) / perfTest.target * 100));
+        Math.max(0, 100 - ((testDuration - perfTest.target) / perfTest.target * 100));
       
       results.push({
         name: perfTest.name,
@@ -626,7 +626,7 @@ class AutonomousSystemValidator {
         testsPassed: this.validationResults.tests.filter(t => t.status === 'passed').length,
         totalTests: this.validationResults.tests.length,
         systemHealth: this.validationResults.overallScore >= 80 ? 'Healthy' : 
-                     this.validationResults.overallScore >= 60 ? 'Warning' : 'Critical'
+          this.validationResults.overallScore >= 60 ? 'Warning' : 'Critical'
       },
       results: this.validationResults
     };
@@ -671,8 +671,8 @@ ${results.tests.map(test => `
 ## System Metrics
 
 ${Object.entries(results.metrics).map(([key, value]) => 
-  `- **${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:** ${value}`
-).join('\n')}
+    `- **${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:** ${value}`
+  ).join('\n')}
 
 ## Recommendations
 
@@ -686,10 +686,10 @@ ${index + 1}. **${rec.title}** (${rec.priority.toUpperCase()} PRIORITY)
 ## Conclusion
 
 ${summary.systemHealth === 'Healthy' ? 
-  `🎉 **SYSTEM VALIDATED** - The autonomous CI/CD debugging system is ready for production use. All critical components are functioning correctly with high reliability.` :
-  summary.systemHealth === 'Warning' ?
-  `⚠️ **ATTENTION REQUIRED** - The system is functional but some components need improvement. Address the high-priority recommendations before production deployment.` :
-  `🚨 **CRITICAL ISSUES** - The system requires immediate attention. Multiple components are failing and need to be fixed before the system can be considered reliable.`
+    `🎉 **SYSTEM VALIDATED** - The autonomous CI/CD debugging system is ready for production use. All critical components are functioning correctly with high reliability.` :
+    summary.systemHealth === 'Warning' ?
+      `⚠️ **ATTENTION REQUIRED** - The system is functional but some components need improvement. Address the high-priority recommendations before production deployment.` :
+      `🚨 **CRITICAL ISSUES** - The system requires immediate attention. Multiple components are failing and need to be fixed before the system can be considered reliable.`
 }
 
 ---

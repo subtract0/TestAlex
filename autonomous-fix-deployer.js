@@ -500,9 +500,9 @@ All configuration files follow best practices and include:
       
       // Upgrade Node.js version
       const fixedContent = content
-        .replace(/NODE_VERSION: '18'/g, "NODE_VERSION: '20'  # Upgraded for Firebase compatibility")
-        .replace(/node-version: '18'/g, "node-version: '20'")
-        .replace(/node-version: 18/g, "node-version: '20'");
+        .replace(/NODE_VERSION: '18'/g, 'NODE_VERSION: \'20\'  # Upgraded for Firebase compatibility')
+        .replace(/node-version: '18'/g, 'node-version: \'20\'')
+        .replace(/node-version: 18/g, 'node-version: \'20\'');
       
       if (content !== fixedContent) {
         await this.octokit.rest.repos.createOrUpdateFileContents({

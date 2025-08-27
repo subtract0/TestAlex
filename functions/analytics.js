@@ -1,9 +1,9 @@
-const functions = require('firebase-functions/v2');
-const { onCall, onRequest } = require('firebase-functions/v2/https');
-const { onSchedule } = require('firebase-functions/v2/scheduler');
-const { initializeApp } = require('firebase-admin/app');
-const { getFirestore, FieldValue } = require('firebase-admin/firestore');
-const { logger } = require('firebase-functions');
+const functions = require("firebase-functions/v2");
+const { onCall, onRequest } = require("firebase-functions/v2/https");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
+const { initializeApp } = require("firebase-admin/app");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+const { logger } = require("firebase-functions");
 
 // Initialize Firebase Admin
 const app = initializeApp();
@@ -15,19 +15,19 @@ const db = getFirestore(app);
 exports.trackUserInteraction = onCall(
   {
     cors: true,
-    timeoutSeconds: 15,
+    timeoutSeconds: 15
   },
   async (request) => {
     const { data, auth } = request;
     
     if (!auth) {
-      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+      throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
     }
 
     const { 
       action, 
       category, 
-      label = '', 
+      label = "", 
       value = 1,
       metadata = {} 
     } = data;
@@ -42,19 +42,19 @@ exports.trackUserInteraction = onCall(
         ...metadata,
         timestamp: new Date(),
         sessionId: metadata.sessionId || generateSessionId(),
-        userAgent: (request.headers && request.headers['user-agent']) || 'unknown',
-        platform: metadata.platform || 'unknown'
+        userAgent: (request.headers && request.headers["user-agent"]) || "unknown",
+        platform: metadata.platform || "unknown"
       }
     };
 
     try {
       // Store individual interaction
-      await db.collection('analytics').doc('interactions').collection('events').add(interaction);
+      await db.collection("analytics").doc("interactions").collection("events").add(interaction);
       
       // Update aggregated stats
       await updateUserStats(auth.uid, action, category, value);
       
-      logger.info('User interaction tracked', {
+      logger.info("User interaction tracked", {
         userId: auth.uid,
         action,
         category
@@ -63,8 +63,8 @@ exports.trackUserInteraction = onCall(
       return { success: true, timestamp: interaction.metadata.timestamp };
       
     } catch (error) {
-      logger.error('Failed to track interaction', error);
-      throw new functions.https.HttpsError('internal', 'Failed to track interaction');
+      logger.error("Failed to track interaction", error);
+      throw new functions.https.HttpsError("internal", "Failed to track interaction");
     }
   }
 );
@@ -75,16 +75,16 @@ exports.trackUserInteraction = onCall(
 exports.analyzeUserJourney = onCall(
   {
     cors: true,
-    timeoutSeconds: 30,
+    timeoutSeconds: 30
   },
   async (request) => {
     const { data, auth } = request;
     
     if (!auth) {
-      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+      throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
     }
 
-    const { timeframe = '30d', includePatterns = true } = data;
+    const { timeframe = "30d", includePatterns = true } = data;
 
     try {
       const endDate = new Date();
@@ -92,28 +92,28 @@ exports.analyzeUserJourney = onCall(
       
       // Calculate start date based on timeframe
       switch (timeframe) {
-        case '7d':
-          startDate.setDate(endDate.getDate() - 7);
-          break;
-        case '30d':
-          startDate.setDate(endDate.getDate() - 30);
-          break;
-        case '90d':
-          startDate.setDate(endDate.getDate() - 90);
-          break;
-        default:
-          startDate.setDate(endDate.getDate() - 30);
+      case "7d":
+        startDate.setDate(endDate.getDate() - 7);
+        break;
+      case "30d":
+        startDate.setDate(endDate.getDate() - 30);
+        break;
+      case "90d":
+        startDate.setDate(endDate.getDate() - 90);
+        break;
+      default:
+        startDate.setDate(endDate.getDate() - 30);
       }
 
       // Get user interactions
       const interactionsSnapshot = await db
-        .collection('analytics')
-        .doc('interactions')
-        .collection('events')
-        .where('userId', '==', auth.uid)
-        .where('metadata.timestamp', '>=', startDate)
-        .where('metadata.timestamp', '<=', endDate)
-        .orderBy('metadata.timestamp', 'asc')
+        .collection("analytics")
+        .doc("interactions")
+        .collection("events")
+        .where("userId", "==", auth.uid)
+        .where("metadata.timestamp", ">=", startDate)
+        .where("metadata.timestamp", "<=", endDate)
+        .orderBy("metadata.timestamp", "asc")
         .get();
 
       const interactions = interactionsSnapshot.docs.map(doc => doc.data());
@@ -133,7 +133,7 @@ exports.analyzeUserJourney = onCall(
         analysis.recommendations = generateRecommendations(analysis);
       }
 
-      logger.info('User journey analyzed', {
+      logger.info("User journey analyzed", {
         userId: auth.uid,
         timeframe,
         totalInteractions: analysis.totalInteractions
@@ -142,8 +142,8 @@ exports.analyzeUserJourney = onCall(
       return analysis;
 
     } catch (error) {
-      logger.error('Failed to analyze user journey', error);
-      throw new functions.https.HttpsError('internal', 'Analysis failed');
+      logger.error("Failed to analyze user journey", error);
+      throw new functions.https.HttpsError("internal", "Analysis failed");
     }
   }
 );
@@ -154,22 +154,22 @@ exports.analyzeUserJourney = onCall(
 exports.getContentAnalytics = onCall(
   {
     cors: true,
-    timeoutSeconds: 20,
+    timeoutSeconds: 20
   },
   async (request) => {
     const { data, auth } = request;
     
     if (!auth) {
-      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+      throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
     }
 
     try {
       // Get user's content interactions
       const contentSnapshot = await db
-        .collection('analytics')
-        .doc('content')
-        .collection('effectiveness')
-        .where('userId', '==', auth.uid)
+        .collection("analytics")
+        .doc("content")
+        .collection("effectiveness")
+        .where("userId", "==", auth.uid)
         .get();
 
       const contentData = contentSnapshot.docs.map(doc => ({
@@ -178,8 +178,8 @@ exports.getContentAnalytics = onCall(
       }));
 
       const analytics = {
-        mostEngagingTopics: findTopTopics(contentData, 'engagement'),
-        mostHelpfulResponses: findTopResponses(contentData, 'helpfulness'),
+        mostEngagingTopics: findTopTopics(contentData, "engagement"),
+        mostHelpfulResponses: findTopResponses(contentData, "helpfulness"),
         contentPreferences: analyzeContentPreferences(contentData),
         improvementAreas: identifyImprovementAreas(contentData),
         personalizedRecommendations: generatePersonalizedContent(auth.uid, contentData)
@@ -188,8 +188,8 @@ exports.getContentAnalytics = onCall(
       return analytics;
 
     } catch (error) {
-      logger.error('Failed to get content analytics', error);
-      throw new functions.https.HttpsError('internal', 'Content analytics failed');
+      logger.error("Failed to get content analytics", error);
+      throw new functions.https.HttpsError("internal", "Content analytics failed");
     }
   }
 );
@@ -200,26 +200,26 @@ exports.getContentAnalytics = onCall(
 exports.getDashboardData = onRequest(
   {
     cors: true,
-    timeoutSeconds: 25,
+    timeoutSeconds: 25
   },
   async (req, res) => {
     try {
-      const timeframe = req.query.timeframe || '24h';
+      const timeframe = req.query.timeframe || "24h";
       const endDate = new Date();
       const startDate = new Date();
       
       switch (timeframe) {
-        case '1h':
-          startDate.setHours(endDate.getHours() - 1);
-          break;
-        case '24h':
-          startDate.setDate(endDate.getDate() - 1);
-          break;
-        case '7d':
-          startDate.setDate(endDate.getDate() - 7);
-          break;
-        default:
-          startDate.setDate(endDate.getDate() - 1);
+      case "1h":
+        startDate.setHours(endDate.getHours() - 1);
+        break;
+      case "24h":
+        startDate.setDate(endDate.getDate() - 1);
+        break;
+      case "7d":
+        startDate.setDate(endDate.getDate() - 7);
+        break;
+      default:
+        startDate.setDate(endDate.getDate() - 1);
       }
 
       // Get aggregated metrics
@@ -256,9 +256,9 @@ exports.getDashboardData = onRequest(
       res.json(dashboard);
 
     } catch (error) {
-      logger.error('Dashboard data retrieval failed', error);
+      logger.error("Dashboard data retrieval failed", error);
       res.status(500).json({
-        error: 'Failed to retrieve dashboard data',
+        error: "Failed to retrieve dashboard data",
         message: error.message
       });
     }
@@ -270,11 +270,11 @@ exports.getDashboardData = onRequest(
  */
 exports.processAnalytics = onSchedule(
   {
-    schedule: '0 2 * * *', // Daily at 2 AM
-    timeZone: 'UTC',
+    schedule: "0 2 * * *", // Daily at 2 AM
+    timeZone: "UTC"
   },
   async (event) => {
-    logger.info('Starting daily analytics processing');
+    logger.info("Starting daily analytics processing");
 
     try {
       const yesterday = new Date();
@@ -292,17 +292,17 @@ exports.processAnalytics = onSchedule(
         cleanupOldData()
       ]);
 
-      logger.info('Daily analytics processing completed');
+      logger.info("Daily analytics processing completed");
 
     } catch (error) {
-      logger.error('Analytics processing failed', error);
+      logger.error("Analytics processing failed", error);
     }
   }
 );
 
 // Helper Functions
 async function updateUserStats(userId, action, category, value) {
-  const statsRef = db.collection('userStats').doc(userId);
+  const statsRef = db.collection("userStats").doc(userId);
   
   await statsRef.set({
     [`actions.${action}`]: FieldValue.increment(value),
@@ -386,8 +386,8 @@ function generateInsights(interactions) {
     
     if (lastWeek.length > interactions.length * 0.5) {
       insights.push({
-        type: 'engagement',
-        message: 'Your engagement has increased significantly this week!',
+        type: "engagement",
+        message: "Your engagement has increased significantly this week!",
         confidence: 0.8
       });
     }
@@ -401,10 +401,10 @@ function generateInsights(interactions) {
 function identifyBehaviorPatterns(interactions) {
   // Implement ML-based pattern recognition
   return {
-    sessionLength: 'medium', // short, medium, long
-    preferredTime: 'evening', // morning, afternoon, evening
-    interactionStyle: 'exploratory', // focused, exploratory, casual
-    contentPreference: 'spiritual guidance' // spiritual guidance, practical advice, community
+    sessionLength: "medium", // short, medium, long
+    preferredTime: "evening", // morning, afternoon, evening
+    interactionStyle: "exploratory", // focused, exploratory, casual
+    contentPreference: "spiritual guidance" // spiritual guidance, practical advice, community
   };
 }
 
@@ -412,11 +412,11 @@ function generateRecommendations(analysis) {
   const recommendations = [];
   
   // Based on behavior patterns
-  if (analysis.behaviorPatterns && analysis.behaviorPatterns.interactionStyle === 'exploratory') {
+  if (analysis.behaviorPatterns && analysis.behaviorPatterns.interactionStyle === "exploratory") {
     recommendations.push({
-      type: 'content',
-      message: 'Try exploring the guided meditation series',
-      priority: 'high'
+      type: "content",
+      message: "Try exploring the guided meditation series",
+      priority: "high"
     });
   }
   
@@ -442,17 +442,17 @@ async function getAverageSessionDuration(startDate, endDate) {
 
 async function getTopCategories(startDate, endDate) {
   return [
-    { category: 'spiritual_guidance', count: 245 },
-    { category: 'meditation', count: 189 },
-    { category: 'forgiveness', count: 156 }
+    { category: "spiritual_guidance", count: 245 },
+    { category: "meditation", count: 189 },
+    { category: "forgiveness", count: 156 }
   ];
 }
 
 async function getSystemHealthMetrics() {
   return {
-    status: 'healthy',
-    uptime: '99.9%',
-    responseTime: '150ms'
+    status: "healthy",
+    uptime: "99.9%",
+    responseTime: "150ms"
   };
 }
 
