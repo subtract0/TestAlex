@@ -19,7 +19,7 @@
     "install:playwright": "playwright install",
     "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
     "lint:fix": "eslint . --ext .js,.ts,.jsx,.tsx --fix",
-    "health-check": "node scripts/health-check.js",
+    "health-check": "node scripts/health-check-ci.js",
     "test:verbose": "jest --verbose"
   },
   "devDependencies": {
