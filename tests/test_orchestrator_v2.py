@@ -167,7 +167,7 @@ class TestNewAgentExecution:
             result = await executor.execute_generic_agent_task(task, {"prompt": "You are a helpful assistant."}, {}, unknown_agent)
             
             assert result.success is True
-            assert "successfully" in result.output or "Successfully" in result.output
+            assert "completed" in result.output or "task executed" in result.output.lower()
 
 
 class TestCapabilityRouting:
