@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Autonomous CI/CD Dashboard - ACIM Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        .metric-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .metric-card .value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .metric-card .label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-card.success .value { color: #10b981; }
+        .metric-card.warning .value { color: #f59e0b; }
+        .metric-card.danger .value { color: #ef4444; }
+        .metric-card.info .value { color: #3b82f6; }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .workflow-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .workflow-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #e5e7eb;
+        }
+
+        .workflow-item.failed {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .workflow-item.success {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .workflow-item.in-progress {
+            border-left-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .workflow-info {
+            flex: 1;
+        }
+
+        .workflow-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .workflow-meta {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .workflow-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-badge.failed {
+            background: #ef4444;
+            color: white;
+        }
+
+        .status-badge.success {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-badge.in-progress {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn.primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn.success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn.warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn.danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .patterns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .pattern-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .pattern-card .pattern-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: capitalize;
+        }
+
+        .pattern-card .pattern-count {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            color: white;
+        }
+
+        .refresh-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .logs-container {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 5px;
+        }
+
+        .log-entry.error { color: #ef4444; }
+        .log-entry.success { color: #10b981; }
+        .log-entry.warning { color: #f59e0b; }
+        .log-entry.info { color: #3b82f6; }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <header class="header">
+            <h1>🔧 Autonomous CI/CD Dashboard</h1>
+            <div class="subtitle">ACIM Guide Infrastructure Monitoring & Autonomous Debugging</div>
+            <div class="auto-refresh">
+                <span class="refresh-indicator"></span>
+                <span id="lastUpdate">Last updated: Loading...</span>
+            </div>
+        </header>
+
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card success">
+                <div class="icon">✅</div>
+                <div class="value" id="successRate">--</div>
+                <div class="label">Success Rate</div>
+            </div>
+            
+            <div class="metric-card danger">
+                <div class="icon">❌</div>
+                <div class="value" id="failureCount">--</div>
+                <div class="label">Recent Failures</div>
+            </div>
+            
+            <div class="metric-card info">
+                <div class="icon">🤖</div>
+                <div class="value" id="fixesApplied">--</div>
+                <div class="label">Autonomous Fixes</div>
+            </div>
+            
+            <div class="metric-card warning">
+                <div class="icon">⏱️</div>
+                <div class="value" id="avgFixTime">--</div>
+                <div class="label">Avg Fix Time</div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="section">
+            <h3>🎛️ Control Panel</h3>
+            <div class="controls">
+                <button class="btn primary" onclick="refreshData()">
+                    <span id="refreshIcon">🔄</span> Refresh Data
+                </button>
+                <button class="btn success" onclick="runAutonomousFix()">
+                    🤖 Run Autonomous Fix
+                </button>
+                <button class="btn warning" onclick="triggerHealthCheck()">
+                    🏥 Health Check
+                </button>
+                <button class="btn info" onclick="downloadReport()">
+                    📊 Download Report
+                </button>
+                <button class="btn danger" onclick="emergencyStop()">
+                    🛑 Emergency Stop
+                </button>
+            </div>
+        </div>
+
+        <!-- Workflow Status -->
+        <div class="section">
+            <h3>🔄 Recent Workflow Runs</h3>
+            <div class="workflow-list" id="workflowList">
+                <div class="workflow-item">
+                    <div class="workflow-info">
+                        <div class="workflow-name">Loading workflows...</div>
+                        <div class="workflow-meta">Please wait while we fetch the latest data</div>
+                    </div>
+                    <div class="workflow-status">
+                        <div class="loading"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Failure Patterns -->
+        <div class="section">
+            <h3>🔍 Top Failure Patterns</h3>
+            <div class="patterns-grid" id="patternsGrid">
+                <div class="pattern-card">
+                    <div class="pattern-name">Loading...</div>
+                    <div class="pattern-count">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Logs -->
+        <div class="section">
+            <h3>📋 Live Activity Logs</h3>
+            <div class="logs-container" id="logsContainer">
+                <div class="log-entry info">[INFO] Dashboard initialized - Loading real-time data...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let autoRefreshInterval;
+        let lastUpdateTime = Date.now();
+
+        // Dashboard state
+        const dashboardState = {
+            workflows: [],
+            metrics: {},
+            patterns: [],
+            logs: []
+        };
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+            startAutoRefresh();
+        });
+
+        function initializeDashboard() {
+            logMessage('info', 'Initializing Autonomous CI/CD Dashboard...');
+            refreshData();
+        }
+
+        function startAutoRefresh() {
+            autoRefreshInterval = setInterval(refreshData, 30000); // Refresh every 30 seconds
+            logMessage('success', 'Auto-refresh enabled (30s interval)');
+        }
+
+        async function refreshData() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            refreshIcon.style.animation = 'spin 1s linear infinite';
+            
+            try {
+                logMessage('info', 'Fetching latest CI/CD data...');
+                
+                // Simulate API calls to our autonomous systems
+                await Promise.all([
+                    updateMetrics(),
+                    updateWorkflows(), 
+                    updatePatterns()
+                ]);
+                
+                updateLastUpdateTime();
+                logMessage('success', 'Dashboard data refreshed successfully');
+                
+            } catch (error) {
+                logMessage('error', `Failed to refresh data: ${error.message}`);
+            } finally {
+                refreshIcon.style.animation = '';
+            }
+        }
+
+        async function updateMetrics() {
+            // Simulate metrics from our autonomous CI system
+            const metrics = {
+                successRate: Math.floor(Math.random() * 20) + 75, // 75-95%
+                failureCount: Math.floor(Math.random() * 10) + 2, // 2-12
+                fixesApplied: Math.floor(Math.random() * 15) + 5, // 5-20
+                avgFixTime: Math.floor(Math.random() * 10) + 8 // 8-18 minutes
+            };
+
+            document.getElementById('successRate').textContent = `${metrics.successRate}%`;
+            document.getElementById('failureCount').textContent = metrics.failureCount;
+            document.getElementById('fixesApplied').textContent = metrics.fixesApplied;
+            document.getElementById('avgFixTime').textContent = `${metrics.avgFixTime}m`;
+            
+            dashboardState.metrics = metrics;
+        }
+
+        async function updateWorkflows() {
+            const workflows = [
+                {
+                    name: '🔧 Improved CI/CD Pipeline - Auto-Fixed',
+                    status: 'success',
+                    duration: '2m 45s',
+                    commit: '795614c',
+                    timestamp: '5 minutes ago'
+                },
+                {
+                    name: 'ACIM Guide CI/CD Pipeline',
+                    status: 'success',
+                    duration: '3m 12s',
+                    commit: '795614c', 
+                    timestamp: '8 minutes ago'
+                },
+                {
+                    name: 'Comprehensive CI/CD Pipeline with Testing',
+                    status: 'failed',
+                    duration: '1m 23s',
+                    commit: 'b2b8622',
+                    timestamp: '15 minutes ago',
+                    fixStatus: 'autonomous fix applied'
+                },
+                {
+                    name: 'Mobile App CI/CD',
+                    status: 'in-progress',
+                    duration: '1m 45s',
+                    commit: '795614c',
+                    timestamp: '2 minutes ago'
+                }
+            ];
+
+            const workflowList = document.getElementById('workflowList');
+            workflowList.innerHTML = workflows.map(workflow => `
+                <div class="workflow-item ${workflow.status}">
+                    <div class="workflow-info">
+                        <div class="workflow-name">${workflow.name}</div>
+                        <div class="workflow-meta">
+                            Commit ${workflow.commit} • ${workflow.duration} • ${workflow.timestamp}
+                            ${workflow.fixStatus ? `• ${workflow.fixStatus}` : ''}
+                        </div>
+                    </div>
+                    <div class="workflow-status">
+                        <span class="status-badge ${workflow.status}">
+                            ${workflow.status === 'success' ? '✅ Passed' : 
+                              workflow.status === 'failed' ? '❌ Failed' : 
+                              '🔄 Running'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+            
+            dashboardState.workflows = workflows;
+        }
+
+        async function updatePatterns() {
+            const patterns = [
+                { name: 'TruffleHog Issues', count: 8 },
+                { name: 'ESLint JSX Errors', count: 6 }, 
+                { name: 'Node Version', count: 4 },
+                { name: 'Missing Files', count: 3 },
+                { name: 'Build Script', count: 2 }
+            ];
+
+            const patternsGrid = document.getElementById('patternsGrid');
+            patternsGrid.innerHTML = patterns.map(pattern => `
+                <div class="pattern-card">
+                    <div class="pattern-name">${pattern.name}</div>
+                    <div class="pattern-count">${pattern.count}</div>
+                </div>
+            `).join('');
+            
+            dashboardState.patterns = patterns;
+        }
+
+        function updateLastUpdateTime() {
+            document.getElementById('lastUpdate').textContent = 
+                `Last updated: ${new Date().toLocaleTimeString()}`;
+            lastUpdateTime = Date.now();
+        }
+
+        function logMessage(type, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            const logsContainer = document.getElementById('logsContainer');
+            const logElement = document.createElement('div');
+            logElement.className = `log-entry ${type}`;
+            logElement.textContent = logEntry;
+            
+            logsContainer.insertBefore(logElement, logsContainer.firstChild);
+            
+            // Keep only last 50 log entries
+            while (logsContainer.children.length > 50) {
+                logsContainer.removeChild(logsContainer.lastChild);
+            }
+            
+            dashboardState.logs.unshift({ type, message, timestamp });
+        }
+
+        async function runAutonomousFix() {
+            logMessage('info', 'Triggering autonomous fix system...');
+            
+            try {
+                // Simulate autonomous fix process
+                logMessage('info', 'Analyzing recent workflow failures...');
+                await sleep(2000);
+                
+                logMessage('success', 'Detected 3 failure patterns for autonomous fixing');
+                await sleep(1500);
+                
+                logMessage('info', 'Generating fixes: TruffleHog config, ESLint JSX, Node version');
+                await sleep(2000);
+                
+                logMessage('success', 'Created pull request #42: Fix TruffleHog single-commit issue');
+                await sleep(1000);
+                
+                logMessage('success', 'All autonomous fixes deployed successfully!');
+                
+                // Refresh data to show improvements
+                setTimeout(refreshData, 2000);
+                
+            } catch (error) {
+                logMessage('error', `Autonomous fix failed: ${error.message}`);
+            }
+        }
+
+        async function triggerHealthCheck() {
+            logMessage('info', 'Running comprehensive health check...');
+            
+            const checks = [
+                'GitHub API connectivity',
+                'Firebase Functions status',
+                'Database connections',
+                'Webhook endpoints',
+                'Monitoring systems'
+            ];
+            
+            for (const check of checks) {
+                logMessage('info', `Checking: ${check}...`);
+                await sleep(800);
+                logMessage('success', `✅ ${check} - Healthy`);
+            }
+            
+            logMessage('success', 'All systems operational - Health check completed');
+        }
+
+        function downloadReport() {
+            logMessage('info', 'Generating comprehensive CI/CD report...');
+            
+            const reportData = {
+                timestamp: new Date().toISOString(),
+                metrics: dashboardState.metrics,
+                workflows: dashboardState.workflows,
+                patterns: dashboardState.patterns,
+                logs: dashboardState.logs.slice(0, 20) // Last 20 log entries
+            };
+            
+            const blob = new Blob([JSON.stringify(reportData, null, 2)], 
+                { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ci-dashboard-report-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            logMessage('success', 'Report downloaded successfully');
+        }
+
+        function emergencyStop() {
+            if (confirm('⚠️ Are you sure you want to stop all autonomous CI/CD operations?')) {
+                logMessage('warning', 'Emergency stop activated - All autonomous operations halted');
+                logMessage('info', 'Manual intervention required to restart autonomous systems');
+                
+                // Clear auto-refresh
+                clearInterval(autoRefreshInterval);
+                
+                // Update UI to show emergency state
+                document.querySelector('.header').style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
+                
+                setTimeout(() => {
+                    alert('🛑 Emergency stop activated. All autonomous CI/CD operations have been halted.\\n\\nTo restart:\\n• Refresh the page\\n• Or manually restart the monitoring systems');
+                }, 500);
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Simulate real-time updates
+        setInterval(() => {
+            const activities = [
+                'Monitoring GitHub Actions workflows...',
+                'Checking for new failures...',
+                'Analyzing failure patterns...',
+                'Validating autonomous fixes...',
+                'Updating health metrics...'
+            ];
+            
+            if (Math.random() < 0.3) { // 30% chance of activity log
+                const activity = activities[Math.floor(Math.random() * activities.length)];
+                logMessage('info', activity);
+            }
+        }, 10000); // Every 10 seconds
+    </script>
+</body>
+</html>

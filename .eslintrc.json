@@ -7,9 +7,20 @@
   "extends": [
     "eslint:recommended"
   ],
+  "plugins": [
+    "react"
+  ],
   "parserOptions": {
     "ecmaVersion": 2022,
-    "sourceType": "module"
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
   },
   "rules": {
     "no-unused-vars": "warn",

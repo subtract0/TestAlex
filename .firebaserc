@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "acim-guide-test"
+  },
+  "targets": {},
+  "etags": {
+    "acim-guide-test": {
+      "extensionInstances": {
+        "firestore-stripe-payments": "569647baf06f39692cf724dfb734130c10739a01ef5c13713849ecd06ee41c6a",
+        "firestore-stripe-payments-zaqo": "99e3249d652d29d831da9ba146e0de3e4085715c8b66ceb1e091c83712c09701"
+      }
+    }
   }
 }

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Payment - ACIMguide Course</title>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: linear-gradient(135deg, #E3F2FD 0%, #FFFFFF 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .test-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            max-width: 500px;
+        }
+        h1 {
+            color: #1976D2;
+            margin-bottom: 1rem;
+        }
+        .course-info {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+        .price {
+            font-size: 3rem;
+            color: #2196F3;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        .test-card-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+        .btn {
+            background: #2196F3;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 1rem;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #1976D2;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        .status.loading {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #99d6ff;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test Payment System</h1>
+        <p>Test your €7 ACIM course purchase flow</p>
+        
+        <div class="course-info">
+            <h3>14-Day ACIM Transformation Course</h3>
+            <p>Daily guided spiritual prompts for inner peace</p>
+            <div class="price">€7</div>
+        </div>
+        
+        <div class="test-card-info">
+            <strong>🧪 Test Card Information:</strong><br>
+            <strong>Card Number:</strong> 4242424242424242<br>
+            <strong>Expiry:</strong> Any future date (e.g., 12/25)<br>
+            <strong>CVC:</strong> Any 3 digits (e.g., 123)<br>
+            <strong>ZIP:</strong> Any 5 digits (e.g., 12345)
+        </div>
+        
+        <div class="status" id="status"></div>
+        
+        <button onclick="testPayment()" class="btn" id="testBtn">
+            🚀 Test Payment Flow
+        </button>
+        
+        <button onclick="simulateSuccess()" class="btn" style="background: #28a745;">
+            ✅ Simulate Success
+        </button>
+        
+        <p style="font-size: 0.9rem; color: #666; margin-top: 2rem;">
+            This is a test environment - no real money will be charged
+        </p>
+    </div>
+
+    <!-- Stripe JavaScript SDK -->
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <script>
+        // Initialize Stripe (you'll need to replace with your publishable key)
+        // For testing, we'll simulate the flow
+        
+        let testInProgress = false;
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+        
+        function testPayment() {
+            if (testInProgress) return;
+            
+            const btn = document.getElementById('testBtn');
+            btn.disabled = true;
+            btn.textContent = 'Testing...';
+            testInProgress = true;
+            
+            showStatus('🔄 Checking Stripe configuration...', 'loading');
+            
+            // Simulate the payment flow steps
+            setTimeout(() => {
+                showStatus('🔄 Creating checkout session...', 'loading');
+                
+                setTimeout(() => {
+                    showStatus('🔄 Redirecting to Stripe Checkout...', 'loading');
+                    
+                    setTimeout(() => {
+                        // Check if we have the necessary Stripe configuration
+                        checkStripeConfig();
+                    }, 1500);
+                }, 1500);
+            }, 1000);
+        }
+        
+        function checkStripeConfig() {
+            // This would normally check if Stripe is properly configured
+            // For now, we'll show what needs to be set up
+            
+            const missingItems = [];
+            
+            // Check for Stripe publishable key (normally in environment)
+            if (typeof window.STRIPE_PUBLISHABLE_KEY === 'undefined') {
+                missingItems.push('Stripe Publishable Key');
+            }
+            
+            // Check for Firebase functions (normally available when deployed)
+            if (typeof firebase === 'undefined') {
+                missingItems.push('Firebase SDK');
+            }
+            
+            if (missingItems.length > 0) {
+                showStatus(`❌ Missing: ${missingItems.join(', ')}. Need to complete setup first.`, 'error');
+                showSetupInstructions();
+            } else {
+                showStatus('✅ Configuration looks good! Payment flow would work.', 'success');
+            }
+            
+            // Reset button
+            const btn = document.getElementById('testBtn');
+            btn.disabled = false;
+            btn.textContent = '🚀 Test Payment Flow';
+            testInProgress = false;
+        }
+        
+        function simulateSuccess() {
+            showStatus('🎉 Payment Successful! Customer would be redirected to success page.', 'success');
+            
+            setTimeout(() => {
+                showStatus('📧 Course access email would be sent. Customer data saved to Firestore.', 'success');
+            }, 2000);
+        }
+        
+        function showSetupInstructions() {
+            const container = document.querySelector('.test-container');
+            const instructions = document.createElement('div');
+            instructions.innerHTML = `
+                <div style="background: #f8f9fa; padding: 1.5rem; margin: 1rem 0; border-radius: 8px; text-align: left;">
+                    <h4 style="color: #1976D2; margin-top: 0;">🔧 Setup Needed:</h4>
+                    <ol style="margin: 0;">
+                        <li>Get Stripe API keys from <a href="https://dashboard.stripe.com/apikeys" target="_blank">Stripe Dashboard</a></li>
+                        <li>Add Stripe publishable key to website</li>
+                        <li>Install Firebase Stripe extension</li>
+                        <li>Create €7 course product in Stripe</li>
+                        <li>Deploy to Firebase Hosting</li>
+                    </ol>
+                    <p style="margin-bottom: 0;"><strong>Need help?</strong> Run the setup script or ask your Business RAG!</p>
+                </div>
+            `;
+            
+            if (!document.getElementById('setup-instructions')) {
+                instructions.id = 'setup-instructions';
+                container.appendChild(instructions);
+            }
+        }
+        
+        // Auto-run a quick test when page loads
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('testBtn').click();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

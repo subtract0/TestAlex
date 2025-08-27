@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Setup Stripe Product</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .btn { background: #4285f4; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 10px 5px; }
+        .btn:hover { background: #3367d6; }
+        .success { background: #d4edda; padding: 15px; border-radius: 5px; margin: 10px 0; color: #155724; }
+        .error { background: #f8d7da; padding: 15px; border-radius: 5px; margin: 10px 0; color: #721c24; }
+        .info { background: #d1ecf1; padding: 15px; border-radius: 5px; margin: 10px 0; color: #0c5460; }
+        .code { background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; margin: 10px 0; }
+        pre { margin: 0; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>ACIMguide - Stripe Product Setup</h1>
+    
+    <div id="auth-section">
+        <p>You need to sign in as an admin to set up the product.</p>
+        <button id="sign-in-btn" class="btn">Sign In with Google</button>
+    </div>
+
+    <div id="setup-section" class="hidden">
+        <h2>Create Product & Price</h2>
+        <p>This will create the ACIMguide premium course product in Firestore, which will sync to Stripe.</p>
+        <button id="create-product-btn" class="btn">Create Product & Price</button>
+    </div>
+
+    <div id="results-section" class="hidden">
+        <h2>Setup Results</h2>
+        <div id="status"></div>
+        <div id="price-info" class="info hidden">
+            <h3>Important: Update payment.html</h3>
+            <p>Replace the price ID in your payment.html file:</p>
+            <div class="code">
+                <pre id="price-code"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNLq3_CtF47Nq8oEA7YRYiDLAhFOhzOJ4",
+            authDomain: "acim-guide-test.firebaseapp.com",
+            projectId: "acim-guide-test",
+            storageBucket: "acim-guide-test.appspot.com",
+            messagingSenderId: "257923742377",
+            appId: "1:257923742377:web:82edb01b2ed0de15c6e9a1"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const firestore = firebase.firestore();
+
+        const authSection = document.getElementById('auth-section');
+        const setupSection = document.getElementById('setup-section');
+        const resultsSection = document.getElementById('results-section');
+        const signInBtn = document.getElementById('sign-in-btn');
+        const createProductBtn = document.getElementById('create-product-btn');
+        const status = document.getElementById('status');
+        const priceInfo = document.getElementById('price-info');
+        const priceCode = document.getElementById('price-code');
+
+        signInBtn.addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider);
+        });
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                authSection.classList.add('hidden');
+                setupSection.classList.remove('hidden');
+            } else {
+                authSection.classList.remove('hidden');
+                setupSection.classList.add('hidden');
+            }
+        });
+
+        createProductBtn.addEventListener('click', async () => {
+            createProductBtn.disabled = true;
+            createProductBtn.textContent = 'Creating...';
+            resultsSection.classList.remove('hidden');
+            status.innerHTML = '<div class="info">Creating product in Firestore...</div>';
+
+            try {
+                // Create product
+                const productRef = firestore.collection('products').doc('acim-premium-guide');
+                await productRef.set({
+                    name: 'A Course in Miracles - Premium Guide',
+                    description: 'Unlock the profound teachings of A Course in Miracles with our comprehensive premium guide. Transform your understanding and experience inner peace through practical insights and exercises.',
+                    active: true,
+                    role: 'premium',
+                    images: [],
+                    metadata: {
+                        course_type: 'premium',
+                        access_duration: 'lifetime'
+                    },
+                    tax_code: 'txcd_10000000'
+                });
+
+                status.innerHTML += '<div class="success">✅ Product created in Firestore</div>';
+
+                // Create price
+                const priceRef = productRef.collection('prices').doc('premium-guide-7eur');
+                await priceRef.set({
+                    active: true,
+                    currency: 'eur',
+                    unit_amount: 700, // €7.00 in cents
+                    type: 'one_time',
+                    metadata: {
+                        course: 'acim-premium-guide'
+                    }
+                });
+
+                status.innerHTML += '<div class="success">✅ Price created in Firestore</div>';
+                status.innerHTML += '<div class="info">⏳ Waiting for Stripe sync (this may take a few moments)...</div>';
+
+                // Monitor for Stripe sync
+                const unsubscribe = priceRef.onSnapshot(doc => {
+                    const data = doc.data();
+                    if (data && data.id) {
+                        unsubscribe();
+                        status.innerHTML += '<div class="success">✅ Stripe sync complete!</div>';
+                        priceInfo.classList.remove('hidden');
+                        priceCode.textContent = `price: '${data.id}', // Your Stripe price ID`;
+                        
+                        status.innerHTML += `<div class="success">
+                            <h3>🎉 Setup Complete!</h3>
+                            <p><strong>Stripe Price ID:</strong> ${data.id}</p>
+                            <p>You can now update your payment.html file and test payments!</p>
+                        </div>`;
+                    }
+                });
+
+                // Timeout after 30 seconds
+                setTimeout(() => {
+                    unsubscribe();
+                    if (!status.innerHTML.includes('Stripe sync complete')) {
+                        status.innerHTML += '<div class="info">Stripe sync is taking longer than expected. Check your Firestore console in a few minutes for the price ID.</div>';
+                    }
+                }, 30000);
+
+            } catch (error) {
+                console.error('Setup error:', error);
+                status.innerHTML += `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+
+            createProductBtn.disabled = false;
+            createProductBtn.textContent = 'Create Product & Price';
+        });
+    </script>
+</body>
+</html>

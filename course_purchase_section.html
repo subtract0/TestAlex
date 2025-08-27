@@ -1,0 +1,294 @@
+<!-- Add this section AFTER the quick-actions div and BEFORE the input-container div in your index.html -->
+
+<!-- Premium Course Section -->
+<div class="course-premium-section" id="coursePremiumSection" style="display: none;">
+    <div class="course-premium-content">
+        <h3>🌟 Transform Your Life with ACIM</h3>
+        <p>Ready for deeper spiritual transformation? Join our 14-day guided journey based on the principles of A Course in Miracles.</p>
+        
+        <div class="course-features">
+            <div class="course-feature">
+                <span class="feature-icon">📚</span>
+                <span>Daily guided spiritual prompts</span>
+            </div>
+            <div class="course-feature">
+                <span class="feature-icon">🧘</span>
+                <span>Personalized ACIM practices</span>
+            </div>
+            <div class="course-feature">
+                <span class="feature-icon">✨</span>
+                <span>Path to inner peace & healing</span>
+            </div>
+        </div>
+        
+        <div class="course-pricing">
+            <div class="price-display">
+                <span class="price-amount">€7</span>
+                <span class="price-period">one-time</span>
+            </div>
+            <p class="price-description">Complete 14-day transformation journey</p>
+        </div>
+        
+        <button onclick="purchaseACIMCourse()" class="course-purchase-btn" id="coursePurchaseBtn">
+            Start Your Transformation Journey ✨
+        </button>
+        
+        <div class="course-guarantee">
+            💰 30-day money-back guarantee
+        </div>
+    </div>
+</div>
+
+<!-- Add this CSS to your existing <style> section -->
+<style>
+    /* Premium Course Section - Matches ACIM Guide Design System */
+    .course-premium-section {
+        background: linear-gradient(135deg, var(--primary-light) 0%, var(--white) 100%);
+        border: 1px solid rgba(33, 150, 243, 0.2);
+        border-radius: var(--space-2);
+        margin: var(--space-4);
+        padding: var(--space-6);
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all var(--duration-normal) var(--ease-out);
+        animation: courseSlideIn 0.6s ease-out;
+    }
+    
+    .course-premium-section:hover {
+        box-shadow: 0 4px 16px rgba(33, 150, 243, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    @keyframes courseSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .course-premium-content h3 {
+        font-family: var(--font-secondary);
+        font-size: 1.4rem;
+        color: var(--primary-dark);
+        margin: 0 0 var(--space-3) 0;
+        font-weight: 600;
+    }
+    
+    .course-premium-content p {
+        color: var(--medium-gray);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin: 0 0 var(--space-6) 0;
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .course-features {
+        display: grid;
+        gap: var(--space-3);
+        margin: var(--space-6) 0;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .course-feature {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: var(--space-3);
+        font-size: 0.9rem;
+        color: var(--dark-gray);
+    }
+    
+    .feature-icon {
+        font-size: 1.1rem;
+        width: 24px;
+        text-align: center;
+    }
+    
+    .course-pricing {
+        margin: var(--space-8) 0 var(--space-6) 0;
+        padding: var(--space-4) 0;
+        border-top: 1px solid rgba(33, 150, 243, 0.1);
+        border-bottom: 1px solid rgba(33, 150, 243, 0.1);
+    }
+    
+    .price-display {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: var(--space-2);
+        margin: 0 0 var(--space-2) 0;
+    }
+    
+    .price-amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        font-family: var(--font-primary);
+    }
+    
+    .price-period {
+        font-size: 0.9rem;
+        color: var(--medium-gray);
+        font-weight: 500;
+    }
+    
+    .price-description {
+        font-size: 0.85rem;
+        color: var(--medium-gray);
+        margin: 0;
+    }
+    
+    .course-purchase-btn {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: var(--white);
+        border: none;
+        padding: var(--space-4) var(--space-8);
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: var(--space-2);
+        cursor: pointer;
+        transition: all var(--duration-normal) var(--ease-out);
+        font-family: var(--font-primary);
+        box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+        margin: var(--space-2) 0;
+    }
+    
+    .course-purchase-btn:hover {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, #1565C0 100%);
+        box-shadow: 0 4px 16px rgba(33, 150, 243, 0.4);
+        transform: translateY(-1px);
+    }
+    
+    .course-purchase-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+    }
+    
+    .course-purchase-btn:disabled {
+        background: var(--medium-gray);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .course-guarantee {
+        font-size: 0.8rem;
+        color: var(--medium-gray);
+        margin: var(--space-4) 0 0 0;
+        font-style: italic;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+        .course-premium-section {
+            margin: var(--space-3);
+            padding: var(--space-4);
+        }
+        
+        .price-amount {
+            font-size: 2rem;
+        }
+        
+        .course-purchase-btn {
+            padding: var(--space-3) var(--space-6);
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<!-- Add this JavaScript to your existing <script> section -->
+<script>
+    // Show course section after user engages with the platform
+    let hasUserEngaged = false;
+    let messageCount = 0;
+    
+    // Show course section after 2-3 messages or 30 seconds
+    function checkShowCourseSection() {
+        if (!hasUserEngaged && (messageCount >= 2 || document.hidden === false)) {
+            hasUserEngaged = true;
+            setTimeout(showCourseSection, 5000); // Show after 5 seconds
+        }
+    }
+    
+    function showCourseSection() {
+        const section = document.getElementById('coursePremiumSection');
+        if (section) {
+            section.style.display = 'block';
+            // Scroll it into view gently
+            setTimeout(() => {
+                section.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }, 300);
+        }
+    }
+    
+    // Purchase function - integrates with Stripe Firebase extension
+    async function purchaseACIMCourse() {
+        const purchaseBtn = document.getElementById('coursePurchaseBtn');
+        
+        // Disable button during processing
+        purchaseBtn.disabled = true;
+        purchaseBtn.textContent = 'Creating checkout...';
+        
+        try {
+            // Check if user is authenticated
+            if (!isAuthenticated || !currentUserId) {
+                throw new Error('Please wait for the connection to complete before purchasing.');
+            }
+            
+            // Create checkout session using Stripe Firebase extension
+            const createCheckoutSession = firebase.functions().httpsCallable('ext-firestore-stripe-payments-createCheckoutSession');
+            
+            const { data } = await createCheckoutSession({
+                price: 'price_YOUR_PRICE_ID_HERE', // Replace with your actual Stripe price ID
+                success_url: window.location.origin + '/course-success',
+                cancel_url: window.location.origin,
+                metadata: {
+                    course: '14-day-acim-transformation',
+                    source: 'acimguide-platform'
+                }
+            });
+            
+            // Redirect to Stripe Checkout
+            window.location.href = data.url;
+            
+        } catch (error) {
+            console.error('Purchase error:', error);
+            
+            // Re-enable button
+            purchaseBtn.disabled = false;
+            purchaseBtn.textContent = 'Start Your Transformation Journey ✨';
+            
+            // Show error message
+            let errorMsg = error.message || 'Purchase failed. Please try again.';
+            if (error.code === 'unauthenticated') {
+                errorMsg = 'Please wait for the connection to complete and try again.';
+            }
+            
+            addMessage(`❌ ${errorMsg}<br><br>If the issue continues, please contact support.`);
+        }
+    }
+    
+    // Hook into existing message function to track engagement
+    const originalAddMessage = addMessage;
+    addMessage = function(content, isUser = false) {
+        if (isUser) {
+            messageCount++;
+            checkShowCourseSection();
+        }
+        return originalAddMessage(content, isUser);
+    };
+    
+    // Also show course section after some time on page
+    setTimeout(checkShowCourseSection, 30000); // 30 seconds
+</script>

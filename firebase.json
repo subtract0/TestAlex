@@ -32,5 +32,8 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "extensions": {
+    "firestore-stripe-payments-zaqo": "stripe/firestore-stripe-payments@0.3.4"
   }
 }

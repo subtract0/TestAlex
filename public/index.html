@@ -702,7 +702,7 @@
                 <div class="quick-action" onclick="sendQuickAction('What does ACIM say about finding inner peace?')">
                     Inner Peace
                 </div>
-                <div class="quick-action" onclick="sendQuickAction('Explain lesson 1 of the ACIM workbook.')">
+                <div class="quick-action" onclick="sendDailyLesson()">
                     Daily Lesson
                 </div>
             </div>
@@ -1045,6 +1045,20 @@
                     quickActions.style.display = 'none';
                 }, 300);
             }
+        }
+
+        function sendDailyLesson() {
+            // Calculate current lesson based on day of year
+            const now = new Date();
+            const start = new Date(now.getFullYear(), 0, 0);
+            const diff = (now - start) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
+            const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            // ACIM has 365 lessons, cycle through them
+            const lessonNumber = ((dayOfYear - 1) % 365) + 1;
+            
+            const message = `Explain lesson ${lessonNumber} of the ACIM workbook.`;
+            sendQuickAction(message);
         }
 
         function handleKeyPress(event) {

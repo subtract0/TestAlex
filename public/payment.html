@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACIMguide Premium Course - €7</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: #333;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo h1 {
+            color: #667eea;
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        .course-info {
+            background: #f8f9ff;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+        .course-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .course-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .price {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .auth-section, .payment-section {
+            margin: 30px 0;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden { display: none; }
+        .user-info {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            color: #0c5460;
+        }
+        .features {
+            margin: 20px 0;
+        }
+        .features h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        .features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .features li:before {
+            content: '✓';
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>ACIMguide</h1>
+        </div>
+
+        <div class="course-info">
+            <div class="course-title">A Course in Miracles - Premium Guide</div>
+            <div class="course-description">
+                Unlock the profound teachings of A Course in Miracles with our comprehensive premium guide. 
+                Transform your understanding and experience inner peace through practical insights and exercises.
+            </div>
+            
+            <div class="features">
+                <h3>What You'll Get:</h3>
+                <ul>
+                    <li>Complete course analysis and interpretation</li>
+                    <li>Daily practice exercises and meditations</li>
+                    <li>Step-by-step guidance for beginners</li>
+                    <li>Advanced concepts explained simply</li>
+                    <li>Lifetime access to all materials</li>
+                    <li>Community access and support</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="price">€7.00</div>
+
+        <!-- Authentication Section -->
+        <div id="auth-section" class="auth-section">
+            <h3>Sign in to purchase:</h3>
+            <button id="sign-in-btn" class="btn">Sign in with Google</button>
+        </div>
+
+        <!-- User Info Section -->
+        <div id="user-section" class="hidden">
+            <div id="user-info" class="user-info"></div>
+            <button id="sign-out-btn" class="btn">Sign Out</button>
+        </div>
+
+        <!-- Payment Section -->
+        <div id="payment-section" class="payment-section hidden">
+            <button id="purchase-btn" class="btn">Purchase Now - €7.00</button>
+        </div>
+
+        <!-- Messages -->
+        <div id="message" class="hidden"></div>
+    </div>
+
+    <script type="module">
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNLq3_CtF47Nq8oEA7YRYiDLAhFOhzOJ4",
+            authDomain: "acim-guide-test.firebaseapp.com",
+            projectId: "acim-guide-test",
+            storageBucket: "acim-guide-test.appspot.com",
+            messagingSenderId: "257923742377",
+            appId: "1:257923742377:web:82edb01b2ed0de15c6e9a1"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const firestore = firebase.firestore();
+        const functions = firebase.functions('europe-west3');
+
+        // DOM elements
+        const authSection = document.getElementById('auth-section');
+        const userSection = document.getElementById('user-section');
+        const paymentSection = document.getElementById('payment-section');
+        const signInBtn = document.getElementById('sign-in-btn');
+        const signOutBtn = document.getElementById('sign-out-btn');
+        const purchaseBtn = document.getElementById('purchase-btn');
+        const userInfo = document.getElementById('user-info');
+        const message = document.getElementById('message');
+
+        // Utility functions
+        function showMessage(text, isError = false) {
+            message.textContent = text;
+            message.className = isError ? 'error-message' : 'success-message';
+            message.classList.remove('hidden');
+            setTimeout(() => message.classList.add('hidden'), 5000);
+        }
+
+        function setLoading(button, loading) {
+            if (loading) {
+                button.innerHTML = '<span class="loading"></span>Processing...';
+                button.disabled = true;
+            } else {
+                button.disabled = false;
+            }
+        }
+
+        // Authentication
+        signInBtn.addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(error => {
+                console.error('Sign-in error:', error);
+                showMessage('Failed to sign in. Please try again.', true);
+            });
+        });
+
+        signOutBtn.addEventListener('click', () => {
+            auth.signOut();
+        });
+
+        // Auth state observer
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                authSection.classList.add('hidden');
+                userSection.classList.remove('hidden');
+                paymentSection.classList.remove('hidden');
+                
+                userInfo.innerHTML = `
+                    <strong>Welcome, ${user.displayName}!</strong><br>
+                    Email: ${user.email}
+                `;
+            } else {
+                authSection.classList.remove('hidden');
+                userSection.classList.add('hidden');
+                paymentSection.classList.add('hidden');
+            }
+        });
+
+        // Purchase logic
+        purchaseBtn.addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (!user) {
+                showMessage('Please sign in first.', true);
+                return;
+            }
+
+            setLoading(purchaseBtn, true);
+            purchaseBtn.textContent = 'Creating checkout session...';
+
+            try {
+                // Create checkout session document
+                const docRef = await firestore
+                    .collection('customers')
+                    .doc(user.uid)
+                    .collection('checkout_sessions')
+                    .add({
+                        price: 'price_1Q8zITKFYTLiXckokJrIXrJh', // Your Stripe price ID
+                        success_url: window.location.origin + '/?success=true',
+                        cancel_url: window.location.origin + '/?canceled=true',
+                        metadata: {
+                            course: 'acim-premium-guide'
+                        }
+                    });
+
+                // Wait for checkout session URL
+                const unsubscribe = docRef.onSnapshot(snap => {
+                    const data = snap.data();
+                    if (data?.url) {
+                        unsubscribe();
+                        window.location.href = data.url;
+                    } else if (data?.error) {
+                        unsubscribe();
+                        console.error('Checkout error:', data.error);
+                        showMessage(`Payment setup failed: ${data.error.message}`, true);
+                        purchaseBtn.textContent = 'Purchase Now - €7.00';
+                        setLoading(purchaseBtn, false);
+                    }
+                });
+
+                // Timeout after 10 seconds
+                setTimeout(() => {
+                    unsubscribe();
+                    showMessage('Checkout session creation timed out. Please try again.', true);
+                    purchaseBtn.textContent = 'Purchase Now - €7.00';
+                    setLoading(purchaseBtn, false);
+                }, 10000);
+
+            } catch (error) {
+                console.error('Purchase error:', error);
+                showMessage('Failed to start checkout. Please try again.', true);
+                purchaseBtn.textContent = 'Purchase Now - €7.00';
+                setLoading(purchaseBtn, false);
+            }
+        });
+
+        // Handle URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            showMessage('🎉 Payment successful! Thank you for your purchase!');
+        } else if (urlParams.get('canceled') === 'true') {
+            showMessage('Payment was canceled. You can try again anytime.', true);
+        }
+    </script>
+</body>
+</html>
