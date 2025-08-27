@@ -32,7 +32,7 @@ on:
         type: boolean
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   PYTHON_VERSION: '3.11'
   COVERAGE_THRESHOLD: 75
 
@@ -92,12 +92,46 @@ jobs:
           done
 
   # =================
+  # FAST UNIT TESTS (FAIL-FAST)
+  # =================
+  fast-tests:
+    name: Fast Unit Tests (Fail-Fast)
+    runs-on: ubuntu-latest
+    needs: setup
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install Node.js dependencies
+        run: npm ci
+        timeout-minutes: 5
+        
+      - name: Run ESLint (fail-fast)
+        run: |
+          echo "🔍 Running ESLint with fail-fast..."
+          npm run lint
+        timeout-minutes: 3
+        
+      - name: Run fast unit tests (fail-fast)
+        run: |
+          echo "⚡ Running fast unit tests - fail immediately on any failure..."
+          npm run test:unit -- --passWithNoTests --maxWorkers=50%
+        timeout-minutes: 8
+
+  # =================
   # PYTHON TESTING
   # =================
   python-tests:
     name: Python Tests & Coverage
     runs-on: ubuntu-latest
-    needs: setup
+    needs: [setup, fast-tests]  # Depends on fast tests passing first
     
     steps:
       - name: Checkout repository
@@ -133,6 +167,7 @@ jobs:
             --cov-fail-under=70 \
             --junit-xml=pytest-results.xml \
             -v
+        timeout-minutes: 20
             
       - name: Upload Python coverage reports
         uses: codecov/codecov-action@v3
@@ -227,12 +262,12 @@ jobs:
           retention-days: 30
 
   # =================
-  # NODE.JS & PLAYWRIGHT SETUP
+  # NODE.JS SETUP FOR E2E
   # =================
   node-setup:
-    name: Node.js Setup & Unit Tests
+    name: Node.js E2E Setup
     runs-on: ubuntu-latest
-    needs: setup
+    needs: [setup, fast-tests]  # Fast tests must pass first
     
     steps:
       - name: Checkout repository
@@ -245,22 +280,18 @@ jobs:
           cache: 'npm'
           
       - name: Install Node.js dependencies
-        run: |
-          npm ci
-          
-      - name: Run ESLint
-        run: |
-          echo "🔍 Running ESLint..."
-          npm run lint || true
+        run: npm ci
+        timeout-minutes: 5
           
       - name: Install Playwright browsers
-        run: |
-          npm run install:playwright
+        run: npm run install:playwright
+        timeout-minutes: 12
           
-      - name: Run JavaScript/TypeScript unit tests
+      - name: Run comprehensive unit tests with coverage
         run: |
-          echo "🧪 Running JavaScript/TypeScript unit tests..."
+          echo "🧪 Running comprehensive unit tests with coverage..."
           npm run test:coverage
+        timeout-minutes: 12
           
       - name: Upload Node.js coverage
         uses: codecov/codecov-action@v3
@@ -270,16 +301,87 @@ jobs:
           name: javascript-coverage
 
   # =================
-  # E2E TESTING (PLAYWRIGHT)
+  # SMOKE TESTS (CRITICAL PATH)
   # =================
-  e2e-tests:
-    name: End-to-End Tests
+  smoke-tests:
+    name: Critical Path Smoke Tests
     runs-on: ubuntu-latest
     needs: [setup, node-setup]
     if: needs.setup.outputs.should_run_e2e == 'true'
     
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm run install:playwright
+          
+      - name: Wait for staging environment with retry
+        if: needs.setup.outputs.staging_url != ''
+        run: |
+          echo "⏳ Waiting for staging environment to be ready..."
+          
+          max_attempts=10
+          attempt=1
+          base_delay=5
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt/$max_attempts: Checking ${{ needs.setup.outputs.staging_url }}..."
+            
+            if curl -s --max-time 10 --head "${{ needs.setup.outputs.staging_url }}" | head -n 1 | grep -q "200 OK"; then
+              echo "✅ Staging environment is ready"
+              break
+            else
+              if [ $attempt -eq $max_attempts ]; then
+                echo "❌ Staging environment not available after $max_attempts attempts"
+                echo "This indicates a real infrastructure problem that needs investigation"
+                exit 1
+              fi
+              
+              # Exponential backoff: 5s, 10s, 20s, 40s, etc.
+              delay=$((base_delay * (2 ** (attempt - 1))))
+              echo "Staging not ready, waiting ${delay}s before retry..."
+              sleep $delay
+              attempt=$((attempt + 1))
+            fi
+          done
+          
+      - name: Run critical smoke tests (fail-fast)
+        run: |
+          echo "💨 Running critical smoke tests - FAIL FAST on any failure..."
+          PLAYWRIGHT_BASE_URL="${{ needs.setup.outputs.staging_url }}" \
+          npm run test:e2e -- --grep="@smoke|@critical" --reporter=line
+        timeout-minutes: 10
+        
+      - name: Upload smoke test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  # =================
+  # FULL E2E TESTING (POST-SMOKE)
+  # =================
+  e2e-tests:
+    name: Full End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: [setup, node-setup, smoke-tests]
+    if: needs.setup.outputs.should_run_e2e == 'true'
+    
     strategy:
-      fail-fast: false
+      fail-fast: true  # Fail fast - if one browser fails, likely all will
       matrix:
         browser: [chromium, firefox, webkit]
         
@@ -302,34 +404,13 @@ jobs:
         run: |
           echo "PLAYWRIGHT_BASE_URL=${{ needs.setup.outputs.staging_url }}" >> $GITHUB_ENV
           
-      - name: Wait for staging environment
-        if: needs.setup.outputs.staging_url != ''
+      - name: Run comprehensive E2E tests
         run: |
-          echo "⏳ Waiting for staging environment to be ready..."
-          
-          max_attempts=30
-          attempt=1
-          
-          while [ $attempt -le $max_attempts ]; do
-            if curl -s --head "${{ needs.setup.outputs.staging_url }}" | head -n 1 | grep -q "200 OK"; then
-              echo "✅ Staging environment is ready"
-              break
-            else
-              echo "Attempt $attempt/$max_attempts: Staging not ready, waiting 30s..."
-              sleep 30
-              attempt=$((attempt + 1))
-            fi
-          done
-          
-          if [ $attempt -gt $max_attempts ]; then
-            echo "❌ Staging environment not ready after $(($max_attempts * 30)) seconds"
-            exit 1
-          fi
-          
-      - name: Run Playwright E2E tests
-        run: |
-          echo "🎭 Running E2E tests with Playwright on ${{ matrix.browser }}..."
-          npm run test:e2e -- --project=${{ matrix.browser }}
+          echo "🎭 Running comprehensive E2E tests on ${{ matrix.browser }}..."
+          echo "Smoke tests already passed - running full test suite"
+          PLAYWRIGHT_BASE_URL="${{ needs.setup.outputs.staging_url }}" \
+          npm run test:e2e -- --project=${{ matrix.browser }} --grep="^(?!.*@smoke).*$"
+        timeout-minutes: 25
           
       - name: Upload Playwright test results
         uses: actions/upload-artifact@v4
@@ -399,7 +480,7 @@ jobs:
           };
           EOF
           
-          lhci autorun || true
+          lhci autorun
           
       - name: Upload Lighthouse results
         uses: actions/upload-artifact@v4
@@ -602,3 +683,245 @@ jobs:
           name: nightly-e2e-report
           path: nightly-report.md
           retention-days: 90
+
+  # =================
+  # COMPREHENSIVE ERROR HANDLING & RECOVERY
+  # =================
+  failure-recovery:
+    name: Failure Recovery & Monitoring
+    runs-on: ubuntu-latest
+    needs: [python-tests, mutation-testing, e2e-tests, performance-tests, security-tests, notify-results]
+    if: failure() || cancelled()
+    
+    steps:
+      - name: Analyze failure patterns
+        run: |
+          echo "🔍 Analyzing CI/CD Pipeline Failures"
+          echo "===================================="
+          echo ""
+          echo "📊 Job Results Summary:"
+          echo "• Python Tests: ${{ needs.python-tests.result }}"
+          echo "• Mutation Testing: ${{ needs.mutation-testing.result }}"
+          echo "• E2E Tests: ${{ needs.e2e-tests.result }}"
+          echo "• Performance Tests: ${{ needs.performance-tests.result }}"
+          echo "• Security Tests: ${{ needs.security-tests.result }}"
+          echo "• Notification: ${{ needs.notify-results.result }}"
+          echo ""
+          
+          # Categorize failure types
+          failed_jobs=()
+          if [ "${{ needs.python-tests.result }}" = "failure" ]; then
+            failed_jobs+=("Python Tests")
+          fi
+          if [ "${{ needs.mutation-testing.result }}" = "failure" ]; then
+            failed_jobs+=("Mutation Testing")
+          fi
+          if [ "${{ needs.e2e-tests.result }}" = "failure" ]; then
+            failed_jobs+=("E2E Tests")
+          fi
+          if [ "${{ needs.performance-tests.result }}" = "failure" ]; then
+            failed_jobs+=("Performance Tests")
+          fi
+          if [ "${{ needs.security-tests.result }}" = "failure" ]; then
+            failed_jobs+=("Security Tests")
+          fi
+          
+          if [ ${#failed_jobs[@]} -eq 0 ]; then
+            echo "✅ No critical failures detected - may be timeout or cancellation"
+          else
+            echo "❌ Failed Jobs: ${failed_jobs[*]}"
+            
+            # Provide specific recovery guidance
+            for job in "${failed_jobs[@]}"; do
+              case $job in
+                "Python Tests")
+                  echo ""
+                  echo "🐍 Python Test Failure Recovery:"
+                  echo "  • Check test logs for specific failures"
+                  echo "  • Review code coverage requirements (70%+)"
+                  echo "  • Verify dependencies in requirements.txt"
+                  ;;
+                "E2E Tests")
+                  echo ""
+                  echo "🎭 E2E Test Failure Recovery:"
+                  echo "  • Check staging environment availability"
+                  echo "  • Review browser compatibility issues"
+                  echo "  • Verify Playwright configuration"
+                  ;;
+                "Performance Tests")
+                  echo ""
+                  echo "🏃 Performance Test Failure Recovery:"
+                  echo "  • Check Lighthouse score thresholds"
+                  echo "  • Review Core Web Vitals metrics"
+                  echo "  • Optimize resource loading"
+                  ;;
+                "Security Tests")
+                  echo ""
+                  echo "🔒 Security Test Failure Recovery:"
+                  echo "  • Address vulnerability findings"
+                  echo "  • Update dependencies with security patches"
+                  echo "  • Review code for security best practices"
+                  ;;
+              esac
+            done
+          fi
+          
+      - name: Generate failure report
+        run: |
+          echo "🚨 CI/CD PIPELINE FAILURE REPORT" >> $GITHUB_STEP_SUMMARY
+          echo "================================" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**⏰ Failure Time:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "**🔖 Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**🌿 Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**👤 Actor:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "**🔄 Run Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ❌ Failed Components" >> $GITHUB_STEP_SUMMARY
+          
+          # Add specific failure information
+          if [ "${{ needs.python-tests.result }}" = "failure" ]; then
+            echo "- 🐍 **Python Tests**: Failed - Check test logs and coverage" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.e2e-tests.result }}" = "failure" ]; then
+            echo "- 🎭 **E2E Tests**: Failed - Verify staging environment and browser compatibility" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.performance-tests.result }}" = "failure" ]; then
+            echo "- 🏃 **Performance Tests**: Failed - Review Lighthouse scores and optimization" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.security-tests.result }}" = "failure" ]; then
+            echo "- 🔒 **Security Tests**: Failed - Address vulnerabilities and security issues" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔧 Recovery Actions" >> $GITHUB_STEP_SUMMARY
+          echo "1. Review artifact logs for detailed error information" >> $GITHUB_STEP_SUMMARY
+          echo "2. Fix identified issues in a new commit" >> $GITHUB_STEP_SUMMARY
+          echo "3. Re-run pipeline to verify fixes" >> $GITHUB_STEP_SUMMARY
+          echo "4. Consider using manual workflow dispatch for testing" >> $GITHUB_STEP_SUMMARY
+          
+      - name: Create incident tracking
+        run: |
+          echo "📋 Creating incident tracking for failed pipeline..."
+          
+          # Generate incident ID
+          incident_id="CI-$(date +%Y%m%d)-${{ github.run_number }}"
+          echo "Incident ID: $incident_id"
+          
+          # Log incident details
+          echo "{
+            \"incident_id\": \"$incident_id\",
+            \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
+            \"commit_sha\": \"${{ github.sha }}\",
+            \"branch\": \"${{ github.ref_name }}\",
+            \"actor\": \"${{ github.actor }}\",
+            \"failed_jobs\": {
+              \"python_tests\": \"${{ needs.python-tests.result }}\",
+              \"mutation_testing\": \"${{ needs.mutation-testing.result }}\",
+              \"e2e_tests\": \"${{ needs.e2e-tests.result }}\",
+              \"performance_tests\": \"${{ needs.performance-tests.result }}\",
+              \"security_tests\": \"${{ needs.security-tests.result }}\"
+            },
+            \"recovery_status\": \"pending\"
+          }" > incident-$incident_id.json
+          
+          echo "📝 Incident logged: $incident_id"
+
+  # =================
+  # WORKFLOW HEALTH MONITORING
+  # =================
+  workflow-health:
+    name: Workflow Health Monitoring
+    runs-on: ubuntu-latest
+    needs: [python-tests, mutation-testing, e2e-tests, performance-tests, security-tests]
+    if: always()
+    
+    steps:
+      - name: Calculate success metrics
+        run: |
+          echo "📈 Calculating Pipeline Health Metrics"
+          echo "====================================="
+          echo ""
+          
+          # Count successful vs failed jobs
+          total_jobs=5
+          successful_jobs=0
+          
+          jobs_status=(
+            "${{ needs.python-tests.result }}"
+            "${{ needs.mutation-testing.result }}"
+            "${{ needs.e2e-tests.result }}"
+            "${{ needs.performance-tests.result }}"
+            "${{ needs.security-tests.result }}"
+          )
+          
+          for status in "${jobs_status[@]}"; do
+            if [ "$status" = "success" ]; then
+              successful_jobs=$((successful_jobs + 1))
+            fi
+          done
+          
+          success_rate=$((successful_jobs * 100 / total_jobs))
+          echo "Success Rate: $success_rate% ($successful_jobs/$total_jobs jobs)"
+          
+          # Set health status
+          if [ $success_rate -ge 80 ]; then
+            echo "🟢 Pipeline Health: HEALTHY"
+            health_status="healthy"
+          elif [ $success_rate -ge 60 ]; then
+            echo "🟡 Pipeline Health: WARNING"
+            health_status="warning"
+          else
+            echo "🔴 Pipeline Health: CRITICAL"
+            health_status="critical"
+          fi
+          
+          echo "health_status=$health_status" >> $GITHUB_ENV
+          echo "success_rate=$success_rate" >> $GITHUB_ENV
+          
+      - name: Generate health recommendations
+        run: |
+          echo "💡 Pipeline Health Recommendations"
+          echo "================================="
+          echo ""
+          
+          if [ "$health_status" = "critical" ]; then
+            echo "🚨 CRITICAL PIPELINE HEALTH:"
+            echo "• Immediate investigation required"
+            echo "• Consider feature freeze until stability restored"
+            echo "• Review recent changes for breaking patterns"
+            echo "• Check infrastructure and dependencies"
+          elif [ "$health_status" = "warning" ]; then
+            echo "⚠️ WARNING PIPELINE HEALTH:"
+            echo "• Monitor closely for degradation trends"
+            echo "• Review flaky test patterns"
+            echo "• Consider additional test stability measures"
+            echo "• Update dependencies and infrastructure"
+          else
+            echo "✅ HEALTHY PIPELINE:"
+            echo "• Pipeline operating within normal parameters"
+            echo "• Continue monitoring for optimization opportunities"
+            echo "• Maintain current quality gates and thresholds"
+          fi
+          
+          echo ""
+          echo "📊 Current Success Rate: $success_rate%"
+          echo "🎯 Target Success Rate: 90%+"
+          
+      - name: Update workflow health dashboard
+        run: |
+          echo "🎛️ WORKFLOW HEALTH DASHBOARD" >> $GITHUB_STEP_SUMMARY
+          echo "============================" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**📊 Success Rate:** $success_rate%" >> $GITHUB_STEP_SUMMARY
+          echo "**🏥 Health Status:** $health_status" >> $GITHUB_STEP_SUMMARY
+          echo "**⏰ Last Updated:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Job Status Matrix" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status | Health |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🐍 Python Tests | ${{ needs.python-tests.result }} | $([ "${{ needs.python-tests.result }}" = "success" ] && echo "✅" || echo "❌") |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧬 Mutation Tests | ${{ needs.mutation-testing.result }} | $([ "${{ needs.mutation-testing.result }}" = "success" ] || [ "${{ needs.mutation-testing.result }}" = "skipped" ] && echo "✅" || echo "❌") |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🎭 E2E Tests | ${{ needs.e2e-tests.result }} | $([ "${{ needs.e2e-tests.result }}" = "success" ] || [ "${{ needs.e2e-tests.result }}" = "skipped" ] && echo "✅" || echo "❌") |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏃 Performance | ${{ needs.performance-tests.result }} | $([ "${{ needs.performance-tests.result }}" = "success" ] || [ "${{ needs.performance-tests.result }}" = "skipped" ] && echo "✅" || echo "❌") |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔒 Security | ${{ needs.security-tests.result }} | $([ "${{ needs.security-tests.result }}" = "success" ] && echo "✅" || echo "❌") |" >> $GITHUB_STEP_SUMMARY

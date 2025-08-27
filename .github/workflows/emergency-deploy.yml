@@ -24,7 +24,7 @@ on:
         type: boolean
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
 
 jobs:
   # =================
@@ -98,16 +98,19 @@ jobs:
         run: |
           echo "📦 Fast dependency installation..."
           npm ci --prefer-offline --no-audit
+        timeout-minutes: 3
           
       - name: Critical syntax check
         run: |
           echo "🔍 Running critical syntax checks..."
-          npm run lint -- --quiet --ext .js,.jsx || echo "Syntax check completed with warnings"
+          npm run lint -- --quiet --ext .js,.jsx
+        timeout-minutes: 3
           
       - name: Fast unit tests
         run: |
           echo "⚡ Running essential unit tests only..."
-          npm test -- --passWithNoTests --maxWorkers=2 || echo "Fast tests completed"
+          npm test -- --passWithNoTests --maxWorkers=2
+        timeout-minutes: 5
           
       - name: Security scan (rapid)
         run: |
@@ -178,11 +181,13 @@ jobs:
           
       - name: Install dependencies
         run: npm ci
+        timeout-minutes: 5
         
       - name: Emergency build
         run: |
           echo "🔥 Emergency build process..."
-          npm run build || echo "Build completed"
+          npm run build
+        timeout-minutes: 10
           
       - name: Simulate emergency deployment
         run: |

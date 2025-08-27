@@ -1,6 +1,6 @@
 {
   "title": "Autonomous CI/CD System Validation Report",
-  "timestamp": "2025-08-27T19:00:24.876Z",
+  "timestamp": "2025-08-27T19:12:31.716Z",
   "summary": {
     "overallScore": 100,
     "testsPassed": 7,
@@ -8,22 +8,22 @@
     "systemHealth": "Healthy"
   },
   "results": {
-    "timestamp": "2025-08-27T19:00:19.114Z",
+    "timestamp": "2025-08-27T19:12:24.031Z",
     "overallScore": 100,
     "tests": [
       {
         "name": "GitHub API Connectivity",
         "status": "passed",
         "score": 100,
-        "details": "Successfully connected to GitHub API. Repository: subtract0/TestAlex, Workflows: 10, Recent runs: 127",
-        "duration": 821
+        "details": "Successfully connected to GitHub API. Repository: subtract0/TestAlex, Workflows: 10, Recent runs: 142",
+        "duration": 1108
       },
       {
         "name": "Workflow Monitoring",
         "status": "passed",
         "score": 100,
-        "details": "Monitored 127 workflow runs. Success rate: 30.0%. Failed runs: 14",
-        "duration": 750
+        "details": "Monitored 135 workflow runs. Success rate: 30.0%. Failed runs: 14",
+        "duration": 808
       },
       {
         "name": "Failure Pattern Detection",
@@ -43,8 +43,8 @@
         "name": "System Performance",
         "status": "passed",
         "score": 100,
-        "details": "Performance tests completed. Average response time meets targets. Results: Workflow Analysis: 1349ms (100/100), Pattern Detection: 637ms (100/100), Fix Generation: 1082ms (100/100)",
-        "duration": 3068
+        "details": "Performance tests completed. Average response time meets targets. Results: Workflow Analysis: 2870ms (100/100), Pattern Detection: 698ms (100/100), Fix Generation: 822ms (100/100)",
+        "duration": 4390
       },
       {
         "name": "Error Handling",
@@ -58,15 +58,15 @@
         "status": "passed",
         "score": 100,
         "details": "Configuration validation: 4/4 configurations valid. ✅ .eslintrc.json, ✅ package.json, ✅ .github/workflows/ci-improved.yml, ✅ autonomous-ci-debugger.js",
-        "duration": 5
+        "duration": 1
       }
     ],
     "metrics": {
-      "totalWorkflows": 127,
+      "totalWorkflows": 142,
       "recentRuns": 10,
-      "successRate": "40.0",
-      "failureRate": "60.0",
-      "avgDuration": "2m",
+      "successRate": "0.0",
+      "failureRate": "30.0",
+      "avgDuration": "0m",
       "improvedWorkflowsDeployed": 2,
       "autonomousComponentsCreated": 4
     },
@@ -82,7 +82,7 @@
         "priority": "high",
         "category": "reliability",
         "title": "Improve Workflow Success Rate",
-        "description": "Current success rate: 40% (target: 90%+)",
+        "description": "Current success rate: 0% (target: 90%+)",
         "action": "Deploy additional autonomous fixes to improve stability"
       }
     ]

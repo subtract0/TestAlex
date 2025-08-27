@@ -512,7 +512,7 @@ python-dotenv>=0.19.0
 
 // CLI Interface
 async function main() {
-  const debugger = new AutonomousCIDebugger();
+  const ciDebugger = new AutonomousCIDebugger();
   
   const args = process.argv.slice(2);
   const shouldMonitor = args.includes('--monitor') || args.length === 0;
@@ -521,7 +521,7 @@ async function main() {
 
   try {
     if (shouldMonitor) {
-      const results = await debugger.monitorWorkflows();
+      const results = await ciDebugger.monitorWorkflows();
       
       if (shouldFix) {
         console.log('\n🔧 Autonomous fixing enabled - fixes have been applied');

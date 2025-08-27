@@ -382,3 +382,29 @@ Android app foundation complete with comprehensive setup guide at `/android/READ
 - **Break-even**: ~100-200 premium users
 
 📁 **[Complete Implementation Details →](./docs/archive/IMPLEMENTATION_ROADMAP.md)**
+
+GOLDEN RULE #1: ALWAYS FOLLOW BEST PRACTICES
+NO EXCEPTIONS. NO WORKAROUNDS. NO SHORTCUTS.
+
+Software Engineering Best Practices Are Sacred
+Tests must fail when they should fail - No continue-on-error on test steps
+Build quality into the process - Don't mask problems, fix them
+Fail fast, fail clearly - Give actionable feedback immediately
+Infrastructure problems ≠ Code problems - Handle each appropriately
+Retry logic only for transient issues - Network timeouts, not test failures
+Timeouts prevent hangs - But don't mask real issues
+
+Anti-Patterns to NEVER Use
+❌ continue-on-error: true on tests
+❌ || echo "completed with warnings" on critical steps
+❌ Hiding failures to make builds "green"
+❌ One-size-fits-all error handling
+❌ Masking real problems with workarounds
+
+What TO Do Instead
+✅ Fix the root cause of flaky tests
+✅ Make builds reliable through proper engineering
+✅ Use fail-fast strategies with test categorization
+✅ Handle infrastructure gracefully (skip deployment if no credentials)
+✅ Implement smart retries with exponential backoff for network ops
+✅ Provide clear feedback when things fail

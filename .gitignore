@@ -100,12 +100,23 @@ config/local.json
 config/production.json
 config/development.json
 
+# Firebase extension configuration files
+extensions/*.env
+extensions/firestore-stripe-payments-*.env
+*.extension.env
+
 # Service account keys and JSON credentials
 service-account*
 *service-account*.json
 *credentials*.json
 *key*.json
 *secret*.json
+
+# Firebase config with API keys
+public/config.js
+config.js
+deploy.sh
+*.deploy.sh
 
 # dataconnect generated files
 .dataconnect

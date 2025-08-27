@@ -17,7 +17,7 @@ permissions:
   id-token: write
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   BLOG_DOMAIN: 'acimcoach.com'
 
 jobs:
@@ -43,12 +43,14 @@ jobs:
         cd blog/scripts
         npm init -y
         npm install
+      timeout-minutes: 8
         
     - name: Generate daily ACIM blog post
       run: |
         cd blog/scripts
         chmod +x generate-daily-post.js
         node generate-daily-post.js
+      timeout-minutes: 15
         
     - name: Check for changes
       id: git-check
@@ -122,6 +124,7 @@ jobs:
       run: |
         cd blog/site
         npm install
+      timeout-minutes: 10
         
     - name: Create Astro configuration
       run: |
@@ -431,6 +434,7 @@ jobs:
       run: |
         cd blog/site
         npm run build
+      timeout-minutes: 15
         
     - name: Generate SEO sitemap
       run: |
