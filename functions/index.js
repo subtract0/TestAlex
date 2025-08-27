@@ -27,7 +27,7 @@ if (!ASSISTANT_ID) {
 
 // Initialize OpenAI client
 const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
+  apiKey: OPENAI_API_KEY
 });
 
 logger.info("ACIM Guide Functions initialized", {
@@ -97,7 +97,7 @@ async function getOrCreateThread(userId) {
  * Chat with CourseGPT Assistant - Streamlined Version
  */
 exports.chatWithAssistant = onCall({
-  memory: '512MB',
+  memory: "512MB",
   timeoutSeconds: 60,
   maxInstances: 10
 }, async (request) => {
@@ -123,7 +123,7 @@ exports.chatWithAssistant = onCall({
       userId,
       messageLength: message.length,
       tone,
-      timestamp: startTime,
+      timestamp: startTime
     });
 
     // Get or create thread for user
@@ -144,7 +144,7 @@ exports.chatWithAssistant = onCall({
       tone,
       status: "processing",
       timestamp: new Date(),
-      startTime: startTime,
+      startTime: startTime
     };
 
     let messageRef;
@@ -158,12 +158,12 @@ exports.chatWithAssistant = onCall({
     // Add user message to OpenAI thread
     await openai.beta.threads.messages.create(userThreadId, {
       role: "user",
-      content: message,
+      content: message
     });
 
     // Create and run the assistant
     const run = await openai.beta.threads.runs.create(userThreadId, {
-      assistant_id: ASSISTANT_ID,
+      assistant_id: ASSISTANT_ID
     });
 
     logger.info("Assistant run started", {runId: run.id, threadId: userThreadId});
@@ -182,7 +182,7 @@ exports.chatWithAssistant = onCall({
         logger.info("Run status update", {
           runId: run.id,
           status: runStatus.status,
-          pollCount,
+          pollCount
         });
       }
     }
@@ -191,22 +191,22 @@ exports.chatWithAssistant = onCall({
       // Get the assistant's response
       const messages = await openai.beta.threads.messages.list(userThreadId);
       const assistantMessage = messages.data.find((msg) =>
-        msg.role === "assistant" && msg.run_id === run.id,
+        msg.role === "assistant" && msg.run_id === run.id
       );
 
       if (assistantMessage) {
-        let response = assistantMessage.content[0]?.text?.value || "No response generated";
+        let response = (assistantMessage.content[0] && assistantMessage.content[0].text && assistantMessage.content[0].text.value) || "No response generated";
         
         // Clean up section breaks and HTML tags that should not be displayed
         response = response
           // Handle all section-break patterns comprehensively
-          .replace(/\*?["']?section-break["']?\*?[>]?/gi, '\n\n---\n\n')
+          .replace(/\*?["']?section-break["']?\*?[>]?/gi, "\n\n---\n\n")
           // Handle specific patterns that might appear
-          .replace(/"section-break"[>]?/gi, '\n\n---\n\n')
-          .replace(/[*]"section-break"[*][>]?/gi, '\n\n---\n\n')
-          .replace(/<\/?section-break\/?>/gi, '\n\n---\n\n')
-          .replace(/<\/?[^>]+(>|$)/g, '') // Remove any remaining HTML tags
-          .replace(/\n{3,}/g, '\n\n') // Clean up excessive line breaks
+          .replace(/"section-break"[>]?/gi, "\n\n---\n\n")
+          .replace(/[*]"section-break"[*][>]?/gi, "\n\n---\n\n")
+          .replace(/<\/?section-break\/?>/gi, "\n\n---\n\n")
+          .replace(/<\/?[^>]+(>|$)/g, "") // Remove any remaining HTML tags
+          .replace(/\n{3,}/g, "\n\n") // Clean up excessive line breaks
           .trim();
 
         // Update message document if we created one
@@ -218,7 +218,7 @@ exports.chatWithAssistant = onCall({
               status: "completed",
               completedAt: new Date(),
               latency: Date.now() - startTime,
-              runId: run.id,
+              runId: run.id
             });
           } catch (updateError) {
             logger.warn("Failed to update message document", {error: updateError.message});
@@ -227,14 +227,14 @@ exports.chatWithAssistant = onCall({
 
         logger.info("Chat completed successfully", {
           userId,
-          messageId: messageRef?.id,
+          messageId: (messageRef && messageRef.id),
           responseLength: response.length,
-          latency: Date.now() - startTime,
+          latency: Date.now() - startTime
         });
 
         // Return response for immediate display
         return {
-          messageId: messageRef?.id,
+          messageId: (messageRef && messageRef.id),
           response: response,
           latency: Date.now() - startTime,
           isPlaceholder: false
@@ -248,7 +248,7 @@ exports.chatWithAssistant = onCall({
         status: runStatus.status,
         error: runStatus.last_error
       });
-      throw new Error(`Assistant run failed: ${runStatus.last_error?.message || 'Unknown error'}`);
+      throw new Error(`Assistant run failed: ${(runStatus.last_error && runStatus.last_error.message) || "Unknown error"}`);
     } else {
       logger.error("Assistant run timed out", {runId: run.id, status: runStatus.status, pollCount});
       throw new Error("Assistant response timed out");
@@ -258,7 +258,7 @@ exports.chatWithAssistant = onCall({
     logger.error("Chat function error", {
       error: error.message,
       stack: error.stack,
-      userId: request.auth?.uid
+      userId: (request.auth && request.auth.uid)
     });
     throw error;
   }

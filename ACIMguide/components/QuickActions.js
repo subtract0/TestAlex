@@ -111,16 +111,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
+    borderTopColor: '#E0E0E0'
   },
   title: {
     fontSize: 16,
     fontWeight: '600',
     color: '#2C3E50',
-    marginBottom: 12,
+    marginBottom: 12
   },
   scrollContent: {
-    paddingRight: 16,
+    paddingRight: 16
   },
   actionButton: {
     width: 120,
@@ -136,22 +136,22 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 1
     },
     shadowOpacity: 0.18,
     shadowRadius: 1.0,
-    elevation: 1,
+    elevation: 1
   },
   actionIcon: {
     fontSize: 24,
-    marginBottom: 4,
+    marginBottom: 4
   },
   actionTitle: {
     fontSize: 12,
     fontWeight: '500',
     color: '#34495E',
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 16
   },
   usageBadge: {
     position: 'absolute',
@@ -163,13 +163,13 @@ const styles = StyleSheet.create({
     height: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 4
   },
   usageText: {
     color: '#FFFFFF',
     fontSize: 10,
-    fontWeight: 'bold',
-  },
+    fontWeight: 'bold'
+  }
 });
 
 export default QuickActions;

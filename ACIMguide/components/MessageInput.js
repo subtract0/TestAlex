@@ -8,7 +8,7 @@ import {
   ActivityIndicator
 } from 'react-native';
 
-const MessageInput = ({ onSendMessage, isLoading = false, placeholder = "Ask ACIMguide anything..." }) => {
+const MessageInput = ({ onSendMessage, isLoading = false, placeholder = 'Ask ACIMguide anything...' }) => {
   const [message, setMessage] = useState('');
 
   const handleSend = () => {
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
+    borderTopColor: '#E0E0E0'
   },
   inputContainer: {
     flexDirection: 'row',
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    minHeight: 50,
+    minHeight: 50
   },
   textInput: {
     flex: 1,
@@ -90,10 +90,10 @@ const styles = StyleSheet.create({
     color: '#2C3E50',
     maxHeight: 100,
     paddingVertical: 8,
-    paddingRight: 12,
+    paddingRight: 12
   },
   disabledInput: {
-    color: '#95A5A6',
+    color: '#95A5A6'
   },
   sendButton: {
     backgroundColor: '#3498DB',
@@ -102,31 +102,31 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 8,
+    marginLeft: 8
   },
   disabledButton: {
-    backgroundColor: '#BDC3C7',
+    backgroundColor: '#BDC3C7'
   },
   sendIcon: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   characterCount: {
     fontSize: 12,
     color: '#E74C3C',
     textAlign: 'right',
-    marginTop: 4,
+    marginTop: 4
   },
   loadingContainer: {
     paddingVertical: 8,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   loadingText: {
     fontSize: 14,
     color: '#7F8C8D',
-    fontStyle: 'italic',
-  },
+    fontStyle: 'italic'
+  }
 });
 
 export default MessageInput;

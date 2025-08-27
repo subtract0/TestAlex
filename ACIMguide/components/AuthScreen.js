@@ -82,55 +82,55 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8F9FA',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   content: {
     width: '90%',
     maxWidth: 400,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 40
   },
   logoText: {
     fontSize: 60,
-    marginBottom: 16,
+    marginBottom: 16
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     color: '#2C3E50',
-    marginBottom: 8,
+    marginBottom: 8
   },
   subtitle: {
     fontSize: 16,
     color: '#7F8C8D',
     textAlign: 'center',
-    fontStyle: 'italic',
+    fontStyle: 'italic'
   },
   descriptionContainer: {
-    marginBottom: 40,
+    marginBottom: 40
   },
   description: {
     fontSize: 16,
     color: '#34495E',
     textAlign: 'center',
     lineHeight: 24,
-    marginBottom: 20,
+    marginBottom: 20
   },
   featureList: {
-    alignItems: 'flex-start',
+    alignItems: 'flex-start'
   },
   feature: {
     fontSize: 14,
     color: '#7F8C8D',
     marginBottom: 8,
-    lineHeight: 20,
+    lineHeight: 20
   },
   buttonContainer: {
     width: '100%',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   signInButton: {
     backgroundColor: '#3498DB',
@@ -143,25 +143,25 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 2
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
+    elevation: 5
   },
   disabledButton: {
-    backgroundColor: '#BDC3C7',
+    backgroundColor: '#BDC3C7'
   },
   signInButtonText: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600'
   },
   privacyText: {
     fontSize: 12,
     color: '#95A5A6',
-    textAlign: 'center',
-  },
+    textAlign: 'center'
+  }
 });
 
 export default AuthScreen;

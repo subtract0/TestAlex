@@ -193,7 +193,7 @@ const ChatScreen = ({ user, onSignOut }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F8F9FA'
   },
   header: {
     flexDirection: 'row',
@@ -203,16 +203,16 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: '#E0E0E0'
   },
   headerLeft: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#2C3E50'
   },
   offlineIndicator: {
     fontSize: 12,
@@ -221,51 +221,51 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     backgroundColor: '#FADBD8',
-    borderRadius: 4,
+    borderRadius: 4
   },
   headerRight: {
-    flexDirection: 'row',
+    flexDirection: 'row'
   },
   headerButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    marginLeft: 8,
+    marginLeft: 8
   },
   headerButtonText: {
     color: '#3498DB',
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '500'
   },
   messagesList: {
     flexGrow: 1,
-    paddingVertical: 8,
+    paddingVertical: 8
   },
   emptyStateContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    flex: 1,
+    flex: 1
   },
   emptyState: {
     alignItems: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: 32
   },
   emptyStateIcon: {
     fontSize: 48,
-    marginBottom: 16,
+    marginBottom: 16
   },
   emptyStateTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#2C3E50',
     marginBottom: 12,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   emptyStateSubtitle: {
     fontSize: 16,
     color: '#7F8C8D',
     textAlign: 'center',
-    lineHeight: 24,
-  },
+    lineHeight: 24
+  }
 });
 
 export default ChatScreen;

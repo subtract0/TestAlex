@@ -167,25 +167,56 @@
             border: 1px solid rgba(114, 28, 36, 0.2);
         }
         
-        /* Chat Container - Viewport Optimized */
+        /* Chat Container - Apple-style Scrolling */
         .chat-container {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 0;
             background: #ffffff;
-            scroll-behavior: smooth;
             border: none;
-            min-height: 0; /* Important for flex container */
+            min-height: 0;
+            /* Apple-style smooth scrolling */
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            /* Custom scrolling physics */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
         }
         
-        /* Invisible Scrollbar - Clean Apple Style */
+        /* Beautiful Apple-style Scrollbar */
         .chat-container::-webkit-scrollbar {
-            width: 0;
+            width: 8px;
             background: transparent;
+        }
+        
+        .chat-container::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 4px;
         }
         
         .chat-container::-webkit-scrollbar-thumb {
-            background: transparent;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .chat-container:hover::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            opacity: 1;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Custom scroll momentum for mobile */
+        @supports (-webkit-overflow-scrolling: touch) {
+            .chat-container {
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: y proximity;
+            }
         }
         
         /* Message Layout - Minimalist Spacing */
@@ -873,8 +904,9 @@
         // Initialize when page loads
         initializeAuth();
 
-        // Real-time message listener with improved handling
+        // Session management - fresh start on each page load
         let messageListener = null;
+        let currentSessionStart = Date.now();
         
         function listenForMessages() {
             if (!currentUserId) return;
@@ -884,10 +916,13 @@
                 messageListener();
             }
             
+            // Only listen for NEW messages from current session
+            // This prevents loading old conversation history on refresh
             messageListener = firestore.collection('messages')
                 .where('userId', '==', currentUserId)
+                .where('timestamp', '>', currentSessionStart) // Only current session
                 .orderBy('timestamp', 'desc')
-                .limit(10)
+                .limit(5) // Limit to recent messages only
                 .onSnapshot((snapshot) => {
                     snapshot.docChanges().forEach((change) => {
                         if (change.type === 'added' || change.type === 'modified') {
@@ -896,10 +931,11 @@
                             // Only show messages that are completed for this user (filtered by userId already)
                             if (messageData.status === 'completed') {
                                 
-                                // Remove any existing processing/reflecting messages (no :contains() in native selectors)
+                                // Remove any existing processing/reflecting messages
                                 Array.from(document.querySelectorAll('.message .message-content')).forEach(el => {
                                     const t = el.textContent || '';
-                                    if (t.includes('CourseGPT is reflecting on your question')) {
+                                    if (t.includes('CourseGPT is reflecting on your question') || 
+                                        t.includes('Processing your question')) {
                                         el.parentElement.remove();
                                     }
                                 });
@@ -907,11 +943,13 @@
                                 // Add the real AI response to chat
                                 const content = (messageData.assistantResponse || messageData.text || '').trim();
                                 if (!content) return;
+                                
                                 let response = content;
                                 if (Array.isArray(messageData.citations) && messageData.citations.length > 0) {
                                     response += '<br><br><strong>📚 Citations from A Course in Miracles:</strong><br>' +
                                         messageData.citations.map(c => `• ${c.text}`).join('<br>');
                                 }
+                                
                                 // Check if this exact response already exists to prevent duplicates
                                 const chatContainer = document.getElementById('chatContainer');
                                 const existingMessages = Array.from(chatContainer.querySelectorAll('.message.assistant .message-content'));
@@ -933,7 +971,7 @@
                                 
                                 // Only add the message if it's not a duplicate
                                 if (!isDuplicate) {
-                                    addMessage(response);
+                                    addMessageWithAnimation(response);
                                 }
                                 showLoading(false);
                             }
@@ -945,7 +983,12 @@
                 });
         }
 
+        // Enhanced message adding with smooth Apple-style animations
         function addMessage(content, isUser = false) {
+            return addMessageWithAnimation(content, isUser);
+        }
+        
+        function addMessageWithAnimation(content, isUser = false) {
             const chatContainer = document.getElementById('chatContainer');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
@@ -1020,9 +1063,47 @@
             
             messageDiv.appendChild(contentDiv);
             chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
             
-            return messageDiv; // Return the element so it can be removed later
+            // Smooth Apple-style scroll to bottom with easing
+            requestAnimationFrame(() => {
+                const targetScrollTop = chatContainer.scrollHeight - chatContainer.clientHeight;
+                const currentScrollTop = chatContainer.scrollTop;
+                const distance = targetScrollTop - currentScrollTop;
+                
+                if (Math.abs(distance) < 5) {
+                    // If we're close, just snap to bottom
+                    chatContainer.scrollTop = targetScrollTop;
+                } else {
+                    // Smooth scroll with custom easing
+                    smoothScrollTo(chatContainer, targetScrollTop, 600);
+                }
+            });
+            
+            return messageDiv;
+        }
+        
+        // Apple-style smooth scrolling function
+        function smoothScrollTo(element, targetY, duration = 600) {
+            const startY = element.scrollTop;
+            const distance = targetY - startY;
+            const startTime = Date.now();
+            
+            function scroll() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Apple-style easing curve (ease-out with slight bounce)
+                const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+                const position = startY + (distance * easeOutCubic);
+                
+                element.scrollTop = position;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(scroll);
+                }
+            }
+            
+            requestAnimationFrame(scroll);
         }
 
         function showLoading(show) {

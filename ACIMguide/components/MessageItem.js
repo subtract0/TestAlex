@@ -84,16 +84,16 @@ const MessageItem = ({ message, isLast = false }) => {
 
   const getStatusIcon = () => {
     switch (message.status) {
-      case 'sending':
-        return '⏳';
-      case 'sent':
-        return '✓';
-      case 'delivered':
-        return '✓✓';
-      case 'failed':
-        return '❌';
-      default:
-        return '';
+    case 'sending':
+      return '⏳';
+    case 'sent':
+      return '✓';
+    case 'delivered':
+      return '✓✓';
+    case 'failed':
+      return '❌';
+    default:
+      return '';
     }
   };
 
@@ -137,104 +137,104 @@ const MessageItem = ({ message, isLast = false }) => {
 const styles = StyleSheet.create({
   container: {
     marginVertical: 4,
-    paddingHorizontal: 16,
+    paddingHorizontal: 16
   },
   lastMessage: {
-    marginBottom: 16,
+    marginBottom: 16
   },
   userContainer: {
-    alignItems: 'flex-end',
+    alignItems: 'flex-end'
   },
   assistantContainer: {
-    alignItems: 'flex-start',
+    alignItems: 'flex-start'
   },
   messageBubble: {
     maxWidth: '80%',
     padding: 12,
-    borderRadius: 18,
+    borderRadius: 18
   },
   userBubble: {
     backgroundColor: '#3498DB',
-    borderBottomRightRadius: 4,
+    borderBottomRightRadius: 4
   },
   assistantBubble: {
     backgroundColor: '#FFFFFF',
     borderBottomLeftRadius: 4,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: '#E0E0E0'
   },
   assistantLabel: {
     fontSize: 12,
     fontWeight: '600',
     color: '#7F8C8D',
-    marginBottom: 4,
+    marginBottom: 4
   },
   messageText: {
     fontSize: 16,
     lineHeight: 22,
-    color: '#2C3E50',
+    color: '#2C3E50'
   },
   userMessageText: {
-    color: '#FFFFFF',
+    color: '#FFFFFF'
   },
   boldText: {
     fontWeight: 'bold',
-    fontStyle: 'italic',
+    fontStyle: 'italic'
   },
   messageFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 8
   },
   timestamp: {
     fontSize: 12,
-    color: '#95A5A6',
+    color: '#95A5A6'
   },
   userTimestamp: {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: 'rgba(255, 255, 255, 0.7)'
   },
   statusIcon: {
     fontSize: 12,
     color: 'rgba(255, 255, 255, 0.7)',
-    marginLeft: 4,
+    marginLeft: 4
   },
   citationsContainer: {
     marginTop: 12,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#ECF0F1',
+    borderTopColor: '#ECF0F1'
   },
   citationsToggle: {
-    paddingVertical: 4,
+    paddingVertical: 4
   },
   citationsToggleText: {
     fontSize: 12,
     color: '#7F8C8D',
-    fontWeight: '500',
+    fontWeight: '500'
   },
   citationsList: {
-    marginTop: 8,
+    marginTop: 8
   },
   citationItem: {
     paddingVertical: 6,
     paddingHorizontal: 8,
     backgroundColor: '#F8F9FA',
     borderRadius: 8,
-    marginBottom: 4,
+    marginBottom: 4
   },
   citationText: {
     fontSize: 12,
     color: '#34495E',
     fontStyle: 'italic',
-    lineHeight: 16,
+    lineHeight: 16
   },
   citationSource: {
     fontSize: 10,
     color: '#7F8C8D',
     marginTop: 2,
-    fontWeight: '500',
-  },
+    fontWeight: '500'
+  }
 });
 
 export default MessageItem;

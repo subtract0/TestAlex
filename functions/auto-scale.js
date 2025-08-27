@@ -4,10 +4,10 @@
  * Runs every 10 minutes to optimize cost and performance
  */
 
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-const {GoogleAuth} = require('google-auth-library');
-const logger = require('firebase-functions/logger');
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+const {GoogleAuth} = require("google-auth-library");
+const logger = require("firebase-functions/logger");
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -59,7 +59,7 @@ async function getCurrentUsageMetrics() {
     
     // Get daily token usage across all users
     const rateLimitsSnapshot = await admin.firestore()
-      .collection('rateLimits')
+      .collection("rateLimits")
       .get();
     
     let totalDailyTokens = 0;
@@ -81,14 +81,14 @@ async function getCurrentUsageMetrics() {
     
     // Get error rate from recent function executions
     const errorsSnapshot = await admin.firestore()
-      .collection('function_logs')
-      .where('timestamp', '>=', tenMinutesAgo)
-      .where('level', '==', 'ERROR')
+      .collection("function_logs")
+      .where("timestamp", ">=", tenMinutesAgo)
+      .where("level", "==", "ERROR")
       .get();
     
     const totalExecutionsSnapshot = await admin.firestore()
-      .collection('function_logs')
-      .where('timestamp', '>=', tenMinutesAgo)
+      .collection("function_logs")
+      .where("timestamp", ">=", tenMinutesAgo)
       .get();
     
     const errorRate = totalExecutionsSnapshot.size > 0 
@@ -108,7 +108,7 @@ async function getCurrentUsageMetrics() {
     };
     
   } catch (error) {
-    logger.error('Failed to get usage metrics', { error: error.message });
+    logger.error("Failed to get usage metrics", { error: error.message });
     throw error;
   }
 }
@@ -151,7 +151,7 @@ function calculateOptimalMaxInstances(metrics) {
   
   // Error rate-based emergency scaling
   if (metrics.errorRate >= SCALING_CONFIG.thresholds.errorRate.critical) {
-    logger.warn('Critical error rate detected, enabling emergency scaling', {
+    logger.warn("Critical error rate detected, enabling emergency scaling", {
       errorRate: metrics.errorRate,
       threshold: SCALING_CONFIG.thresholds.errorRate.critical
     });
@@ -192,12 +192,12 @@ async function updateFunctionScaling(functionName, newMaxInstances) {
     // to update the function configuration. For now, we'll log the change
     // and store it in Firestore for monitoring.
     
-    await admin.firestore().collection('scaling_events').add({
+    await admin.firestore().collection("scaling_events").add({
       functionName,
       newMaxInstances,
       timestamp: new Date(),
-      action: 'scale_update',
-      status: 'simulated' // In production, this would be 'applied'
+      action: "scale_update",
+      status: "simulated" // In production, this would be 'applied'
     });
     
     logger.info(`Scaling configuration updated for ${functionName}`, {
@@ -205,7 +205,7 @@ async function updateFunctionScaling(functionName, newMaxInstances) {
     });
     
   } catch (error) {
-    logger.error('Failed to update function scaling', {
+    logger.error("Failed to update function scaling", {
       functionName,
       error: error.message
     });
@@ -218,7 +218,7 @@ async function updateFunctionScaling(functionName, newMaxInstances) {
  */
 async function storeScalingMetrics(metrics, scalingDecision) {
   try {
-    await admin.firestore().collection('scaling_metrics').add({
+    await admin.firestore().collection("scaling_metrics").add({
       ...metrics,
       scalingDecision,
       timestamp: new Date()
@@ -229,8 +229,8 @@ async function storeScalingMetrics(metrics, scalingDecision) {
     weekAgo.setDate(weekAgo.getDate() - 7);
     
     const oldMetricsQuery = admin.firestore()
-      .collection('scaling_metrics')
-      .where('timestamp', '<', weekAgo)
+      .collection("scaling_metrics")
+      .where("timestamp", "<", weekAgo)
       .limit(100);
     
     const oldMetrics = await oldMetricsQuery.get();
@@ -242,13 +242,13 @@ async function storeScalingMetrics(metrics, scalingDecision) {
       });
       await batch.commit();
       
-      logger.info('Cleaned up old scaling metrics', {
+      logger.info("Cleaned up old scaling metrics", {
         deletedCount: oldMetrics.size
       });
     }
     
   } catch (error) {
-    logger.error('Failed to store scaling metrics', { error: error.message });
+    logger.error("Failed to store scaling metrics", { error: error.message });
     // Don't throw - this is not critical for the scaling operation
   }
 }
@@ -263,8 +263,8 @@ async function sendScalingAlerts(metrics, scalingDecision) {
     // High token usage alert
     if (metrics.totalDailyTokens >= SCALING_CONFIG.thresholds.dailyTokens.high) {
       alerts.push({
-        type: 'high_token_usage',
-        severity: metrics.totalDailyTokens >= SCALING_CONFIG.thresholds.dailyTokens.emergency ? 'critical' : 'warning',
+        type: "high_token_usage",
+        severity: metrics.totalDailyTokens >= SCALING_CONFIG.thresholds.dailyTokens.emergency ? "critical" : "warning",
         message: `Daily token usage: ${metrics.totalDailyTokens}`,
         threshold: SCALING_CONFIG.thresholds.dailyTokens.high
       });
@@ -273,8 +273,8 @@ async function sendScalingAlerts(metrics, scalingDecision) {
     // High error rate alert
     if (metrics.errorRate >= SCALING_CONFIG.thresholds.errorRate.warning) {
       alerts.push({
-        type: 'high_error_rate',
-        severity: metrics.errorRate >= SCALING_CONFIG.thresholds.errorRate.critical ? 'critical' : 'warning',
+        type: "high_error_rate",
+        severity: metrics.errorRate >= SCALING_CONFIG.thresholds.errorRate.critical ? "critical" : "warning",
         message: `Error rate: ${(metrics.errorRate * 100).toFixed(2)}%`,
         threshold: SCALING_CONFIG.thresholds.errorRate.warning
       });
@@ -283,27 +283,27 @@ async function sendScalingAlerts(metrics, scalingDecision) {
     // Emergency scaling alert
     if (scalingDecision.reasoning.emergencyScaling) {
       alerts.push({
-        type: 'emergency_scaling',
-        severity: 'critical',
+        type: "emergency_scaling",
+        severity: "critical",
         message: `Emergency scaling activated: ${scalingDecision.recommended} instances`,
-        reason: 'Critical error rate detected'
+        reason: "Critical error rate detected"
       });
     }
     
     if (alerts.length > 0) {
       // Store alerts for monitoring dashboard
-      await admin.firestore().collection('scaling_alerts').add({
+      await admin.firestore().collection("scaling_alerts").add({
         alerts,
         timestamp: new Date(),
         metrics,
         scalingDecision
       });
       
-      logger.warn('Scaling alerts generated', { alertCount: alerts.length, alerts });
+      logger.warn("Scaling alerts generated", { alertCount: alerts.length, alerts });
     }
     
   } catch (error) {
-    logger.error('Failed to send scaling alerts', { error: error.message });
+    logger.error("Failed to send scaling alerts", { error: error.message });
     // Don't throw - this is not critical for the scaling operation
   }
 }
@@ -313,10 +313,10 @@ async function sendScalingAlerts(metrics, scalingDecision) {
  * Triggered every 10 minutes by Cloud Scheduler
  */
 exports.autoScaleCloudFunctions = functions.pubsub
-  .schedule('every 10 minutes')
+  .schedule("every 10 minutes")
   .onRun(async (context) => {
     try {
-      logger.info('Auto-scaling function triggered');
+      logger.info("Auto-scaling function triggered");
       
       // Get current usage metrics
       const metrics = await getCurrentUsageMetrics();
@@ -324,15 +324,15 @@ exports.autoScaleCloudFunctions = functions.pubsub
       // Calculate optimal scaling
       const scalingDecision = calculateOptimalMaxInstances(metrics);
       
-      logger.info('Auto-scaling analysis complete', {
+      logger.info("Auto-scaling analysis complete", {
         metrics,
         scalingDecision
       });
       
       // Get current configuration to see if update is needed
       const currentConfigDoc = await admin.firestore()
-        .collection('function_config')
-        .doc('chatWithAssistant')
+        .collection("function_config")
+        .doc("chatWithAssistant")
         .get();
       
       const currentMaxInstances = currentConfigDoc.exists 
@@ -343,25 +343,25 @@ exports.autoScaleCloudFunctions = functions.pubsub
       const changeThreshold = 2;
       if (Math.abs(scalingDecision.recommended - currentMaxInstances) >= changeThreshold) {
         // Update function scaling
-        await updateFunctionScaling('chatWithAssistant', scalingDecision.recommended);
+        await updateFunctionScaling("chatWithAssistant", scalingDecision.recommended);
         
         // Store updated configuration
         await admin.firestore()
-          .collection('function_config')
-          .doc('chatWithAssistant')
+          .collection("function_config")
+          .doc("chatWithAssistant")
           .set({
             maxInstances: scalingDecision.recommended,
             lastUpdate: new Date(),
             previousMaxInstances: currentMaxInstances
           }, { merge: true });
         
-        logger.info('Function scaling updated', {
+        logger.info("Function scaling updated", {
           previousMaxInstances: currentMaxInstances,
           newMaxInstances: scalingDecision.recommended,
           change: scalingDecision.recommended - currentMaxInstances
         });
       } else {
-        logger.info('No scaling change needed', {
+        logger.info("No scaling change needed", {
           currentMaxInstances,
           recommendedMaxInstances: scalingDecision.recommended,
           changeThreshold
@@ -375,20 +375,20 @@ exports.autoScaleCloudFunctions = functions.pubsub
       await sendScalingAlerts(metrics, scalingDecision);
       
       return {
-        status: 'success',
+        status: "success",
         metrics,
         scalingDecision,
         updated: Math.abs(scalingDecision.recommended - currentMaxInstances) >= changeThreshold
       };
       
     } catch (error) {
-      logger.error('Auto-scaling function failed', {
+      logger.error("Auto-scaling function failed", {
         error: error.message,
         stack: error.stack
       });
       
       // Store error for monitoring
-      await admin.firestore().collection('scaling_errors').add({
+      await admin.firestore().collection("scaling_errors").add({
         error: error.message,
         stack: error.stack,
         timestamp: new Date()
@@ -407,28 +407,28 @@ exports.manualScaleOverride = functions.https.onCall(async (data, context) => {
     // Verify admin access
     if (!context.auth || !context.auth.token.admin) {
       throw new functions.https.HttpsError(
-        'permission-denied',
-        'Admin access required for manual scaling override'
+        "permission-denied",
+        "Admin access required for manual scaling override"
       );
     }
     
     const { maxInstances, reason, duration = 60 } = data;
     
-    if (!maxInstances || typeof maxInstances !== 'number') {
+    if (!maxInstances || typeof maxInstances !== "number") {
       throw new functions.https.HttpsError(
-        'invalid-argument',
-        'maxInstances must be a number'
+        "invalid-argument",
+        "maxInstances must be a number"
       );
     }
     
     if (maxInstances < 1 || maxInstances > SCALING_CONFIG.maxInstancesEmergency) {
       throw new functions.https.HttpsError(
-        'invalid-argument',
+        "invalid-argument",
         `maxInstances must be between 1 and ${SCALING_CONFIG.maxInstancesEmergency}`
       );
     }
     
-    logger.warn('Manual scaling override requested', {
+    logger.warn("Manual scaling override requested", {
       requestedBy: context.auth.uid,
       maxInstances,
       reason,
@@ -436,15 +436,15 @@ exports.manualScaleOverride = functions.https.onCall(async (data, context) => {
     });
     
     // Apply manual override
-    await updateFunctionScaling('chatWithAssistant', maxInstances);
+    await updateFunctionScaling("chatWithAssistant", maxInstances);
     
     // Store override configuration with expiration
     const overrideEnd = new Date();
     overrideEnd.setMinutes(overrideEnd.getMinutes() + duration);
     
     await admin.firestore()
-      .collection('function_config')
-      .doc('chatWithAssistant')
+      .collection("function_config")
+      .doc("chatWithAssistant")
       .set({
         maxInstances,
         lastUpdate: new Date(),
@@ -458,9 +458,9 @@ exports.manualScaleOverride = functions.https.onCall(async (data, context) => {
       }, { merge: true });
     
     // Log override event
-    await admin.firestore().collection('scaling_events').add({
-      type: 'manual_override',
-      functionName: 'chatWithAssistant',
+    await admin.firestore().collection("scaling_events").add({
+      type: "manual_override",
+      functionName: "chatWithAssistant",
       maxInstances,
       requestedBy: context.auth.uid,
       reason,
@@ -469,15 +469,15 @@ exports.manualScaleOverride = functions.https.onCall(async (data, context) => {
     });
     
     return {
-      status: 'success',
+      status: "success",
       message: `Manual scaling override applied: ${maxInstances} instances for ${duration} minutes`,
       expiresAt: overrideEnd.toISOString()
     };
     
   } catch (error) {
-    logger.error('Manual scaling override failed', {
+    logger.error("Manual scaling override failed", {
       error: error.message,
-      requestedBy: context.auth?.uid
+      requestedBy: (context.auth && context.auth.uid)
     });
     throw error;
   }
@@ -491,15 +491,15 @@ exports.getScalingStatus = functions.https.onCall(async (data, context) => {
     // Verify authenticated access
     if (!context.auth) {
       throw new functions.https.HttpsError(
-        'unauthenticated',
-        'Authentication required'
+        "unauthenticated",
+        "Authentication required"
       );
     }
     
     // Get current configuration
     const configDoc = await admin.firestore()
-      .collection('function_config')
-      .doc('chatWithAssistant')
+      .collection("function_config")
+      .doc("chatWithAssistant")
       .get();
     
     const config = configDoc.exists ? configDoc.data() : {};
@@ -509,9 +509,9 @@ exports.getScalingStatus = functions.https.onCall(async (data, context) => {
     oneHourAgo.setHours(oneHourAgo.getHours() - 1);
     
     const recentMetricsSnapshot = await admin.firestore()
-      .collection('scaling_metrics')
-      .where('timestamp', '>=', oneHourAgo)
-      .orderBy('timestamp', 'desc')
+      .collection("scaling_metrics")
+      .where("timestamp", ">=", oneHourAgo)
+      .orderBy("timestamp", "desc")
       .limit(10)
       .get();
     
@@ -519,9 +519,9 @@ exports.getScalingStatus = functions.https.onCall(async (data, context) => {
     
     // Get recent scaling events
     const recentEventsSnapshot = await admin.firestore()
-      .collection('scaling_events')
-      .where('timestamp', '>=', oneHourAgo)
-      .orderBy('timestamp', 'desc')
+      .collection("scaling_events")
+      .where("timestamp", ">=", oneHourAgo)
+      .orderBy("timestamp", "desc")
       .limit(5)
       .get();
     
@@ -536,10 +536,10 @@ exports.getScalingStatus = functions.https.onCall(async (data, context) => {
     };
     
   } catch (error) {
-    logger.error('Get scaling status failed', { error: error.message });
+    logger.error("Get scaling status failed", { error: error.message });
     throw new functions.https.HttpsError(
-      'internal',
-      'Failed to get scaling status'
+      "internal",
+      "Failed to get scaling status"
     );
   }
 });

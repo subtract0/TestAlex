@@ -1,6 +1,6 @@
-const functions = require('firebase-functions/v2');
-const { onCall } = require('firebase-functions/v2/https');
-const { logger } = require('firebase-functions');
+const functions = require("firebase-functions/v2");
+const { onCall } = require("firebase-functions/v2/https");
+const { logger } = require("firebase-functions");
 
 /**
  * Advanced Response Caching System
@@ -12,22 +12,22 @@ exports.cachedChatResponse = onCall(
   {
     cors: true,
     timeoutSeconds: 60,
-    memory: '512MB'
+    memory: "512MB"
   },
   async (request) => {
     const { data, auth } = request;
     
     if (!auth) {
-      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+      throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
     }
 
-    const { message, context = 'general' } = data;
-    const cacheKey = `${auth.uid}:${context}:${Buffer.from(message).toString('base64').slice(0, 32)}`;
+    const { message, context = "general" } = data;
+    const cacheKey = `${auth.uid}:${context}:${Buffer.from(message).toString("base64").slice(0, 32)}`;
     
     // Check cache first
     const cached = responseCache.get(cacheKey);
     if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
-      logger.info('Serving cached response', { userId: auth.uid, cacheHit: true });
+      logger.info("Serving cached response", { userId: auth.uid, cacheHit: true });
       return {
         response: cached.response,
         cached: true,
@@ -64,19 +64,19 @@ exports.batchProcessRequests = onCall(
   {
     cors: true,
     timeoutSeconds: 120,
-    memory: '1GB'
+    memory: "1GB"
   },
   async (request) => {
     const { data, auth } = request;
     
     if (!auth) {
-      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+      throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
     }
 
     const { requests = [] } = data;
     
     if (requests.length > 10) {
-      throw new functions.https.HttpsError('invalid-argument', 'Maximum 10 requests per batch');
+      throw new functions.https.HttpsError("invalid-argument", "Maximum 10 requests per batch");
     }
 
     const results = await Promise.allSettled(
@@ -93,7 +93,7 @@ exports.batchProcessRequests = onCall(
             duration
           };
         } catch (error) {
-          logger.error('Batch request failed', { 
+          logger.error("Batch request failed", { 
             index, 
             error: error.message,
             userId: auth.uid 
@@ -111,7 +111,7 @@ exports.batchProcessRequests = onCall(
     const successful = results.filter(r => r.value.success).length;
     const failed = results.length - successful;
 
-    logger.info('Batch processing completed', {
+    logger.info("Batch processing completed", {
       userId: auth.uid,
       total: requests.length,
       successful,
@@ -132,13 +132,13 @@ exports.preloadContent = onCall(
   {
     cors: true,
     timeoutSeconds: 30,
-    memory: '512MB'
+    memory: "512MB"
   },
   async (request) => {
     const { data, auth } = request;
     
     if (!auth) {
-      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+      throw new functions.https.HttpsError("unauthenticated", "User must be authenticated");
     }
 
     const { topics = [], userPreferences = {} } = data;
@@ -152,7 +152,7 @@ exports.preloadContent = onCall(
         try {
           const response = await generateChatResponse(
             `Brief guidance on ${topic} from A Course in Miracles`,
-            'preload',
+            "preload",
             auth.uid
           );
           
@@ -162,7 +162,7 @@ exports.preloadContent = onCall(
             timestamp: Date.now()
           };
         } catch (error) {
-          logger.error('Preload failed for topic', { topic, error: error.message });
+          logger.error("Preload failed for topic", { topic, error: error.message });
           return null;
         }
       })
@@ -170,7 +170,7 @@ exports.preloadContent = onCall(
 
     const validContent = preloadedContent.filter(c => c !== null);
 
-    logger.info('Content preloaded', {
+    logger.info("Content preloaded", {
       userId: auth.uid,
       requested: topics.length,
       preloaded: validContent.length
@@ -193,7 +193,7 @@ async function generateChatResponse(message, context, userId) {
     message: `Response to: ${message}`,
     context,
     userId,
-    model: 'gpt-4',
+    model: "gpt-4",
     tokens: 150
   };
 }
@@ -201,14 +201,14 @@ async function generateChatResponse(message, context, userId) {
 async function processIndividualRequest(req, userId) {
   // Process individual request based on type
   switch (req.type) {
-    case 'chat':
-      return await generateChatResponse(req.message, req.context || 'general', userId);
-    case 'history':
-      return await getUserChatHistory(userId, req.limit || 10);
-    case 'usage':
-      return await getUserUsageStats(userId);
-    default:
-      throw new Error(`Unknown request type: ${req.type}`);
+  case "chat":
+    return await generateChatResponse(req.message, req.context || "general", userId);
+  case "history":
+    return await getUserChatHistory(userId, req.limit || 10);
+  case "usage":
+    return await getUserUsageStats(userId);
+  default:
+    throw new Error(`Unknown request type: ${req.type}`);
   }
 }
 
@@ -219,7 +219,7 @@ async function analyzeAndSelectContent(topics, preferences, userId) {
   // - Seasonal/contextual relevance
   
   const basTopics = [
-    'forgiveness', 'peace', 'love', 'miracles', 'healing'
+    "forgiveness", "peace", "love", "miracles", "healing"
   ];
   
   const userSpecificTopics = topics.length > 0 ? topics : baseTopic;
@@ -260,7 +260,7 @@ function cleanupCache() {
   
   keysToDelete.forEach(key => responseCache.delete(key));
   
-  logger.info('Cache cleanup completed', { 
+  logger.info("Cache cleanup completed", { 
     deletedEntries: keysToDelete.length,
     remainingEntries: responseCache.size 
   });

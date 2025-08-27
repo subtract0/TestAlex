@@ -9,7 +9,7 @@ const {describe, it, expect, beforeEach} = require("@jest/globals");
 const logger = {
   info: jest.fn(),
   warn: jest.fn(),
-  error: jest.fn(),
+  error: jest.fn()
 };
 
 // Import the language detection function (we'll extract it for testing)
@@ -28,32 +28,32 @@ function detectLanguage(message) {
         // Spanish indicators
         words: ["el", "la", "de", "que", "y", "es", "en", "un", "una", "con", "no", "se", "te", "lo", "le", "da", "su", "por", "son", "como", "para", "del", "está", "todo", "pero", "más", "hacer", "muy", "puede", "dios", "amor", "vida", "curso", "milagros"],
         patterns: [/¿.*?\?/, /¡.*?!/, /ñ/, /á|é|í|ó|ú/, /ción$/, /dad$/, /mente$/],
-        greeting: ["hola", "buenos días", "buenas tardes", "buenas noches"],
+        greeting: ["hola", "buenos días", "buenas tardes", "buenas noches"]
       },
       "fr": {
         // French indicators
         words: ["le", "de", "et", "à", "un", "il", "être", "et", "en", "avoir", "que", "pour", "dans", "ce", "son", "une", "sur", "avec", "ne", "se", "pas", "tout", "plus", "par", "grand", "il", "me", "même", "faire", "elle", "dieu", "amour", "vie", "cours", "miracles"],
         patterns: [/ç/, /à|é|è|ê|î|ô|ù|û/, /tion$/, /ment$/, /ique$/],
-        greeting: ["bonjour", "bonsoir", "salut"],
+        greeting: ["bonjour", "bonsoir", "salut"]
       },
       "de": {
         // German indicators
         words: ["der", "die", "und", "in", "den", "von", "zu", "das", "mit", "sich", "des", "auf", "für", "ist", "im", "dem", "nicht", "ein", "eine", "als", "auch", "es", "an", "werden", "aus", "er", "hat", "daß", "sie", "nach", "wird", "bei", "gott", "liebe", "leben", "kurs", "wunder"],
         patterns: [/ä|ö|ü|ß/, /ung$/, /keit$/, /lich$/],
-        greeting: ["hallo", "guten tag", "guten morgen", "guten abend"],
+        greeting: ["hallo", "guten tag", "guten morgen", "guten abend"]
       },
       "pt": {
         // Portuguese indicators
         words: ["o", "de", "e", "do", "a", "em", "um", "para", "é", "com", "não", "uma", "os", "no", "se", "na", "por", "mais", "as", "dos", "como", "mas", "foi", "ao", "ele", "das", "tem", "à", "seu", "sua", "ou", "ser", "quando", "muito", "há", "nos", "já", "está", "eu", "também", "deus", "amor", "vida", "curso", "milagres"],
         patterns: [/ã|õ|ç/, /ção$/, /dade$/, /mente$/],
-        greeting: ["olá", "oi", "bom dia", "boa tarde", "boa noite"],
+        greeting: ["olá", "oi", "bom dia", "boa tarde", "boa noite"]
       },
       "it": {
         // Italian indicators
         words: ["il", "di", "che", "e", "la", "per", "un", "in", "con", "del", "da", "a", "al", "le", "si", "dei", "come", "lo", "se", "gli", "alla", "più", "nel", "dalla", "sua", "suo", "ci", "anche", "tutto", "ancora", "fatto", "dopo", "vita", "tempo", "anni", "stato", "dio", "amore", "corso", "miracoli"],
         patterns: [/à|è|é|ì|í|î|ò|ó|ù|ú/, /zione$/, /mente$/, /ario$/],
-        greeting: ["ciao", "salve", "buongiorno", "buonasera"],
-      },
+        greeting: ["ciao", "salve", "buongiorno", "buonasera"]
+      }
     };
 
     const scores = {};

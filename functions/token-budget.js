@@ -334,7 +334,7 @@ exports.checkBudgetAllowance = functions.https.onCall(async (data, context) => {
   } catch (error) {
     logger.error('Budget allowance check failed', {
       error: error.message,
-      userId: context.auth?.uid
+      userId: (context.auth && context.auth.uid)
     });
     
     throw new functions.https.HttpsError(
@@ -394,7 +394,7 @@ exports.recordApiUsage = functions.https.onCall(async (data, context) => {
   } catch (error) {
     logger.error('API usage recording failed', {
       error: error.message,
-      userId: context.auth?.uid
+      userId: (context.auth && context.auth.uid)
     });
     
     throw new functions.https.HttpsError(

@@ -23,7 +23,7 @@ const config = functions.config();
 // Initialize OpenAI client - try both new and legacy config formats
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || (config.openai && config.openai.key);
 const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
+  apiKey: OPENAI_API_KEY
 });
 
 // Configuration constants - try both new and legacy config formats
@@ -49,9 +49,9 @@ const AUTO_SCALE_CONFIG = {
     requestsPerMinute: {
       low: 10,
       medium: 30,
-      high: 60,
-    },
-  },
+      high: 60
+    }
+  }
 };
 
 /**
@@ -79,9 +79,9 @@ async function calculateOptimalMaxInstances() {
 
     // Get recent request rate (last 10 minutes)
     const recentMetricsSnapshot = await admin.firestore()
-        .collection("metrics")
-        .doc("requests")
-        .get();
+      .collection("metrics")
+      .doc("requests")
+      .get();
 
     const recentData = recentMetricsSnapshot.exists ? recentMetricsSnapshot.data() : {};
     const recentRequests = recentData.last10Minutes || 0;
@@ -118,14 +118,14 @@ async function calculateOptimalMaxInstances() {
       timeBasedMax,
       usageBasedMax,
       optimalMax,
-      currentBudgetUtilization: totalDailyTokens / DAILY_OUT_TOKENS_CAP,
+      currentBudgetUtilization: totalDailyTokens / DAILY_OUT_TOKENS_CAP
     });
 
     return Math.max(1, optimalMax); // Always allow at least 1 instance
   } catch (error) {
     logger.warn("Auto-scaling calculation failed, using default", {
       error: error.message,
-      defaultMax: AUTO_SCALE_CONFIG.maxInstancesLow,
+      defaultMax: AUTO_SCALE_CONFIG.maxInstancesLow
     });
     return AUTO_SCALE_CONFIG.maxInstancesLow;
   }
@@ -148,7 +148,7 @@ logger.info("Cloud Functions initialized", {
   assistantId: ASSISTANT_ID,
   vectorStoreId: VECTOR_STORE_ID,
   dailyTokenCap: DAILY_OUT_TOKENS_CAP,
-  rateLimitRpm: RATE_LIMIT_RPM,
+  rateLimitRpm: RATE_LIMIT_RPM
 });
 
 /**
@@ -180,14 +180,14 @@ async function checkRateLimit(userId) {
     // Check rate limit
     if (data.requests.length >= RATE_LIMIT_RPM) {
       throw new Error(
-          `Rate limit exceeded. Maximum ${RATE_LIMIT_RPM} requests per minute.`,
+        `Rate limit exceeded. Maximum ${RATE_LIMIT_RPM} requests per minute.`
       );
     }
 
     // Check daily token limit
     if (data.dailyTokens >= DAILY_OUT_TOKENS_CAP) {
       throw new Error(
-          `Daily token limit reached. Limit: ${DAILY_OUT_TOKENS_CAP} tokens.`,
+        `Daily token limit reached. Limit: ${DAILY_OUT_TOKENS_CAP} tokens.`
       );
     }
 
@@ -233,7 +233,7 @@ function extractCitations(message) {
         citations.push({
           type: "file",
           fileId: annotation.file_citation.file_id,
-          text: annotation.text,
+          text: annotation.text
         });
       }
     });
@@ -261,32 +261,32 @@ function detectLanguage(message) {
         // Spanish indicators
         words: ["el", "la", "de", "que", "y", "es", "en", "un", "una", "con", "no", "se", "te", "lo", "le", "da", "su", "por", "son", "como", "para", "del", "está", "todo", "pero", "más", "hacer", "muy", "puede", "dios", "amor", "vida", "curso", "milagros"],
         patterns: [/¿.*?\?/, /¡.*?!/, /ñ/, /á|é|í|ó|ú/, /ción$/, /dad$/, /mente$/],
-        greeting: ["hola", "buenos días", "buenas tardes", "buenas noches"],
+        greeting: ["hola", "buenos días", "buenas tardes", "buenas noches"]
       },
       "fr": {
         // French indicators
         words: ["le", "de", "et", "à", "un", "il", "être", "et", "en", "avoir", "que", "pour", "dans", "ce", "son", "une", "sur", "avec", "ne", "se", "pas", "tout", "plus", "par", "grand", "il", "me", "même", "faire", "elle", "dieu", "amour", "vie", "cours", "miracles"],
         patterns: [/ç/, /à|é|è|ê|î|ô|ù|û/, /tion$/, /ment$/, /ique$/],
-        greeting: ["bonjour", "bonsoir", "salut"],
+        greeting: ["bonjour", "bonsoir", "salut"]
       },
       "de": {
         // German indicators
         words: ["der", "die", "und", "in", "den", "von", "zu", "das", "mit", "sich", "des", "auf", "für", "ist", "im", "dem", "nicht", "ein", "eine", "als", "auch", "es", "an", "werden", "aus", "er", "hat", "daß", "sie", "nach", "wird", "bei", "gott", "liebe", "leben", "kurs", "wunder"],
         patterns: [/ä|ö|ü|ß/, /ung$/, /keit$/, /lich$/],
-        greeting: ["hallo", "guten tag", "guten morgen", "guten abend"],
+        greeting: ["hallo", "guten tag", "guten morgen", "guten abend"]
       },
       "pt": {
         // Portuguese indicators
         words: ["o", "de", "e", "do", "a", "em", "um", "para", "é", "com", "não", "uma", "os", "no", "se", "na", "por", "mais", "as", "dos", "como", "mas", "foi", "ao", "ele", "das", "tem", "à", "seu", "sua", "ou", "ser", "quando", "muito", "há", "nos", "já", "está", "eu", "também", "deus", "amor", "vida", "curso", "milagres"],
         patterns: [/ã|õ|ç/, /ção$/, /dade$/, /mente$/],
-        greeting: ["olá", "oi", "bom dia", "boa tarde", "boa noite"],
+        greeting: ["olá", "oi", "bom dia", "boa tarde", "boa noite"]
       },
       "it": {
         // Italian indicators
         words: ["il", "di", "che", "e", "la", "per", "un", "in", "con", "del", "da", "a", "al", "le", "si", "dei", "come", "lo", "se", "gli", "alla", "più", "nel", "dalla", "sua", "suo", "ci", "anche", "tutto", "ancora", "fatto", "dopo", "vita", "tempo", "anni", "stato", "dio", "amore", "corso", "miracoli"],
         patterns: [/à|è|é|ì|í|î|ò|ó|ù|ú/, /zione$/, /mente$/, /ario$/],
-        greeting: ["ciao", "salve", "buongiorno", "buonasera"],
-      },
+        greeting: ["ciao", "salve", "buongiorno", "buonasera"]
+      }
     };
 
     const scores = {};
@@ -348,7 +348,7 @@ function detectLanguage(message) {
         message: text.substring(0, 50) + "...",
         detected: detectedLang,
         scores: scores,
-        messageLength: text.length,
+        messageLength: text.length
       });
     }
 
@@ -356,7 +356,7 @@ function detectLanguage(message) {
   } catch (error) {
     logger.warn("Language detection error, defaulting to English", {
       error: error.message,
-      message: message ? message.substring(0, 50) + "..." : "undefined",
+      message: message ? message.substring(0, 50) + "..." : "undefined"
     });
     return "en"; // Safe fallback to English
   }
@@ -369,7 +369,7 @@ function detectLanguage(message) {
 exports.chatWithAssistant = onCall({
   memory: "512MB",
   timeoutSeconds: 60,
-  maxInstances: 10,
+  maxInstances: 10
 }, async (request) => {
   const startTime = Date.now();
   let tokenIn = 0;
@@ -399,7 +399,7 @@ exports.chatWithAssistant = onCall({
       const budgetCheck = await admin.firestore().runTransaction(async (transaction) => {
         // Simulate budget check (in production, this would call the budget microservice)
         const budgetDoc = await transaction.get(
-            admin.firestore().collection("budget_status").doc("current"),
+          admin.firestore().collection("budget_status").doc("current")
         );
 
         const budgetData = budgetDoc.exists ? budgetDoc.data() : {utilization: 0.5};
@@ -412,7 +412,7 @@ exports.chatWithAssistant = onCall({
             allowed: userTier !== "free",
             serviceLevel: "emergency",
             maxTokens: 150,
-            reason: userTier === "free" ? "Budget constraints: Free tier temporarily limited" : null,
+            reason: userTier === "free" ? "Budget constraints: Free tier temporarily limited" : null
           };
         } else if (budgetData.utilization >= 0.85) {
           return {allowed: true, serviceLevel: "slowdown", maxTokens: 300};
@@ -420,7 +420,7 @@ exports.chatWithAssistant = onCall({
           return {
             allowed: true,
             serviceLevel: "warning",
-            maxTokens: userTier === "free" ? 300 : 500,
+            maxTokens: userTier === "free" ? 300 : 500
           };
         } else {
           return {allowed: true, serviceLevel: "normal", maxTokens: 500};
@@ -437,7 +437,7 @@ exports.chatWithAssistant = onCall({
     } catch (budgetError) {
       logger.warn("Budget check failed, proceeding with caution", {
         error: budgetError.message,
-        userId,
+        userId
       });
       // Continue with reduced service in case of budget check failure
       maxTokens = 300;
@@ -452,7 +452,7 @@ exports.chatWithAssistant = onCall({
       messageLength: message.length,
       tone,
       detectedLanguage,
-      timestamp: startTime,
+      timestamp: startTime
     });
 
     // Check rate limits and daily token usage
@@ -480,7 +480,7 @@ exports.chatWithAssistant = onCall({
       tokenIn: 0,
       tokenOut: 0,
       citations: [],
-      startTime: startTime,
+      startTime: startTime
     };
 
     const messageRef = await admin.firestore().collection("messages").add(messageDoc);
@@ -489,12 +489,12 @@ exports.chatWithAssistant = onCall({
     // Add user message to OpenAI thread
     await openai.beta.threads.messages.create(userThreadId, {
       role: "user",
-      content: message,
+      content: message
     });
 
     // Create and run the assistant
     const run = await openai.beta.threads.runs.create(userThreadId, {
-      assistant_id: ASSISTANT_ID,
+      assistant_id: ASSISTANT_ID
     });
 
     logger.info("Assistant run started", {runId: run.id, threadId: userThreadId});
@@ -526,7 +526,7 @@ exports.chatWithAssistant = onCall({
         param1_threadId: currentThreadId,
         param2_runId: currentRunId,
         threadIdType: typeof currentThreadId,
-        runIdType: typeof currentRunId,
+        runIdType: typeof currentRunId
       });
 
       // Fix: Use correct OpenAI v4 SDK syntax with object parameters
@@ -538,7 +538,7 @@ exports.chatWithAssistant = onCall({
           runId: run.id,
           threadId: userThreadId,
           status: runStatus.status,
-          pollCount,
+          pollCount
         });
       }
     }
@@ -547,7 +547,7 @@ exports.chatWithAssistant = onCall({
       // Get the assistant's response
       const messages = await openai.beta.threads.messages.list(userThreadId);
       const assistantMessage = messages.data.find((msg) =>
-        msg.role === "assistant" && msg.run_id === run.id,
+        msg.role === "assistant" && msg.run_id === run.id
       );
 
       if (assistantMessage) {
@@ -571,7 +571,7 @@ exports.chatWithAssistant = onCall({
           citations: citations,
           completedAt: new Date(),
           latency: Date.now() - startTime,
-          runId: run.id,
+          runId: run.id
         });
 
         // Calculate remaining daily tokens
@@ -584,7 +584,7 @@ exports.chatWithAssistant = onCall({
           tokenOut,
           limitRemaining,
           latency: Date.now() - startTime,
-          citationsCount: citations.length,
+          citationsCount: citations.length
         });
 
         // Return response with actual CourseGPT content for immediate display
@@ -594,7 +594,7 @@ exports.chatWithAssistant = onCall({
           tokenIn,
           tokenOut,
           limitRemaining,
-          citations: citations,
+          citations: citations
         };
       }
     }
@@ -603,13 +603,13 @@ exports.chatWithAssistant = onCall({
     await messageRef.update({
       status: "failed",
       error: `Assistant run failed with status: ${runStatus.status}`,
-      failedAt: new Date(),
+      failedAt: new Date()
     });
 
     logger.error("Assistant run failed", {
       runId: run.id,
       status: runStatus.status,
-      lastError: runStatus.last_error,
+      lastError: runStatus.last_error
     });
 
     throw new Error(`Assistant run failed with status: ${runStatus.status}`);
@@ -618,7 +618,7 @@ exports.chatWithAssistant = onCall({
       userId: request.auth && request.auth.uid,
       error: error.message,
       stack: error.stack,
-      latency: Date.now() - startTime,
+      latency: Date.now() - startTime
     });
     throw error;
   }
@@ -655,7 +655,7 @@ async function getOrCreateThread(userId) {
     const firestore = admin.firestore();
     await firestore.collection("users").doc(userId).set({
       threadId: thread.id,
-      createdAt: new Date(),
+      createdAt: new Date()
     }, {merge: true});
 
     logger.info("New thread created for user", {userId, threadId: thread.id});
@@ -673,7 +673,7 @@ async function getOrCreateThread(userId) {
 exports.clearThread = onCall({
   memory: "256MB",
   timeoutSeconds: 30,
-  maxInstances: 5,
+  maxInstances: 5
 }, async (request) => {
   try {
     const userId = request.auth && request.auth.uid;
@@ -705,7 +705,7 @@ exports.clearThread = onCall({
     // Update user document
     await admin.firestore().collection("users").doc(userId).set({
       threadId: newThread.id,
-      clearedAt: new Date(),
+      clearedAt: new Date()
     }, {merge: true});
 
     // Clear user's message history in Firestore
@@ -722,7 +722,7 @@ exports.clearThread = onCall({
 
     return {
       threadId: newThread.id,
-      message: "Thread cleared and reset successfully",
+      message: "Thread cleared and reset successfully"
     };
   } catch (error) {
     logger.error("Clear thread error", {error: error.message, stack: error.stack});

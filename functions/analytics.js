@@ -42,7 +42,7 @@ exports.trackUserInteraction = onCall(
         ...metadata,
         timestamp: new Date(),
         sessionId: metadata.sessionId || generateSessionId(),
-        userAgent: request.headers?.['user-agent'] || 'unknown',
+        userAgent: (request.headers && request.headers['user-agent']) || 'unknown',
         platform: metadata.platform || 'unknown'
       }
     };
@@ -412,7 +412,7 @@ function generateRecommendations(analysis) {
   const recommendations = [];
   
   // Based on behavior patterns
-  if (analysis.behaviorPatterns?.interactionStyle === 'exploratory') {
+  if (analysis.behaviorPatterns && analysis.behaviorPatterns.interactionStyle === 'exploratory') {
     recommendations.push({
       type: 'content',
       message: 'Try exploring the guided meditation series',

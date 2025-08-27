@@ -110,9 +110,9 @@ class AutonomousCIDebugger {
         files: ['.github/workflows/*.yml'],
         fix: (content) => {
           return content
-            .replace(/NODE_VERSION: '18'/g, "NODE_VERSION: '20'")
-            .replace(/node-version: '18'/g, "node-version: '20'")
-            .replace(/node-version: 18/g, "node-version: '20'");
+            .replace(/NODE_VERSION: '18'/g, 'NODE_VERSION: \'20\'')
+            .replace(/node-version: '18'/g, 'node-version: \'20\'')
+            .replace(/node-version: 18/g, 'node-version: \'20\'');
         }
       },
       missingFile: {

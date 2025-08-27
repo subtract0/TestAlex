@@ -784,7 +784,7 @@ async function main() {
   // Import the autonomous debugger
   const AutonomousCIDebugger = require('./autonomous-ci-debugger.js');
   
-  const debugger = new AutonomousCIDebugger();
+  const ciDebugger = new AutonomousCIDebugger();
   const deployer = new AutonomousFixDeployer();
   
   console.log('🚀 Starting Autonomous Fix Deployment System...\n');
@@ -792,7 +792,7 @@ async function main() {
   try {
     // First, analyze current failures
     console.log('📊 Analyzing current CI/CD failures...');
-    const analysisResults = await debugger.monitorWorkflows();
+    const analysisResults = await ciDebugger.monitorWorkflows();
     
     // Then deploy fixes
     if (analysisResults.some(result => result.detectedPatterns.length > 0)) {

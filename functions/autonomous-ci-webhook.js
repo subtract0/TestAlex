@@ -5,9 +5,9 @@
  * and triggers autonomous analysis and fix deployment.
  */
 
-const functions = require('firebase-functions');
-const { Octokit } = require('@octokit/rest');
-const admin = require('firebase-admin');
+const functions = require("firebase-functions");
+const { Octokit } = require("@octokit/rest");
+const admin = require("firebase-admin");
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -32,9 +32,9 @@ class AutonomousCI {
     console.log(`📡 Received webhook: ${action} for workflow ${workflow_run.name}`);
     
     // Only process completed workflow runs that failed
-    if (action !== 'completed' || workflow_run.conclusion !== 'failure') {
-      console.log('ℹ️ Skipping - not a failed workflow completion');
-      return { status: 'skipped', reason: 'not_failed_completion' };
+    if (action !== "completed" || workflow_run.conclusion !== "failure") {
+      console.log("ℹ️ Skipping - not a failed workflow completion");
+      return { status: "skipped", reason: "not_failed_completion" };
     }
     
     const analysisId = this.generateAnalysisId(workflow_run);
@@ -59,17 +59,17 @@ class AutonomousCI {
         await this.updateAnalysisWithFixes(analysisId, fixes);
         
         return {
-          status: 'fixed',
+          status: "fixed",
           analysisId,
           patternsDetected: analysis.detectedPatterns.length,
           fixesDeployed: fixes.length
         };
       } else {
-        console.log('ℹ️ No known failure patterns detected');
+        console.log("ℹ️ No known failure patterns detected");
         return {
-          status: 'analyzed',
+          status: "analyzed",
           analysisId,
-          reason: 'no_patterns_detected'
+          reason: "no_patterns_detected"
         };
       }
       
@@ -112,10 +112,10 @@ class AutonomousCI {
         fullName: repository.full_name,
         defaultBranch: repository.default_branch
       },
-      status: 'logged'
+      status: "logged"
     };
     
-    await db.collection('ci_failures').doc(analysisId).set(eventDoc);
+    await db.collection("ci_failures").doc(analysisId).set(eventDoc);
     console.log(`📝 Logged failure event: ${analysisId}`);
   }
 
@@ -140,7 +140,7 @@ class AutonomousCI {
         run_id: workflowRun.id
       });
 
-      const failedJobs = jobs.jobs.filter(job => job.conclusion === 'failure');
+      const failedJobs = jobs.jobs.filter(job => job.conclusion === "failure");
       analysis.failedJobs = failedJobs.map(job => ({
         id: job.id,
         name: job.name,
@@ -218,15 +218,15 @@ class AutonomousCI {
    */
   getPatternSeverity(patternName) {
     const severityMap = {
-      truffleHog: 'high',
-      eslintJsx: 'high',
-      nodeVersion: 'medium',
-      missingFile: 'high',
-      buildScript: 'medium',
-      authFailure: 'low' // Low because we're using simulated deployments
+      truffleHog: "high",
+      eslintJsx: "high",
+      nodeVersion: "medium",
+      missingFile: "high",
+      buildScript: "medium",
+      authFailure: "low" // Low because we're using simulated deployments
     };
     
-    return severityMap[patternName] || 'medium';
+    return severityMap[patternName] || "medium";
   }
 
   /**
@@ -260,25 +260,25 @@ class AutonomousCI {
    */
   getRecommendedAction(patternName) {
     const actionMap = {
-      truffleHog: 'Update TruffleHog configuration to handle single commits',
-      eslintJsx: 'Configure ESLint for React Native JSX parsing',
-      nodeVersion: 'Upgrade Node.js version to 20+',
-      missingFile: 'Create missing configuration files',
-      buildScript: 'Add missing npm scripts to package.json',
-      authFailure: 'Configure deployment authentication'
+      truffleHog: "Update TruffleHog configuration to handle single commits",
+      eslintJsx: "Configure ESLint for React Native JSX parsing",
+      nodeVersion: "Upgrade Node.js version to 20+",
+      missingFile: "Create missing configuration files",
+      buildScript: "Add missing npm scripts to package.json",
+      authFailure: "Configure deployment authentication"
     };
     
-    return actionMap[patternName] || 'Manual investigation required';
+    return actionMap[patternName] || "Manual investigation required";
   }
 
   /**
    * Deploy autonomous fixes for detected patterns
    */
   async deployAutonomousFixes(analysis, repository) {
-    console.log('🚀 Deploying autonomous fixes...');
+    console.log("🚀 Deploying autonomous fixes...");
     
     const fixes = [];
-    const highPriorityPatterns = analysis.detectedPatterns.filter(p => p.severity === 'high');
+    const highPriorityPatterns = analysis.detectedPatterns.filter(p => p.severity === "high");
     
     // Group patterns by fix type
     const fixGroups = this.groupPatternsByFixType(highPriorityPatterns);
@@ -313,10 +313,10 @@ class AutonomousCI {
     const groups = {};
     
     const patternToFixMap = {
-      'truffleHog': 'truffleHogFix',
-      'eslintJsx': 'eslintFix',
-      'nodeVersion': 'nodeUpgrade',
-      'missingFile': 'configFiles'
+      "truffleHog": "truffleHogFix",
+      "eslintJsx": "eslintFix",
+      "nodeVersion": "nodeUpgrade",
+      "missingFile": "configFiles"
     };
     
     for (const pattern of patterns) {
@@ -360,10 +360,10 @@ class AutonomousCI {
         failedJobs: analysis.failedJobs,
         recommendations: analysis.recommendations
       },
-      status: 'analyzed'
+      status: "analyzed"
     };
     
-    await db.collection('ci_analyses').doc(analysisId).set(doc);
+    await db.collection("ci_analyses").doc(analysisId).set(doc);
     console.log(`💾 Stored analysis results: ${analysisId}`);
   }
 
@@ -371,11 +371,11 @@ class AutonomousCI {
    * Update analysis with fix results
    */
   async updateAnalysisWithFixes(analysisId, fixes) {
-    await db.collection('ci_analyses').doc(analysisId).update({
+    await db.collection("ci_analyses").doc(analysisId).update({
       fixes,
       fixesApplied: fixes.length,
       successfulFixes: fixes.filter(f => f.success).length,
-      status: 'fixed',
+      status: "fixed",
       fixTimestamp: admin.firestore.FieldValue.serverTimestamp()
     });
     
@@ -396,7 +396,7 @@ class AutonomousCI {
       }
     };
     
-    await db.collection('ci_errors').add(errorDoc);
+    await db.collection("ci_errors").add(errorDoc);
   }
 }
 
@@ -404,10 +404,10 @@ class AutonomousCI {
  * Main Cloud Function - GitHub Webhook Handler
  */
 exports.handleGitHubWebhook = functions.https.onRequest(async (req, res) => {
-  console.log('🎯 GitHub webhook received');
+  console.log("🎯 GitHub webhook received");
   
   // Verify GitHub webhook signature (recommended for production)
-  const signature = req.get('X-Hub-Signature-256');
+  const signature = req.get("X-Hub-Signature-256");
   const payload = JSON.stringify(req.body);
   
   // For demo purposes, we'll skip signature verification
@@ -427,16 +427,16 @@ exports.handleGitHubWebhook = functions.https.onRequest(async (req, res) => {
       });
       
     } else {
-      console.log('ℹ️ Webhook event type not supported for autonomous processing');
+      console.log("ℹ️ Webhook event type not supported for autonomous processing");
       res.json({
         success: true,
-        message: 'Event type not processed',
-        eventType: req.get('X-GitHub-Event')
+        message: "Event type not processed",
+        eventType: req.get("X-GitHub-Event")
       });
     }
     
   } catch (error) {
-    console.error('❌ Error processing webhook:', error);
+    console.error("❌ Error processing webhook:", error);
     
     res.status(500).json({
       success: false,
@@ -449,22 +449,22 @@ exports.handleGitHubWebhook = functions.https.onRequest(async (req, res) => {
 /**
  * Scheduled function to proactively monitor CI/CD health
  */
-exports.scheduledCIMonitoring = functions.pubsub.schedule('every 30 minutes').onRun(async (context) => {
-  console.log('⏰ Running scheduled CI/CD monitoring...');
+exports.scheduledCIMonitoring = functions.pubsub.schedule("every 30 minutes").onRun(async (context) => {
+  console.log("⏰ Running scheduled CI/CD monitoring...");
   
   const autonomousCI = new AutonomousCI();
   
   try {
     // Get recent workflow runs from multiple repositories if needed
     const { data: runs } = await autonomousCI.octokit.rest.actions.listWorkflowRunsForRepo({
-      owner: 'subtract0',
-      repo: 'TestAlex',
+      owner: "subtract0",
+      repo: "TestAlex",
       per_page: 10,
-      status: 'completed'
+      status: "completed"
     });
 
     const recentFailures = runs.workflow_runs
-      .filter(run => run.conclusion === 'failure')
+      .filter(run => run.conclusion === "failure")
       .filter(run => {
         const runTime = new Date(run.created_at);
         const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
@@ -475,8 +475,8 @@ exports.scheduledCIMonitoring = functions.pubsub.schedule('every 30 minutes').on
 
     for (const run of recentFailures) {
       // Check if this run has already been processed
-      const existingAnalysis = await db.collection('ci_failures')
-        .where('workflowRun.id', '==', run.id)
+      const existingAnalysis = await db.collection("ci_failures")
+        .where("workflowRun.id", "==", run.id)
         .limit(1)
         .get();
 
@@ -488,21 +488,21 @@ exports.scheduledCIMonitoring = functions.pubsub.schedule('every 30 minutes').on
       // Process this failure
       console.log(`🔍 Processing new failure: ${run.name} (${run.id})`);
       await autonomousCI.processWorkflowWebhook({
-        action: 'completed',
+        action: "completed",
         workflow_run: run,
         repository: { 
-          full_name: 'subtract0/TestAlex',
-          owner: { login: 'subtract0' },
-          name: 'TestAlex',
-          default_branch: 'main'
+          full_name: "subtract0/TestAlex",
+          owner: { login: "subtract0" },
+          name: "TestAlex",
+          default_branch: "main"
         }
       });
     }
     
-    console.log('✅ Scheduled monitoring completed');
+    console.log("✅ Scheduled monitoring completed");
     
   } catch (error) {
-    console.error('❌ Error in scheduled monitoring:', error);
+    console.error("❌ Error in scheduled monitoring:", error);
   }
 });
 
@@ -511,26 +511,26 @@ exports.scheduledCIMonitoring = functions.pubsub.schedule('every 30 minutes').on
  */
 exports.getCIDashboardData = functions.https.onRequest(async (req, res) => {
   try {
-    const timeRange = req.query.timeRange || '24h';
+    const timeRange = req.query.timeRange || "24h";
     const limit = parseInt(req.query.limit) || 50;
     
     // Calculate time range
-    const hoursBack = timeRange === '7d' ? 7 * 24 : 
-                     timeRange === '30d' ? 30 * 24 : 24;
+    const hoursBack = timeRange === "7d" ? 7 * 24 : 
+      timeRange === "30d" ? 30 * 24 : 24;
     const startTime = new Date(Date.now() - hoursBack * 60 * 60 * 1000);
     
     // Get recent failures
-    const failuresQuery = db.collection('ci_failures')
-      .where('timestamp', '>=', admin.firestore.Timestamp.fromDate(startTime))
-      .orderBy('timestamp', 'desc')
+    const failuresQuery = db.collection("ci_failures")
+      .where("timestamp", ">=", admin.firestore.Timestamp.fromDate(startTime))
+      .orderBy("timestamp", "desc")
       .limit(limit);
     
     const failuresSnapshot = await failuresQuery.get();
     
     // Get recent analyses
-    const analysesQuery = db.collection('ci_analyses')
-      .where('timestamp', '>=', admin.firestore.Timestamp.fromDate(startTime))
-      .orderBy('timestamp', 'desc')
+    const analysesQuery = db.collection("ci_analyses")
+      .where("timestamp", ">=", admin.firestore.Timestamp.fromDate(startTime))
+      .orderBy("timestamp", "desc")
       .limit(limit);
     
     const analysesSnapshot = await analysesQuery.get();
@@ -547,7 +547,7 @@ exports.getCIDashboardData = functions.https.onRequest(async (req, res) => {
     // Pattern frequency analysis
     const patternFrequency = {};
     for (const analysis of analyses) {
-      for (const pattern of analysis.analysis?.detectedPatterns || []) {
+      for (const pattern of (analysis.analysis && analysis.analysis.detectedPatterns) || []) {
         patternFrequency[pattern.name] = (patternFrequency[pattern.name] || 0) + 1;
       }
     }
@@ -573,7 +573,7 @@ exports.getCIDashboardData = functions.https.onRequest(async (req, res) => {
     res.json(dashboard);
     
   } catch (error) {
-    console.error('❌ Error generating dashboard data:', error);
+    console.error("❌ Error generating dashboard data:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -582,14 +582,14 @@ exports.getCIDashboardData = functions.https.onRequest(async (req, res) => {
  * HTTP function to manually trigger autonomous fixing
  */
 exports.triggerAutonomousFix = functions.https.onRequest(async (req, res) => {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
   
   const { workflowRunId } = req.body;
   
   if (!workflowRunId) {
-    return res.status(400).json({ error: 'workflowRunId is required' });
+    return res.status(400).json({ error: "workflowRunId is required" });
   }
   
   try {
@@ -597,20 +597,20 @@ exports.triggerAutonomousFix = functions.https.onRequest(async (req, res) => {
     
     // Get workflow run details
     const { data: workflowRun } = await autonomousCI.octokit.rest.actions.getWorkflowRun({
-      owner: 'subtract0',
-      repo: 'TestAlex', 
+      owner: "subtract0",
+      repo: "TestAlex", 
       run_id: workflowRunId
     });
     
     // Process the workflow run
     const result = await autonomousCI.processWorkflowWebhook({
-      action: 'completed',
+      action: "completed",
       workflow_run: workflowRun,
       repository: {
-        full_name: 'subtract0/TestAlex',
-        owner: { login: 'subtract0' },
-        name: 'TestAlex',
-        default_branch: 'main'
+        full_name: "subtract0/TestAlex",
+        owner: { login: "subtract0" },
+        name: "TestAlex",
+        default_branch: "main"
       }
     });
     
@@ -622,7 +622,7 @@ exports.triggerAutonomousFix = functions.https.onRequest(async (req, res) => {
     });
     
   } catch (error) {
-    console.error('❌ Error triggering autonomous fix:', error);
+    console.error("❌ Error triggering autonomous fix:", error);
     res.status(500).json({ error: error.message });
   }
 });
