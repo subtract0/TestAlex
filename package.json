@@ -26,7 +26,8 @@
     "debug:ci:fix": "node autonomous-ci-debugger.js --monitor --fix",
     "deploy:fixes": "node autonomous-fix-deployer.js",
     "deploy:fixes:dry-run": "node autonomous-fix-deployer.js --dry-run",
-    "deploy:fixes:auto-merge": "node autonomous-fix-deployer.js --auto-merge"
+    "deploy:fixes:auto-merge": "node autonomous-fix-deployer.js --auto-merge",
+    "validate:autonomous": "node validate-autonomous-system.js"
   },
   "devDependencies": {
     "@babel/plugin-syntax-jsx": "^7.27.1",
