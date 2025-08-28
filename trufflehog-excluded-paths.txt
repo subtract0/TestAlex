@@ -1,0 +1,35 @@
+# TruffleHog Excluded Paths
+# Automatically generated directories that may contain false positives
+node_modules/
+.git/
+dist/
+build/
+.firebase/
+.vscode/
+.idea/
+
+# Log files and temporary files
+*.log
+*.tmp
+*.temp
+coverage/
+test-results/
+playwright-report/
+
+# Configuration examples (not actual secrets)
+.env.example
+config.example.js
+firebase.example.json
+
+# Large data files that may trigger false positives
+data/
+*.pdf
+*.zip
+*.tar.gz
+
+# Dependencies and build artifacts
+package-lock.json
+yarn.lock
+__pycache__/
+*.pyc
+*.pyo
