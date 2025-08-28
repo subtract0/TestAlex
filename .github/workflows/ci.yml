@@ -5,9 +5,9 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
-  schedule:
-    # Nightly E2E tests on staging at 2 AM UTC
-    - cron: '0 2 * * *'
+  # schedule:
+    # # Nightly E2E tests on staging at 2 AM UTC - DISABLED to prevent email spam
+    # - cron: '0 2 * * *'
   workflow_dispatch:
     inputs:
       run_e2e:
