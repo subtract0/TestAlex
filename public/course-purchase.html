@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACIM Courses - Transform Your Spiritual Understanding</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-functions.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .course-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
+        }
+
+        .course-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .course-description {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .course-price {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .course-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .course-features li {
+            padding: 0.3rem 0;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .course-features li::before {
+            content: '✨';
+            position: absolute;
+            left: 0;
+        }
+
+        .purchase-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .purchase-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .purchase-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .auth-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 3rem;
+        }
+
+        .auth-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: background 0.3s ease;
+        }
+
+        .auth-btn:hover {
+            background: #357ae8;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff40;
+            border-radius: 50%;
+            border-top: 2px solid #ffffff;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .payment-form {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .payment-element {
+            margin: 1rem 0;
+        }
+
+        .spiritual-note {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c2c7 100%);
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🕊️ ACIM Spiritual Courses</h1>
+            <p>Transform your understanding with authentic Course in Miracles guidance. Each course is carefully crafted to align with pure ACIM teachings.</p>
+        </div>
+
+        <!-- Authentication Section -->
+        <div id="authSection" class="auth-section">
+            <h3>Begin Your Spiritual Journey</h3>
+            <p style="margin: 1rem 0;">Please sign in to access your personalized ACIM courses</p>
+            <button id="signInBtn" class="auth-btn">Sign in with Google</button>
+            <button id="signInAnonymousBtn" class="auth-btn" style="background: #34a853;">Continue as Guest</button>
+        </div>
+
+        <!-- User Info Section -->
+        <div id="userSection" class="auth-section" style="display: none;">
+            <h3>Welcome, Spiritual Seeker 🙏</h3>
+            <p id="userInfo"></p>
+            <button id="signOutBtn" class="auth-btn" style="background: #ea4335;">Sign Out</button>
+        </div>
+
+        <!-- Courses Grid -->
+        <div id="coursesSection" class="courses-grid" style="display: none;">
+            <div class="course-card" data-course="acim-14-day-journey">
+                <div class="course-title">
+                    🌟 14-Day ACIM Journey
+                </div>
+                <div class="course-description">
+                    Transform your spiritual understanding with authentic ACIM guidance over 14 days. Based on the first 14 workbook lessons, this course gently introduces you to seeing beyond the illusions of the world.
+                </div>
+                <div class="course-price">€7</div>
+                <ul class="course-features">
+                    <li>14 daily spiritual lessons</li>
+                    <li>Authentic ACIM workbook guidance</li>
+                    <li>Personal spiritual prompts</li>
+                    <li>Lifetime access</li>
+                    <li>Mobile-friendly content</li>
+                </ul>
+                <button class="purchase-btn" onclick="selectCourse('acim-14-day-journey')">
+                    Choose This Journey
+                </button>
+            </div>
+
+            <div class="course-card" data-course="acim-forgiveness-mastery">
+                <div class="course-title">
+                    💫 ACIM Forgiveness Mastery
+                </div>
+                <div class="course-description">
+                    Deep dive into true forgiveness as taught in A Course in Miracles. Learn to release grievances and find peace through authentic spiritual understanding.
+                </div>
+                <div class="course-price">€7</div>
+                <ul class="course-features">
+                    <li>14 days of forgiveness practice</li>
+                    <li>Release grievances permanently</li>
+                    <li>Find inner peace</li>
+                    <li>Transform relationships</li>
+                    <li>Holy Spirit guidance</li>
+                </ul>
+                <button class="purchase-btn" onclick="selectCourse('acim-forgiveness-mastery')">
+                    Master Forgiveness
+                </button>
+            </div>
+
+            <div class="course-card" data-course="acim-miracle-principles">
+                <div class="course-title">
+                    ⚡ ACIM Miracle Principles
+                </div>
+                <div class="course-description">
+                    Learn the fundamental principles that govern miracles according to ACIM. Understand your role as a miracle worker and how to extend love in every situation.
+                </div>
+                <div class="course-price">€7</div>
+                <ul class="course-features">
+                    <li>50 Miracle Principles explained</li>
+                    <li>Practical miracle applications</li>
+                    <li>Daily miracle practices</li>
+                    <li>Transform your relationships</li>
+                    <li>Become a miracle worker</li>
+                </ul>
+                <button class="purchase-btn" onclick="selectCourse('acim-miracle-principles')">
+                    Learn Miracles
+                </button>
+            </div>
+        </div>
+
+        <!-- Spiritual Note -->
+        <div class="spiritual-note">
+            <h4>🕊️ Spiritual Integrity Guarantee</h4>
+            <p>All course content is based exclusively on authentic A Course in Miracles text. No external spiritual teachings or worldly wisdom is included. Your journey stays true to the pure teachings of the Course.</p>
+        </div>
+
+        <!-- Payment Form -->
+        <div id="paymentForm" class="payment-form">
+            <h3>Complete Your Purchase</h3>
+            <div id="selectedCourseInfo"></div>
+            <div id="payment-element" class="payment-element">
+                <!-- Stripe Elements will create form elements here -->
+            </div>
+            <button id="payBtn" class="purchase-btn">
+                <span id="payBtnText">Pay €7 - Begin Your Journey</span>
+                <span id="payBtnSpinner" class="loading" style="display: none;"></span>
+            </button>
+            <p style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 1rem;">
+                Secure payment powered by Stripe. Your course access begins immediately after payment.
+            </p>
+        </div>
+
+        <!-- Success Message -->
+        <div id="successMessage" class="success-message">
+            <h3>🎉 Payment Successful!</h3>
+            <p>Your ACIM course access has been granted with divine grace. Check your email for course access details, and may this journey bring you closer to the peace of God within you. 🕊️</p>
+            <button class="auth-btn" style="margin-top: 1rem;" onclick="window.location.reload()">View My Courses</button>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message">
+            <p id="errorText"></p>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            // You'll need to replace these with your actual Firebase config
+            apiKey: "your-api-key",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "your-sender-id",
+            appId: "your-app-id"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const functions = firebase.functions();
+
+        // Initialize Stripe
+        const stripe = Stripe('pk_test_your_publishable_key'); // Replace with your Stripe publishable key
+        let elements;
+        let paymentElement;
+        let currentUser = null;
+        let selectedCourse = null;
+        let paymentIntent = null;
+
+        // Course information
+        const courseInfo = {
+            'acim-14-day-journey': {
+                name: '14-Day ACIM Journey',
+                description: 'Transform your spiritual understanding with authentic ACIM guidance over 14 days.',
+                price: 7
+            },
+            'acim-forgiveness-mastery': {
+                name: 'ACIM Forgiveness Mastery',
+                description: 'Deep dive into true forgiveness as taught in A Course in Miracles.',
+                price: 7
+            },
+            'acim-miracle-principles': {
+                name: 'ACIM Miracle Principles',
+                description: 'Learn the fundamental principles that govern miracles according to ACIM.',
+                price: 7
+            }
+        };
+
+        // Authentication handlers
+        document.getElementById('signInBtn').addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider);
+        });
+
+        document.getElementById('signInAnonymousBtn').addEventListener('click', () => {
+            auth.signInAnonymously();
+        });
+
+        document.getElementById('signOutBtn').addEventListener('click', () => {
+            auth.signOut();
+        });
+
+        // Auth state observer
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('userSection').style.display = 'block';
+                document.getElementById('coursesSection').style.display = 'grid';
+                
+                const displayName = user.displayName || 'Anonymous Spiritual Seeker';
+                document.getElementById('userInfo').textContent = `Signed in as ${displayName}`;
+            } else {
+                document.getElementById('authSection').style.display = 'block';
+                document.getElementById('userSection').style.display = 'none';
+                document.getElementById('coursesSection').style.display = 'none';
+                document.getElementById('paymentForm').style.display = 'none';
+            }
+        });
+
+        // Course selection
+        function selectCourse(courseType) {
+            if (!currentUser) {
+                showError('Please sign in first to purchase courses.');
+                return;
+            }
+
+            selectedCourse = courseType;
+            
+            // Update UI
+            document.querySelectorAll('.course-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-course="${courseType}"]`).classList.add('selected');
+
+            // Show course info in payment form
+            const course = courseInfo[courseType];
+            document.getElementById('selectedCourseInfo').innerHTML = `
+                <h4>${course.name}</h4>
+                <p>${course.description}</p>
+                <p><strong>Price: €${course.price}</strong></p>
+            `;
+
+            // Initialize payment
+            initializePayment();
+        }
+
+        // Initialize payment
+        async function initializePayment() {
+            try {
+                showLoading('Preparing payment...');
+
+                // Create payment intent
+                const createPaymentIntent = functions.httpsCallable('createPaymentIntent');
+                const result = await createPaymentIntent({ 
+                    courseType: selectedCourse,
+                    currency: 'eur'
+                });
+
+                paymentIntent = result.data;
+                
+                // Initialize Stripe Elements
+                elements = stripe.elements({
+                    clientSecret: paymentIntent.clientSecret
+                });
+
+                paymentElement = elements.create('payment');
+                paymentElement.mount('#payment-element');
+
+                // Show payment form
+                document.getElementById('paymentForm').style.display = 'block';
+                document.getElementById('paymentForm').scrollIntoView({ behavior: 'smooth' });
+
+                hideLoading();
+
+            } catch (error) {
+                console.error('Payment initialization error:', error);
+                showError(error.message || 'Failed to initialize payment. Please try again.');
+                hideLoading();
+            }
+        }
+
+        // Handle payment
+        document.getElementById('payBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            if (!stripe || !elements) {
+                return;
+            }
+
+            setPaymentLoading(true);
+
+            try {
+                // Confirm payment
+                const { error, paymentIntent: confirmedPayment } = await stripe.confirmPayment({
+                    elements,
+                    redirect: 'if_required'
+                });
+
+                if (error) {
+                    showError(error.message);
+                    setPaymentLoading(false);
+                } else if (confirmedPayment && confirmedPayment.status === 'succeeded') {
+                    // Payment succeeded
+                    document.getElementById('paymentForm').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    // Handle other payment statuses
+                    showError('Payment was not completed. Please try again.');
+                    setPaymentLoading(false);
+                }
+            } catch (error) {
+                console.error('Payment confirmation error:', error);
+                showError('Payment failed. Please try again.');
+                setPaymentLoading(false);
+            }
+        });
+
+        // Utility functions
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('errorMessage').style.display = 'none';
+            }, 5000);
+        }
+
+        function showLoading(message) {
+            console.log('Loading:', message);
+        }
+
+        function hideLoading() {
+            console.log('Loading complete');
+        }
+
+        function setPaymentLoading(loading) {
+            const btn = document.getElementById('payBtn');
+            const text = document.getElementById('payBtnText');
+            const spinner = document.getElementById('payBtnSpinner');
+            
+            if (loading) {
+                btn.disabled = true;
+                text.style.display = 'none';
+                spinner.style.display = 'inline-block';
+            } else {
+                btn.disabled = false;
+                text.style.display = 'inline';
+                spinner.style.display = 'none';
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🕊️ ACIM Course Purchase Interface Loaded');
+            console.log('Spiritual Integrity: Authentic ACIM content only');
+        });
+    </script>
+</body>
+</html>

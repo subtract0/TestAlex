@@ -105,6 +105,11 @@ function initSentry() {
  * Wrap a Firebase Function with Sentry monitoring
  */
 function wrapFunction(handler) {
+  // If Sentry is not configured, return the handler as-is
+  if (!process.env.SENTRY_DSN_FUNCTIONS) {
+    return handler;
+  }
+  
   return Sentry.AWSLambda.wrapHandler(handler);
 }
 
@@ -112,6 +117,16 @@ function wrapFunction(handler) {
  * Create a transaction for performance monitoring
  */
 function createTransaction(name, operation = 'function') {
+  // If Sentry is not configured, return a mock transaction object
+  if (!process.env.SENTRY_DSN_FUNCTIONS) {
+    return {
+      startChild: () => ({ finish: () => {}, setStatus: () => {} }),
+      setStatus: () => {},
+      setTag: () => {},
+      finish: () => {}
+    };
+  }
+  
   return Sentry.startTransaction({
     name,
     op: operation,
@@ -131,6 +146,16 @@ function captureError(error, context = {}) {
     logger.error('Spiritual content error (not sent to Sentry)', {
       message: error.message,
       stack: error.stack?.split('\n')[0] // Only first line of stack
+    });
+    return;
+  }
+
+  // If Sentry is not configured, just log the error
+  if (!process.env.SENTRY_DSN_FUNCTIONS) {
+    logger.error('Error occurred (Sentry not configured)', {
+      message: error.message,
+      stack: error.stack,
+      context
     });
     return;
   }

@@ -38,7 +38,10 @@
     "*.min.js",
     "playwright-report/",
     "test-results/",
-    "**/*.py"
+    "**/*.py",
+    "google-cloud-sdk/**/*.js",
+    "functions/sentry-config.js",
+    "src/sentry-web-config.js"
   ],
   "overrides": [
     {
@@ -58,6 +61,22 @@
         "**/cli*.js"
       ],
       "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": [
+        "tests/**/*.js",
+        "**/*.test.js",
+        "**/*.spec.js",
+        "**/test_*.js"
+      ],
+      "env": {
+        "jest": true,
+        "node": true
+      },
+      "rules": {
+        "no-undef": "off",
         "no-console": "off"
       }
     }
